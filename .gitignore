@@ -1,6 +1,2 @@
-.idea
-.vs
-_ReSharper*
-/bin/
-/build/
-/cmake-build-*/
+.vscode/
+build/
