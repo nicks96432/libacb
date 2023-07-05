@@ -5,6 +5,7 @@
 
 #include "../cdata/ACB_CUE_RECORD.h"
 #include "../cdata/ACB_TRACK_RECORD.h"
+#include "../cdata/AFS2_FILE_RECORD.h"
 #include "../cgss_env.h"
 #include "CUtfTable.h"
 
