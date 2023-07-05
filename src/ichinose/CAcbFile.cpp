@@ -29,8 +29,6 @@ bool_t GetFieldValueAsNumber(CUtfTable *table, uint32_t rowIndex, const char *fi
 
 bool_t GetFieldValueAsString(CUtfTable *table, uint32_t rowIndex, const char *fieldName, string &s);
 
-const uint32_t CAcbFile::KEY_MODIFIER_ENABLED_VERSION = 0x01300000;
-
 CAcbFile::CAcbFile(cgss::IStream *stream, const char *fileName): MyClass(stream, 0, fileName) {}
 
 CAcbFile::CAcbFile(IStream *stream, uint64_t streamOffset, const char *fileName)

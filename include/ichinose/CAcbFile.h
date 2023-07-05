@@ -84,7 +84,7 @@ public:
 
     std::string GetFileExtensionHintByTrackIndex(uint32_t trackIndex) const;
 
-    static const uint32_t KEY_MODIFIER_ENABLED_VERSION;
+    static constexpr uint32_t KEY_MODIFIER_ENABLED_VERSION = 0x01300000;
 
 private:
     void InitializeCueList();
