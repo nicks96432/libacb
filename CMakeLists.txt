@@ -71,6 +71,7 @@ install(
     TARGETS                   cgss-static cgss-shared 
     ARCHIVE DESTINATION       lib
     LIBRARY DESTINATION       lib
+    RUNTIME DESTINATION       lib
 )
 
 install(
