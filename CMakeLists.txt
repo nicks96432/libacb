@@ -14,16 +14,11 @@ else()
     message(FATAL_ERROR "Unknown pointer size: ${CMAKE_SIZEOF_VOID_P}")
 endif()
 
-if(MINGW OR CYGWIN)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--enable-stdcall-fixup,--add-stdcall-alias")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--enable-stdcall-fixup,--add-stdcall-alias")
-endif()
-
 if(CYGWIN OR MINGW)
     # http://stackoverflow.com/questions/12921911/mingw-libgcc-s-sjlj-1-dll-is-missing
     # However, these options will only work if putting them here, not in 'compiler is gnu c' section.
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc -static")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--enable-stdcall-fixup,--add-stdcall-alias -static-libgcc -static")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--enable-stdcall-fixup,--add-stdcall-alias -static-libgcc -static-libstdc++ -static")
     if(CYGWIN)
         # Force using MinGW even though compiling via Cygwin (please install the packages)
         if(${TARGET_ARCH} STREQUAL "x86")
@@ -47,31 +42,30 @@ file(GLOB_RECURSE LIBCGSS_SOURCE_FILES "src/**/*.cpp" "src/**/*.h")
 set(LIBCGSS_DEF_FILE src/cgss.def)
 set(LIBCGSS_SOURCE_FILES ${LIBCGSS_SOURCE_FILES})
 
-add_library(cgss OBJECT ${LIBCGSS_SOURCE_FILES})
-target_include_directories(cgss PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
-set_property(TARGET cgss PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(cgss-static STATIC ${LIBCGSS_SOURCE_FILES})
+target_include_directories(cgss-static PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
+set_target_properties(cgss-static PROPERTIES OUTPUT_NAME cgss)
 
-if(UNIX AND NOT (MINGW OR CYGWIN))
-    target_link_libraries(cgss dl)
+add_library(cgss-shared SHARED ${LIBCGSS_SOURCE_FILES})
+target_include_directories(cgss-shared PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
+set_target_properties(cgss-shared PROPERTIES OUTPUT_NAME cgss)
+
+
+if(UNIX AND NOT (CYGWIN OR MINGW))
+    target_link_libraries(cgss-static dl)
+    target_link_libraries(cgss-shared dl)
 endif()
 
 if(WIN32)
-    set_target_properties(cgss PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
+    set_target_properties(cgss-static PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
+    set_target_properties(cgss-shared PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
 endif()
 
-add_library(cgss-static STATIC)
-target_link_libraries(cgss-static PUBLIC cgss)
-set_target_properties(cgss-static PROPERTIES OUTPUT_NAME cgss)
-
-add_library(cgss-shared SHARED)
-target_link_libraries(cgss-shared PUBLIC cgss)
-set_target_properties(cgss-shared PROPERTIES OUTPUT_NAME cgss)
-
 install(
-    TARGETS                   cgss-static cgss-shared 
+    TARGETS                   cgss-static cgss-shared
     ARCHIVE DESTINATION       lib
     LIBRARY DESTINATION       lib
-    RUNTIME DESTINATION       lib
+    RUNTIME DESTINATION       bin
 )
 
 install(
