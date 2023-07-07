@@ -2,7 +2,7 @@
 
 #if defined(__CGSS_OS_WINDOWS__)
 
-#include <Windows.h>
+#include <windows.h>
 
 #elif defined(__CGSS_OS_UNIX__)
 
