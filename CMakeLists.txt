@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
 project(cgss)
 
+option(LIBCGSS_BUILD_STATIC_LIBS "Build the static library" ON)
+option(LIBCGSS_BUILD_SHARED_LIBS "Build the shared library" ON)
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
@@ -42,31 +45,47 @@ file(GLOB_RECURSE LIBCGSS_SOURCE_FILES "src/**/*.cpp" "src/**/*.h")
 set(LIBCGSS_DEF_FILE src/cgss.def)
 set(LIBCGSS_SOURCE_FILES ${LIBCGSS_SOURCE_FILES})
 
-add_library(cgss-static STATIC ${LIBCGSS_SOURCE_FILES})
-target_include_directories(cgss-static PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
-set_target_properties(cgss-static PROPERTIES OUTPUT_NAME cgss)
+if(LIBCGSS_BUILD_STATIC_LIBS)
+    add_library(cgss-static STATIC ${LIBCGSS_SOURCE_FILES})
+    target_include_directories(cgss-static PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
+    set_target_properties(cgss-static PROPERTIES OUTPUT_NAME cgss)
 
-add_library(cgss-shared SHARED ${LIBCGSS_SOURCE_FILES})
-target_include_directories(cgss-shared PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
-set_target_properties(cgss-shared PROPERTIES OUTPUT_NAME cgss)
+    if(UNIX AND NOT (CYGWIN OR MINGW))
+        target_link_libraries(cgss-static dl)
+    endif()
 
+    if(WIN32)
+        set_target_properties(cgss-static PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
+    endif()
 
-if(UNIX AND NOT (CYGWIN OR MINGW))
-    target_link_libraries(cgss-static dl)
-    target_link_libraries(cgss-shared dl)
+    install(
+        TARGETS                   cgss-static
+        ARCHIVE DESTINATION       lib
+        LIBRARY DESTINATION       lib
+        RUNTIME DESTINATION       bin
+    )
 endif()
 
-if(WIN32)
-    set_target_properties(cgss-static PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
-    set_target_properties(cgss-shared PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
-endif()
+if(LIBCGSS_BUILD_SHARED_LIBS)
+    add_library(cgss-shared SHARED ${LIBCGSS_SOURCE_FILES})
+    target_include_directories(cgss-shared PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
+    set_target_properties(cgss-shared PROPERTIES OUTPUT_NAME cgss)
 
-install(
-    TARGETS                   cgss-static cgss-shared
-    ARCHIVE DESTINATION       lib
-    LIBRARY DESTINATION       lib
-    RUNTIME DESTINATION       bin
-)
+    if(UNIX AND NOT (CYGWIN OR MINGW))
+        target_link_libraries(cgss-shared dl)
+    endif()
+
+    if(WIN32)
+        set_target_properties(cgss-shared PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
+    endif()
+
+    install(
+        TARGETS                   cgss-static
+        ARCHIVE DESTINATION       lib
+        LIBRARY DESTINATION       lib
+        RUNTIME DESTINATION       lib
+    )
+endif()
 
 install(
     DIRECTORY         ${LIBCGSS_INCLUDE_DIRECTORY}
