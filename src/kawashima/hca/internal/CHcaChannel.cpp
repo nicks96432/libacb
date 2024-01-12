@@ -217,7 +217,8 @@ void CHcaChannel::Decode4(
         float *d = &inst2->block[b];
         for (uint32_t i = 0; i < a; i++) {
             *(d++) = *s * f2;
-            *(s++) = *s * f1;
+            *s = *s * f1;
+            ++s;
         }
     }
 }
