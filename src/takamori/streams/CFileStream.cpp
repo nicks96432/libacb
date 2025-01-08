@@ -2,19 +2,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <cstdio>
-#include <cstdlib>
-
-#include "takamori/CFileSystem.h"
-
-#ifndef __MINGW_H
-
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
 
-#endif
-
-using namespace std;
-
+#include "cgss_env_ns.h"
+#include "takamori/CFileSystem.h"
 #include "takamori/exceptions/CArgumentException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CFileStream.h"
@@ -39,92 +33,96 @@ CFileStream::CFileStream(const char *fileName, FileMode mode, FileAccess access)
     _fp     = OpenFile(fileName);
 }
 
-CFileStream::CFileStream(const string &fileName): MyClass(fileName.c_str()) {}
+CFileStream::CFileStream(const std::string &fileName): MyClass(fileName.c_str()) {}
 
-CFileStream::CFileStream(const string &fileName, FileMode mode): MyClass(fileName.c_str(), mode) {}
+CFileStream::CFileStream(const std::string &fileName, FileMode mode)
+    : MyClass(fileName.c_str(), mode) {}
 
-CFileStream::CFileStream(const string &fileName, FileMode mode, FileAccess access)
+CFileStream::CFileStream(const std::string &fileName, FileMode mode, FileAccess access)
     : MyClass(fileName.c_str(), mode, access) {}
 
 CFileStream::~CFileStream() {
     if (_fp) {
-        fclose(_fp);
+        std::fclose(_fp);
     }
     _fp = nullptr;
 }
 
-uint32_t CFileStream::Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CFileStream::Read(
+    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     if (!buffer) {
         throw CArgumentException("FileStream::Read()");
     }
     if (!IsReadable()) {
         throw CInvalidOperationException("FileStream::Read()");
     }
-    const auto actualCount = min(static_cast<uint32_t>(bufferSize - offset), count);
-    const auto byteBuffer  = static_cast<uint8_t *>(buffer);
-    const auto actualRead  = fread(byteBuffer + offset, 1, actualCount, _fp);
-    return static_cast<uint32_t>(actualRead);
+    const auto actualCount = std::min(static_cast<std::uint32_t>(bufferSize - offset), count);
+    const auto byteBuffer  = static_cast<std::uint8_t *>(buffer);
+    const auto actualRead  = std::fread(byteBuffer + offset, 1, actualCount, _fp);
+    return static_cast<std::uint32_t>(actualRead);
 }
 
-uint32_t
-CFileStream::Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CFileStream::Write(
+    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     if (!buffer) {
         throw CArgumentException("FileStream::Write()");
     }
     if (!IsWritable()) {
         throw CInvalidOperationException("FileStream::Write()");
     }
-    const auto actualCount = min(static_cast<uint32_t>(bufferSize - offset), count);
-    const auto byteBuffer  = static_cast<const uint8_t *>(buffer);
-    fwrite(byteBuffer + offset, 1, actualCount, _fp);
+    const auto actualCount = std::min(static_cast<std::uint32_t>(bufferSize - offset), count);
+    const auto byteBuffer  = static_cast<const std::uint8_t *>(buffer);
+    std::fwrite(byteBuffer + offset, 1, actualCount, _fp);
     return actualCount;
 }
 
-bool_t CFileStream::IsWritable() const {
+auto CFileStream::IsWritable() const -> bool_t {
     return _isWritable;
 }
 
-bool_t CFileStream::IsReadable() const {
+auto CFileStream::IsReadable() const -> bool_t {
     return _isReadable;
 }
 
-bool_t CFileStream::IsSeekable() const {
+auto CFileStream::IsSeekable() const -> bool_t {
     return _isSeekable;
 }
 
-uint64_t CFileStream::GetPosition() {
+auto CFileStream::GetPosition() -> std::uint64_t {
     if (_fp == nullptr) {
         return 0;
     } else {
-        return (uint64_t)ftell(_fp);
+        return (std::uint64_t)ftell(_fp);
     }
 }
 
-void CFileStream::SetPosition(uint64_t value) {
-    fseek(_fp, (long)value, SEEK_SET);
+void CFileStream::SetPosition(std::uint64_t value) {
+    std::fseek(_fp, (long)value, SEEK_SET);
 }
 
-uint64_t CFileStream::GetLength() {
+auto CFileStream::GetLength() -> std::uint64_t {
     if (_fp == nullptr) {
         return 0;
     }
 
     auto position = ftell(_fp);
-    fseek(_fp, 0, SEEK_END);
+    std::fseek(_fp, 0, SEEK_END);
     auto r = ftell(_fp);
-    fseek(_fp, position, SEEK_SET);
-    return (uint64_t)r;
+    std::fseek(_fp, position, SEEK_SET);
+    return (std::uint64_t)r;
 }
 
-void CFileStream::SetLength(uint64_t value) {
-    fseek(_fp, (long)value, SEEK_SET);
+void CFileStream::SetLength(std::uint64_t value) {
+    std::fseek(_fp, (long)value, SEEK_SET);
 }
 
 void CFileStream::Flush() {
-    fflush(_fp);
+    std::fflush(_fp);
 }
 
-FILE *CFileStream::OpenFile(const char *fileName) {
+auto CFileStream::OpenFile(const char *fileName) -> std::FILE * {
 #define __OUT() throw CException("Mode/Access: out of range")
 #define __CMB() throw CException("Mode/Access: incompatible")
 #define __EXT() throw CException("File exists: " + std::string(fileName))
@@ -225,15 +223,20 @@ FILE *CFileStream::OpenFile(const char *fileName) {
     default:
         __OUT();
     }
-    return fopen(fileName, fileMode);
+    return std::fopen(fileName, fileMode);
+
+#undef __OUT
+#undef __CMB
+#undef __EXT
+#undef __NEX
 }
 
 void CFileStream::CreateFileInternal(const char *fileName) {
     if (CFileSystem::FileExists(fileName)) {
         return;
     }
-    auto fp = fopen(fileName, "w");
-    fclose(fp);
+    auto fp = std::fopen(fileName, "w");
+    std::fclose(fp);
 }
 
 CGSS_NS_END

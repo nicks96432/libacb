@@ -1,8 +1,10 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_CFILESYSTEM_H_
+#define CGSS_TAKAMORI_CFILESYSTEM_H_
 
 #include <string>
 
-#include "../cgss_env.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -11,21 +13,23 @@ class CGSS_EXPORT CFileSystem final {
     PURE_STATIC(CFileSystem);
 
 public:
-    static bool_t FileExists(const std::string &path);
+    static auto FileExists(const std::string &path) -> bool_t;
 
-    static bool_t DirectoryExists(const std::string &path);
+    static auto DirectoryExists(const std::string &path) -> bool_t;
 
-    static bool_t FileExists(const char *path);
+    static auto FileExists(const char *path) -> bool_t;
 
-    static bool_t DirectoryExists(const char *path);
+    static auto DirectoryExists(const char *path) -> bool_t;
 
-    static bool_t MkDir(const std::string &path);
+    static auto MkDir(const std::string &path) -> bool_t;
 
-    static bool_t MkDir(const char *path);
+    static auto MkDir(const char *path) -> bool_t;
 
-    static bool_t RmFile(const std::string &path);
+    static auto RmFile(const std::string &path) -> bool_t;
 
-    static bool_t RmFile(const char *path);
+    static auto RmFile(const char *path) -> bool_t;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_CFILESYSTEM_H_

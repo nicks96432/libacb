@@ -1,6 +1,10 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCACIPHER_H_
+#define CGSS_KAWASHIMA_HCA_CHCACIPHER_H_
 
-#include "cdata/HCA_CIPHER_CONFIG.h"
+#include <array>
+#include <cstdint>
+
+#include "cgss_cdata.h"
 #include "cgss_enum.h"
 #include "cgss_env.h"
 #include "kawashima/hca/CHcaCipherConfig.h"
@@ -18,29 +22,31 @@ public:
 
     CHcaCipher(const CHcaCipher &);
 
-    bool_t InitEncryptTable();
+    auto InitEncryptTable() -> bool_t;
 
-    void Decrypt(uint8_t *data, uint32_t size) const;
+    void Decrypt(std::uint8_t *data, std::uint32_t size) const;
 
-    void Encrypt(uint8_t *data, uint32_t size) const;
+    void Encrypt(std::uint8_t *data, std::uint32_t size) const;
 
 private:
-    bool_t Init(const CHcaCipherConfig &config);
+    auto Init(const CHcaCipherConfig &config) -> bool_t;
 
-    static const uint32_t TableSize = 0x100;
+    static constexpr std::uint32_t TableSize = 0x100;
 
-    uint8_t _decryptTable[TableSize];
-    uint8_t _encryptTable[TableSize];
+    std::array<std::uint8_t, TableSize> _decryptTable;
+    std::array<std::uint8_t, TableSize> _encryptTable;
 
     void Init0();
 
     void Init1();
 
-    void Init56(uint32_t key1, uint32_t key2);
+    void Init56(std::uint32_t key1, std::uint32_t key2);
 
-    void Init56_CreateTable(uint8_t *table, uint8_t key);
+    void Init56_CreateTable(std::array<std::uint8_t, 0x10> &table, std::uint8_t key);
 
     HcaCipherType _cipherType;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCACIPHER_H_

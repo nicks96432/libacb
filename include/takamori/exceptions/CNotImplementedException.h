@@ -1,6 +1,12 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_EXCEPTIONS_CNOTIMPLEMENTEDEXCEPTION_H_
+#define CGSS_TAKAMORI_EXCEPTIONS_CNOTIMPLEMENTEDEXCEPTION_H_
 
-#include "CException.h"
+#include <string>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./CException.h"
 
 CGSS_NS_BEGIN
 
@@ -19,3 +25,5 @@ public:
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_EXCEPTIONS_CNOTIMPLEMENTEDEXCEPTION_H_

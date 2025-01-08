@@ -1,7 +1,12 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_STREAMS_ISTREAM_H_
+#define CGSS_TAKAMORI_STREAMS_ISTREAM_H_
 
-#include "../../cgss_enum.h"
-#include "../../cgss_env.h"
+#include <cstddef>
+#include <cstdint>
+
+#include "cgss_enum.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -11,39 +16,44 @@ struct CGSS_EXPORT IStream {
 
     virtual ~IStream() = default;
 
-    virtual uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) PURE;
+    virtual auto Read(
+        void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t PURE;
 
-    virtual uint32_t
-    Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) PURE;
+    virtual auto Write(
+        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t PURE;
 
-    virtual void Seek(int64_t offset, StreamSeekOrigin origin) PURE;
+    virtual void Seek(std::int64_t offset, StreamSeekOrigin origin) PURE;
 
-    virtual bool_t IsWritable() const PURE;
+    virtual auto IsWritable() const -> bool_t PURE;
 
-    virtual bool_t IsReadable() const PURE;
+    virtual auto IsReadable() const -> bool_t PURE;
 
-    virtual bool_t IsSeekable() const PURE;
+    virtual auto IsSeekable() const -> bool_t PURE;
 
-    virtual uint64_t GetPosition() PURE;
+    virtual auto GetPosition() -> std::uint64_t PURE;
 
-    virtual void SetPosition(uint64_t value) PURE;
+    virtual void SetPosition(std::uint64_t value) PURE;
 
-    virtual uint64_t GetLength() PURE;
+    virtual auto GetLength() -> std::uint64_t PURE;
 
-    virtual void SetLength(uint64_t value) PURE;
+    virtual void SetLength(std::uint64_t value) PURE;
 
-    virtual int32_t ReadByte() PURE;
+    virtual auto ReadByte() -> std::int32_t PURE;
 
-    virtual uint32_t WriteByte(uint8_t value) PURE;
+    virtual auto WriteByte(std::uint8_t value) -> std::uint32_t PURE;
 
     virtual void Flush() PURE;
 
     virtual void CopyTo(IStream &destination) PURE;
 
-    virtual void CopyTo(IStream &destination, uint32_t bufferSize) PURE;
+    virtual void CopyTo(IStream &destination, std::uint32_t bufferSize) PURE;
 
 protected:
     IStream() = default;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_STREAMS_ISTREAM_H_

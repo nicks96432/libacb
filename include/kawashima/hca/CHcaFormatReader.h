@@ -1,8 +1,12 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCAFORMATREADER_H_
+#define CGSS_KAWASHIMA_HCA_CHCAFORMATREADER_H_
 
-#include "../../cgss_cdata.h"
-#include "../../cgss_env.h"
-#include "../../takamori/streams/CStream.h"
+#include <cstdint>
+
+#include "cgss_cdata.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+#include "takamori/streams/CStream.h"
 
 CGSS_NS_BEGIN
 
@@ -26,24 +30,27 @@ public:
 
     void GetHcaInfo(HCA_INFO *pInfo) const;
 
-    const HCA_INFO &GetHcaInfo() const;
+    auto GetHcaInfo() const -> const HCA_INFO &;
 
-    uint32_t Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) final;
+    auto Write(
+        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t final;
 
-    bool_t IsWritable() const final;
+    auto IsWritable() const -> bool_t final;
 
-    bool_t IsReadable() const final;
+    auto IsReadable() const -> bool_t final;
 
-    bool_t IsSeekable() const final;
+    auto IsSeekable() const -> bool_t final;
 
-    void SetLength(uint64_t value) final;
+    void SetLength(std::uint64_t value) final;
 
     void Flush() final;
 
-    static bool_t IsPossibleHcaStream(IStream *stream);
+    static auto IsPossibleHcaStream(IStream *stream) -> bool_t;
 
 protected:
-    static uint16_t ComputeChecksum(void *pData, uint32_t dwDataSize, uint16_t wInitSum);
+    static auto
+    ComputeChecksum(void *pData, std::uint32_t dwDataSize, std::uint16_t wInitSum) -> std::uint16_t;
 
     HCA_INFO _hcaInfo;
 
@@ -54,7 +61,9 @@ private:
 
     void PrintHcaInfo();
 
-    static const uint16_t *ChecksumTable;
+    static const std::uint16_t *ChecksumTable;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCAFORMATREADER_H_

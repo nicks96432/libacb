@@ -1,4 +1,11 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
+#define CGSS_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
+
+#include <cstddef>
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 #include "./CStream.h"
 
@@ -11,69 +18,74 @@ class CGSS_EXPORT CMemoryStream final: public CStream {
 public:
     CMemoryStream();
 
-    explicit CMemoryStream(uint64_t capacity);
+    explicit CMemoryStream(std::uint64_t capacity);
 
-    CMemoryStream(uint64_t capacity, bool_t isResizable);
+    CMemoryStream(std::uint64_t capacity, bool_t isResizable);
 
-    CMemoryStream(uint8_t *buffer, uint64_t bufferSize);
+    CMemoryStream(std::uint8_t *buffer, std::uint64_t bufferSize);
 
-    CMemoryStream(uint8_t *buffer, uint64_t bufferSize, bool_t isWritable);
+    CMemoryStream(std::uint8_t *buffer, std::uint64_t bufferSize, bool_t isWritable);
 
     CMemoryStream(const CMemoryStream &) = delete;
 
     CMemoryStream(CMemoryStream &&) = delete;
 
-    CMemoryStream &operator=(const CMemoryStream &) = delete;
+    auto operator=(const CMemoryStream &) -> CMemoryStream & = delete;
 
-    CMemoryStream &operator=(CMemoryStream &&) = delete;
+    auto operator=(CMemoryStream &&) -> CMemoryStream & = delete;
 
     ~CMemoryStream() override;
 
-    uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
+        -> std::uint32_t override;
 
-    uint32_t Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Write(
+        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t override;
 
-    bool_t IsWritable() const override;
+    auto IsWritable() const -> bool_t override;
 
-    bool_t IsReadable() const override;
+    auto IsReadable() const -> bool_t override;
 
-    bool_t IsSeekable() const override;
+    auto IsSeekable() const -> bool_t override;
 
-    uint64_t GetPosition() override;
+    auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(uint64_t value) override;
+    void SetPosition(std::uint64_t value) override;
 
-    uint64_t GetLength() override;
+    auto GetLength() -> std::uint64_t override;
 
-    void SetLength(uint64_t value) override;
+    void SetLength(std::uint64_t value) override;
 
     void Flush() override;
 
-    virtual uint64_t GetCapacity() const;
+    virtual auto GetCapacity() const -> std::uint64_t;
 
-    virtual void SetCapacity(uint64_t value);
+    virtual void SetCapacity(std::uint64_t value);
 
     virtual void TrimExcess();
 
-    virtual uint8_t *GetBuffer() const;
+    virtual auto GetBuffer() const -> std::uint8_t *;
 
-    virtual const uint8_t *ToArray();
-
-private:
-    bool_t IsResizable() const;
-
-    bool_t IsExternalBuffer() const;
-
-    void EnsureCapacity(uint64_t requestedLength);
+    virtual auto ToArray() -> const std::uint8_t *;
 
 private:
-    uint8_t *_buffer;
+    auto IsResizable() const -> bool_t;
+
+    auto IsExternalBuffer() const -> bool_t;
+
+    void EnsureCapacity(std::uint64_t requestedLength);
+
+private:
+    std::uint8_t *_buffer;
     bool_t _isResizable;
     bool_t _isExternalBuffer;
-    uint64_t _position;
-    uint64_t _length;
-    uint64_t _capacity;
+    std::uint64_t _position;
+    std::uint64_t _length;
+    std::uint64_t _capacity;
     bool_t _isWritable;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_STREAMS_CMEMORYSTREAM_H_

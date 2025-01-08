@@ -1,8 +1,9 @@
-#pragma once
+#ifndef CGSS_TYPE_TRAITS_H_
+#define CGSS_TYPE_TRAITS_H_
 
 #include <type_traits>
 
-#include "../cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -18,3 +19,5 @@ inline constexpr bool is_numeric_v = std::is_integral<T>::value;
 #endif
 
 CGSS_NS_END
+
+#endif

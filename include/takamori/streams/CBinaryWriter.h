@@ -1,7 +1,13 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_STREAMS_CBINARYWRITER_H_
+#define CGSS_TAKAMORI_STREAMS_CBINARYWRITER_H_
 
-#include "../../cgss_env.h"
-#include "CStream.h"
+#include <cstddef>
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./CStream.h"
 
 CGSS_NS_BEGIN
 
@@ -14,59 +20,62 @@ public:
 
     CBinaryWriter(const CBinaryWriter &) = delete;
 
-    uint32_t WriteInt8(int8_t v);
+    auto WriteInt8(std::int8_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt8(uint8_t v);
+    auto WriteUInt8(std::uint8_t v) -> std::uint32_t;
 
-    uint32_t WriteInt16LE(int16_t v);
+    auto WriteInt16LE(std::int16_t v) -> std::uint32_t;
 
-    uint32_t WriteInt16BE(int16_t v);
+    auto WriteInt16BE(std::int16_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt16LE(uint16_t v);
+    auto WriteUInt16LE(std::uint16_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt16BE(uint16_t v);
+    auto WriteUInt16BE(std::uint16_t v) -> std::uint32_t;
 
-    uint32_t WriteInt32LE(int32_t v);
+    auto WriteInt32LE(std::int32_t v) -> std::uint32_t;
 
-    uint32_t WriteInt32BE(int32_t v);
+    auto WriteInt32BE(std::int32_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt32LE(uint32_t v);
+    auto WriteUInt32LE(std::uint32_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt32BE(uint32_t v);
+    auto WriteUInt32BE(std::uint32_t v) -> std::uint32_t;
 
-    uint32_t WriteInt64LE(int64_t v);
+    auto WriteInt64LE(std::int64_t v) -> std::uint32_t;
 
-    uint32_t WriteInt64BE(int64_t v);
+    auto WriteInt64BE(std::int64_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt64LE(uint64_t v);
+    auto WriteUInt64LE(std::uint64_t v) -> std::uint32_t;
 
-    uint32_t WriteUInt64BE(uint64_t v);
+    auto WriteUInt64BE(std::uint64_t v) -> std::uint32_t;
 
-    uint32_t WriteSingleLE(float v);
+    auto WriteSingleLE(float v) -> std::uint32_t;
 
-    uint32_t WriteSingleBE(float v);
+    auto WriteSingleBE(float v) -> std::uint32_t;
 
-    uint32_t WriteDoubleLE(double v);
+    auto WriteDoubleLE(double v) -> std::uint32_t;
 
-    uint32_t WriteDoubleBE(double v);
+    auto WriteDoubleBE(double v) -> std::uint32_t;
 
-    uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
+        -> std::uint32_t override;
 
-    uint32_t Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Write(
+        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t override;
 
-    bool_t IsWritable() const override;
+    auto IsWritable() const -> bool_t override;
 
-    bool_t IsReadable() const override;
+    auto IsReadable() const -> bool_t override;
 
-    bool_t IsSeekable() const override;
+    auto IsSeekable() const -> bool_t override;
 
-    uint64_t GetPosition() override;
+    auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(uint64_t value) override;
+    void SetPosition(std::uint64_t value) override;
 
-    uint64_t GetLength() override;
+    auto GetLength() -> std::uint64_t override;
 
-    void SetLength(uint64_t value) override;
+    void SetLength(std::uint64_t value) override;
 
     void Flush() override;
 
@@ -75,3 +84,5 @@ private:
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_STREAMS_CBINARYWRITER_H_

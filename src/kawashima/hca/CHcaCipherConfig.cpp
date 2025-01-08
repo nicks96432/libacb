@@ -1,3 +1,6 @@
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 #include "kawashima/hca/CHcaCipherConfig.h"
 
 CGSS_NS_BEGIN

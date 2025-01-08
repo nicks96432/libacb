@@ -1,12 +1,20 @@
-#include "kawashima/hca/CHcaFormatReader.h"
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <stdexcept>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 #include "common/quick_utils.h"
+#include "kawashima/hca/CHcaFormatReader.h"
 #include "kawashima/hca/hca_native.h"
 #include "kawashima/hca/hca_utils.h"
 #include "takamori/exceptions/CException.h"
 #include "takamori/exceptions/CFormatException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CBinaryReader.h"
-#include <iostream>
+#include "takamori/streams/IStream.h"
 
 CGSS_NS_BEGIN
 
@@ -18,17 +26,18 @@ public:
     explicit NullHcaReader(IStream *baseStream): MyBase(baseStream) {}
 
 private:
-    uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override {
+    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
+        -> std::uint32_t override {
         return 0;
     }
 
-    uint64_t GetPosition() override {
+    auto GetPosition() -> std::uint64_t override {
         return 0;
     }
 
-    void SetPosition(uint64_t value) override {}
+    void SetPosition(std::uint64_t value) override {}
 
-    uint64_t GetLength() override {
+    auto GetLength() -> std::uint64_t override {
         return 0;
     }
 };
@@ -38,7 +47,7 @@ CHcaFormatReader::CHcaFormatReader(IStream *baseStream): _baseStream(baseStream)
     Initialize();
 }
 
-const uint16_t *CHcaFormatReader::ChecksumTable = new uint16_t[256]{
+const std::uint16_t *CHcaFormatReader::ChecksumTable = new std::uint16_t[256]{
     0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011, 0x8033, 0x0036, 0x003C, 0x8039,
     0x0028, 0x802D, 0x8027, 0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D, 0x8077, 0x0072,
     0x0050, 0x8055, 0x805F, 0x005A, 0x804B, 0x004E, 0x0044, 0x8041, 0x80C3, 0x00C6, 0x00CC, 0x80C9,
@@ -63,15 +72,17 @@ const uint16_t *CHcaFormatReader::ChecksumTable = new uint16_t[256]{
     0x0208, 0x820D, 0x8207, 0x0202,
 };
 
-uint16_t CHcaFormatReader::ComputeChecksum(void *pData, uint32_t dwDataSize, uint16_t wInitSum) {
-    uint8_t *p = (uint8_t *)pData;
-    for (uint32_t i = 0; i < dwDataSize; ++i, ++p) {
+auto CHcaFormatReader::ComputeChecksum(
+    void *pData, std::uint32_t dwDataSize, std::uint16_t wInitSum
+) -> std::uint16_t {
+    auto *p = (uint8_t *)pData;
+    for (std::uint32_t i = 0; i < dwDataSize; ++i, ++p) {
         wInitSum = (wInitSum << 8) ^ ChecksumTable[(wInitSum >> 8) ^ *p];
     }
     return wInitSum;
 }
 
-const HCA_INFO &CHcaFormatReader::GetHcaInfo() const {
+auto CHcaFormatReader::GetHcaInfo() const -> const HCA_INFO & {
     return _hcaInfo;
 }
 
@@ -89,8 +100,8 @@ void CHcaFormatReader::GetHcaInfo(HCA_INFO *pInfo) const {
 void CHcaFormatReader::Initialize() {
     auto stream   = _baseStream;
     auto &hcaInfo = _hcaInfo;
-    uint32_t bufferSize;
-    uint32_t actualRead;
+    std::uint32_t bufferSize;
+    std::uint32_t actualRead;
 
 #define ENSURE_READ_ALL(var)                                    \
     bufferSize = sizeof(var);                                   \
@@ -116,14 +127,14 @@ void CHcaFormatReader::Initialize() {
         ensureMagicMatch(hcaFileHeader.hca, Magic::HCA);
         // Calculate the correct data offset.
         // Headers will take up to dataOffset bytes, and after that, audio data.
-        uint32_t dataOffset  = bswap(hcaFileHeader.dataOffset);
-        uint16_t fileVersion = bswap(hcaFileHeader.version);
-        hcaInfo.versionMajor = (uint16_t)(fileVersion >> 8);
-        hcaInfo.versionMinor = (uint16_t)(fileVersion & 0xff);
-        hcaInfo.dataOffset   = dataOffset;
+        std::uint32_t dataOffset  = bswap(hcaFileHeader.dataOffset);
+        std::uint16_t fileVersion = bswap(hcaFileHeader.version);
+        hcaInfo.versionMajor      = (std::uint16_t)(fileVersion >> 8);
+        hcaInfo.versionMinor      = (std::uint16_t)(fileVersion & 0xff);
+        hcaInfo.dataOffset        = dataOffset;
 
         // Read the whole headers section and verify checksum.
-        uint8_t *headerContents = new uint8_t[dataOffset];
+        auto *headerContents = new uint8_t[dataOffset];
         stream->Seek(0, StreamSeekOrigin::Begin);
         ENSURE_READ_ALL_BUFFER(headerContents, dataOffset);
         const auto headerChecksum = ComputeChecksum(headerContents, dataOffset, 0);
@@ -185,8 +196,8 @@ void CHcaFormatReader::Initialize() {
             hcaInfo.compR02   = hcaDecodeHeader.r02;
             hcaInfo.compR03   = hcaDecodeHeader.r04;
             hcaInfo.compR04   = hcaDecodeHeader.r03;
-            hcaInfo.compR05   = static_cast<uint16_t>(hcaDecodeHeader.count1 + 1);
-            hcaInfo.compR06   = static_cast<uint16_t>(
+            hcaInfo.compR05   = static_cast<std::uint16_t>(hcaDecodeHeader.count1 + 1);
+            hcaInfo.compR06   = static_cast<std::uint16_t>(
                 (hcaDecodeHeader.enableCount2 ? hcaDecodeHeader.count2 : hcaDecodeHeader.count1) + 1
             );
             hcaInfo.compR07 = hcaInfo.compR05 - hcaInfo.compR06;
@@ -219,7 +230,7 @@ void CHcaFormatReader::Initialize() {
             ENSURE_READ_ALL(hcaAthHeader);
             hcaInfo.athType = hcaAthHeader.type;
         } else {
-            hcaInfo.athType = static_cast<uint16_t>(hcaInfo.versionMajor < 2 ? 1 : 0);
+            hcaInfo.athType = static_cast<std::uint16_t>(hcaInfo.versionMajor < 2 ? 1 : 0);
         }
     }
 
@@ -306,15 +317,15 @@ void CHcaFormatReader::Initialize() {
     stream->Seek(hcaInfo.dataOffset, StreamSeekOrigin::Begin);
 }
 
-bool_t CHcaFormatReader::IsReadable() const {
+auto CHcaFormatReader::IsReadable() const -> bool_t {
     return TRUE;
 }
 
-bool_t CHcaFormatReader::IsWritable() const {
+auto CHcaFormatReader::IsWritable() const -> bool_t {
     return FALSE;
 }
 
-bool_t CHcaFormatReader::IsSeekable() const {
+auto CHcaFormatReader::IsSeekable() const -> bool_t {
     return TRUE;
 }
 
@@ -322,40 +333,40 @@ void CHcaFormatReader::Flush() {
     throw CInvalidOperationException();
 }
 
-void CHcaFormatReader::SetLength(uint64_t value) {
+void CHcaFormatReader::SetLength(std::uint64_t value) {
     throw CInvalidOperationException();
 }
 
-uint32_t
-CHcaFormatReader::Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CHcaFormatReader::Write(
+    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     throw CInvalidOperationException();
 }
 
 void CHcaFormatReader::PrintHcaInfo() {
     const auto &hcaInfo = _hcaInfo;
-    using namespace std;
 
-    cout << "General:" << endl;
-    cout << "  Version: " << hcaInfo.versionMajor << "." << hcaInfo.versionMinor << endl;
-    cout << "  Channels: " << hcaInfo.channelCount << endl;
-    cout << "  Sampling rate: " << hcaInfo.samplingRate << endl;
-    cout << "  Data offset: " << hcaInfo.dataOffset << endl;
-    cout << "  Has loop: " << (hcaInfo.loopExists ? "Yes" : "No") << endl;
-    cout << "Decoding:" << endl;
-    cout << "  Number of blocks: " << hcaInfo.blockCount << endl;
-    cout << "  Size of each block: " << hcaInfo.blockSize << endl;
-    cout << "  Cipher type: " << hcaInfo.cipherType << endl;
+    std::cout << "General:" << std::endl;
+    std::cout << "  Version: " << hcaInfo.versionMajor << "." << hcaInfo.versionMinor << std::endl;
+    std::cout << "  Channels: " << hcaInfo.channelCount << std::endl;
+    std::cout << "  Sampling rate: " << hcaInfo.samplingRate << std::endl;
+    std::cout << "  Data offset: " << hcaInfo.dataOffset << std::endl;
+    std::cout << "  Has loop: " << (hcaInfo.loopExists ? "Yes" : "No") << std::endl;
+    std::cout << "Decoding:" << std::endl;
+    std::cout << "  Number of blocks: " << hcaInfo.blockCount << std::endl;
+    std::cout << "  Size of each block: " << hcaInfo.blockSize << std::endl;
+    std::cout << "  Cipher type: " << hcaInfo.cipherType << std::endl;
     if (hcaInfo.loopExists) {
-        cout << "Loop:" << endl;
-        cout << "  Start index: " << hcaInfo.loopStart << endl;
-        cout << "  End index: " << hcaInfo.loopEnd << endl;
+        std::cout << "Loop:" << std::endl;
+        std::cout << "  Start index: " << hcaInfo.loopStart << std::endl;
+        std::cout << "  End index: " << hcaInfo.loopEnd << std::endl;
     }
-    cout << "Other:" << endl;
-    cout << "  ATH: " << hcaInfo.athType << endl;
-    cout << "  Volume adjustment: " << hcaInfo.rvaVolume << endl;
+    std::cout << "Other:" << std::endl;
+    std::cout << "  ATH: " << hcaInfo.athType << std::endl;
+    std::cout << "  Volume adjustment: " << hcaInfo.rvaVolume << std::endl;
 }
 
-bool_t CHcaFormatReader::IsPossibleHcaStream(IStream *stream) {
+auto CHcaFormatReader::IsPossibleHcaStream(IStream *stream) -> bool_t {
     if (!stream) {
         return FALSE;
     }

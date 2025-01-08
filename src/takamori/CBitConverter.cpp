@@ -1,3 +1,7 @@
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 #include "takamori/CBitConverter.h"
 
 // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
@@ -8,8 +12,8 @@ enum {
 };
 
 static const union {
-    uint8_t bytes[4];
-    uint32_t value;
+    std::uint8_t bytes[4]; // NOLINT(modernize-avoid-c-arrays)
+    std::uint32_t value;
 } _o32_host_order = {
     {0, 1, 2, 3}
 };
@@ -18,34 +22,34 @@ static const union {
 
 CGSS_NS_BEGIN
 
-bool_t CBitConverter::IsLittleEndian() {
+auto CBitConverter::IsLittleEndian() -> bool_t {
     return static_cast<bool_t>(O32_HOST_ORDER == O32_LITTLE_ENDIAN);
 }
 
-float CBitConverter::ToSingle(const void *p) {
+auto CBitConverter::ToSingle(const void *p) -> float {
     const auto v = ToInt32(p);
     return *(float *)&v;
 }
 
-double CBitConverter::ToDouble(const void *p) {
+auto CBitConverter::ToDouble(const void *p) -> double {
     const auto v = ToInt64(p);
     return *(double *)&v;
 }
 
-#define TO_INT(bit, u, U)                                           \
-    u##int##bit##_t CBitConverter::To##U##Int##bit(const void *p) { \
-        const auto *pb    = static_cast<const uint8_t *>(p);        \
-        u##int##bit##_t v = 0;                                      \
-        if (IsLittleEndian()) {                                     \
-            for (auto i = 0; i < ((bit) / 8); ++i) {                \
-                v = v | (pb[i] << (i * 8));                         \
-            }                                                       \
-        } else {                                                    \
-            for (auto i = 0; i < ((bit) / 8); ++i) {                \
-                v = (v << 8) | pb[i];                               \
-            }                                                       \
-        };                                                          \
-        return v;                                                   \
+#define TO_INT(bit, u, U)                                                      \
+    auto CBitConverter::To##U##Int##bit(const void *p)->std::u##int##bit##_t { \
+        const auto *pb    = static_cast<const std::uint8_t *>(p);              \
+        u##int##bit##_t v = 0;                                                 \
+        if (IsLittleEndian()) {                                                \
+            for (auto i = 0; i < ((bit) / 8); ++i) {                           \
+                v = v | (pb[i] << (i * 8));                                    \
+            }                                                                  \
+        } else {                                                               \
+            for (auto i = 0; i < ((bit) / 8); ++i) {                           \
+                v = (v << 8) | pb[i];                                          \
+            }                                                                  \
+        };                                                                     \
+        return v;                                                              \
     }
 
 TO_INT(16, , )

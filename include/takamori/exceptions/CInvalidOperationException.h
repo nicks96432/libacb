@@ -1,7 +1,12 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_EXCEPTIONS_CINVALIDOPERATIONEXCEPTION_H_
+#define CGSS_TAKAMORI_EXCEPTIONS_CINVALIDOPERATIONEXCEPTION_H_
 
-#include "../../cgss_env.h"
-#include "CException.h"
+#include <string>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./CException.h"
 
 CGSS_NS_BEGIN
 
@@ -20,3 +25,5 @@ public:
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_EXCEPTIONS_CINVALIDOPERATIONEXCEPTION_H_

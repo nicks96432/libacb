@@ -1,23 +1,34 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
+#define CGSS_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
 
-#include "../../cgss_env.h"
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
 class CGSS_EXPORT CDefaultWaveGenerator final {
 
 public:
-    static uint32_t Decode8BitU(float data, uint8_t *buffer, uint32_t cursor);
+    static auto
+    Decode8BitU(float data, std::uint8_t *buffer, std::uint32_t cursor) -> std::uint32_t;
 
-    static uint32_t Decode16BitS(float data, uint8_t *buffer, uint32_t cursor);
+    static auto
+    Decode16BitS(float data, std::uint8_t *buffer, std::uint32_t cursor) -> std::uint32_t;
 
-    static uint32_t Decode24BitS(float data, uint8_t *buffer, uint32_t cursor);
+    static auto
+    Decode24BitS(float data, std::uint8_t *buffer, std::uint32_t cursor) -> std::uint32_t;
 
-    static uint32_t Decode32BitS(float data, uint8_t *buffer, uint32_t cursor);
+    static auto
+    Decode32BitS(float data, std::uint8_t *buffer, std::uint32_t cursor) -> std::uint32_t;
 
-    static uint32_t DecodeFloat(float data, uint8_t *buffer, uint32_t cursor);
+    static auto
+    DecodeFloat(float data, std::uint8_t *buffer, std::uint32_t cursor) -> std::uint32_t;
 
     PURE_STATIC(CDefaultWaveGenerator);
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_

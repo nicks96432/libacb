@@ -1,7 +1,13 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_STREAMS_CBINARYREADER_H_
+#define CGSS_TAKAMORI_STREAMS_CBINARYREADER_H_
 
-#include "../../cgss_env.h"
-#include "CStream.h"
+#include <cstddef>
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./CStream.h"
 
 CGSS_NS_BEGIN
 
@@ -14,316 +20,325 @@ public:
 
     CBinaryReader(const CBinaryReader &) = delete;
 
-    int8_t ReadInt8() const;
+    auto ReadInt8() const -> std::int8_t;
 
-    uint8_t ReadUInt8() const;
+    auto ReadUInt8() const -> std::uint8_t;
 
-    int16_t ReadInt16LE() const;
+    auto ReadInt16LE() const -> std::int16_t;
 
-    int16_t ReadInt16BE() const;
+    auto ReadInt16BE() const -> std::int16_t;
 
-    uint16_t ReadUInt16LE() const;
+    auto ReadUInt16LE() const -> std::uint16_t;
 
-    uint16_t ReadUInt16BE() const;
+    auto ReadUInt16BE() const -> std::uint16_t;
 
-    int32_t ReadInt32LE() const;
+    auto ReadInt32LE() const -> std::int32_t;
 
-    int32_t ReadInt32BE() const;
+    auto ReadInt32BE() const -> std::int32_t;
 
-    uint32_t ReadUInt32LE() const;
+    auto ReadUInt32LE() const -> std::uint32_t;
 
-    uint32_t ReadUInt32BE() const;
+    auto ReadUInt32BE() const -> std::uint32_t;
 
-    int64_t ReadInt64LE() const;
+    auto ReadInt64LE() const -> std::int64_t;
 
-    int64_t ReadInt64BE() const;
+    auto ReadInt64BE() const -> std::int64_t;
 
-    uint64_t ReadUInt64LE() const;
+    auto ReadUInt64LE() const -> std::uint64_t;
 
-    uint64_t ReadUInt64BE() const;
+    auto ReadUInt64BE() const -> std::uint64_t;
 
-    float ReadSingleLE() const;
+    auto ReadSingleLE() const -> float;
 
-    float ReadSingleBE() const;
+    auto ReadSingleBE() const -> float;
 
-    double ReadDoubleLE() const;
+    auto ReadDoubleLE() const -> double;
 
-    double ReadDoubleBE() const;
+    auto ReadDoubleBE() const -> double;
 
-    int8_t ReadInt8(uint64_t offset) const;
+    auto ReadInt8(std::uint64_t offset) const -> std::int8_t;
 
-    uint8_t ReadUInt8(uint64_t offset) const;
+    auto ReadUInt8(std::uint64_t offset) const -> std::uint8_t;
 
-    int16_t ReadInt16LE(uint64_t offset) const;
+    auto ReadInt16LE(std::uint64_t offset) const -> std::int16_t;
 
-    int16_t ReadInt16BE(uint64_t offset) const;
+    auto ReadInt16BE(std::uint64_t offset) const -> std::int16_t;
 
-    uint16_t ReadUInt16LE(uint64_t offset) const;
+    auto ReadUInt16LE(std::uint64_t offset) const -> std::uint16_t;
 
-    uint16_t ReadUInt16BE(uint64_t offset) const;
+    auto ReadUInt16BE(std::uint64_t offset) const -> std::uint16_t;
 
-    int32_t ReadInt32LE(uint64_t offset) const;
+    auto ReadInt32LE(std::uint64_t offset) const -> std::int32_t;
 
-    int32_t ReadInt32BE(uint64_t offset) const;
+    auto ReadInt32BE(std::uint64_t offset) const -> std::int32_t;
 
-    uint32_t ReadUInt32LE(uint64_t offset) const;
+    auto ReadUInt32LE(std::uint64_t offset) const -> std::uint32_t;
 
-    uint32_t ReadUInt32BE(uint64_t offset) const;
+    auto ReadUInt32BE(std::uint64_t offset) const -> std::uint32_t;
 
-    int64_t ReadInt64LE(uint64_t offset) const;
+    auto ReadInt64LE(std::uint64_t offset) const -> std::int64_t;
 
-    int64_t ReadInt64BE(uint64_t offset) const;
+    auto ReadInt64BE(std::uint64_t offset) const -> std::int64_t;
 
-    uint64_t ReadUInt64LE(uint64_t offset) const;
+    auto ReadUInt64LE(std::uint64_t offset) const -> std::uint64_t;
 
-    uint64_t ReadUInt64BE(uint64_t offset) const;
+    auto ReadUInt64BE(std::uint64_t offset) const -> std::uint64_t;
 
-    float ReadSingleLE(uint64_t offset) const;
+    auto ReadSingleLE(std::uint64_t offset) const -> float;
 
-    float ReadSingleBE(uint64_t offset) const;
+    auto ReadSingleBE(std::uint64_t offset) const -> float;
 
-    double ReadDoubleLE(uint64_t offset) const;
+    auto ReadDoubleLE(std::uint64_t offset) const -> double;
 
-    double ReadDoubleBE(uint64_t offset) const;
+    auto ReadDoubleBE(std::uint64_t offset) const -> double;
 
-    static int8_t ReadInt8(IStream *stream);
+    static auto ReadInt8(IStream *stream) -> std::int8_t;
 
-    static uint8_t ReadUInt8(IStream *stream);
+    static auto ReadUInt8(IStream *stream) -> std::uint8_t;
 
-    static int16_t ReadInt16LE(IStream *stream);
+    static auto ReadInt16LE(IStream *stream) -> std::int16_t;
 
-    static int16_t ReadInt16BE(IStream *stream);
+    static auto ReadInt16BE(IStream *stream) -> std::int16_t;
 
-    static uint16_t ReadUInt16LE(IStream *stream);
+    static auto ReadUInt16LE(IStream *stream) -> std::uint16_t;
 
-    static uint16_t ReadUInt16BE(IStream *stream);
+    static auto ReadUInt16BE(IStream *stream) -> std::uint16_t;
 
-    static int32_t ReadInt32LE(IStream *stream);
+    static auto ReadInt32LE(IStream *stream) -> std::int32_t;
 
-    static int32_t ReadInt32BE(IStream *stream);
+    static auto ReadInt32BE(IStream *stream) -> std::int32_t;
 
-    static uint32_t ReadUInt32LE(IStream *stream);
+    static auto ReadUInt32LE(IStream *stream) -> std::uint32_t;
 
-    static uint32_t ReadUInt32BE(IStream *stream);
+    static auto ReadUInt32BE(IStream *stream) -> std::uint32_t;
 
-    static int64_t ReadInt64LE(IStream *stream);
+    static auto ReadInt64LE(IStream *stream) -> std::int64_t;
 
-    static int64_t ReadInt64BE(IStream *stream);
+    static auto ReadInt64BE(IStream *stream) -> std::int64_t;
 
-    static uint64_t ReadUInt64LE(IStream *stream);
+    static auto ReadUInt64LE(IStream *stream) -> std::uint64_t;
 
-    static uint64_t ReadUInt64BE(IStream *stream);
+    static auto ReadUInt64BE(IStream *stream) -> std::uint64_t;
 
-    static float ReadSingleLE(IStream *stream);
+    static auto ReadSingleLE(IStream *stream) -> float;
 
-    static float ReadSingleBE(IStream *stream);
+    static auto ReadSingleBE(IStream *stream) -> float;
 
-    static double ReadDoubleLE(IStream *stream);
+    static auto ReadDoubleLE(IStream *stream) -> double;
 
-    static double ReadDoubleBE(IStream *stream);
+    static auto ReadDoubleBE(IStream *stream) -> double;
 
-    static int8_t ReadInt8(IStream *stream, uint64_t offset);
+    static auto ReadInt8(IStream *stream, std::uint64_t offset) -> std::int8_t;
 
-    static uint8_t ReadUInt8(IStream *stream, uint64_t offset);
+    static auto ReadUInt8(IStream *stream, std::uint64_t offset) -> std::uint8_t;
 
-    static int16_t ReadInt16LE(IStream *stream, uint64_t offset);
+    static auto ReadInt16LE(IStream *stream, std::uint64_t offset) -> std::int16_t;
 
-    static int16_t ReadInt16BE(IStream *stream, uint64_t offset);
+    static auto ReadInt16BE(IStream *stream, std::uint64_t offset) -> std::int16_t;
 
-    static uint16_t ReadUInt16LE(IStream *stream, uint64_t offset);
+    static auto ReadUInt16LE(IStream *stream, std::uint64_t offset) -> std::uint16_t;
 
-    static uint16_t ReadUInt16BE(IStream *stream, uint64_t offset);
+    static auto ReadUInt16BE(IStream *stream, std::uint64_t offset) -> std::uint16_t;
 
-    static int32_t ReadInt32LE(IStream *stream, uint64_t offset);
+    static auto ReadInt32LE(IStream *stream, std::uint64_t offset) -> std::int32_t;
 
-    static int32_t ReadInt32BE(IStream *stream, uint64_t offset);
+    static auto ReadInt32BE(IStream *stream, std::uint64_t offset) -> std::int32_t;
 
-    static uint32_t ReadUInt32LE(IStream *stream, uint64_t offset);
+    static auto ReadUInt32LE(IStream *stream, std::uint64_t offset) -> std::uint32_t;
 
-    static uint32_t ReadUInt32BE(IStream *stream, uint64_t offset);
+    static auto ReadUInt32BE(IStream *stream, std::uint64_t offset) -> std::uint32_t;
 
-    static int64_t ReadInt64LE(IStream *stream, uint64_t offset);
+    static auto ReadInt64LE(IStream *stream, std::uint64_t offset) -> std::int64_t;
 
-    static int64_t ReadInt64BE(IStream *stream, uint64_t offset);
+    static auto ReadInt64BE(IStream *stream, std::uint64_t offset) -> std::int64_t;
 
-    static uint64_t ReadUInt64LE(IStream *stream, uint64_t offset);
+    static auto ReadUInt64LE(IStream *stream, std::uint64_t offset) -> std::uint64_t;
 
-    static uint64_t ReadUInt64BE(IStream *stream, uint64_t offset);
+    static auto ReadUInt64BE(IStream *stream, std::uint64_t offset) -> std::uint64_t;
 
-    static float ReadSingleLE(IStream *stream, uint64_t offset);
+    static auto ReadSingleLE(IStream *stream, std::uint64_t offset) -> float;
 
-    static float ReadSingleBE(IStream *stream, uint64_t offset);
+    static auto ReadSingleBE(IStream *stream, std::uint64_t offset) -> float;
 
-    static double ReadDoubleLE(IStream *stream, uint64_t offset);
+    static auto ReadDoubleLE(IStream *stream, std::uint64_t offset) -> double;
 
-    static double ReadDoubleBE(IStream *stream, uint64_t offset);
+    static auto ReadDoubleBE(IStream *stream, std::uint64_t offset) -> double;
 
-    int8_t PeekInt8() const;
+    auto PeekInt8() const -> std::int8_t;
 
-    uint8_t PeekUInt8() const;
+    auto PeekUInt8() const -> std::uint8_t;
 
-    int16_t PeekInt16LE() const;
+    auto PeekInt16LE() const -> std::int16_t;
 
-    int16_t PeekInt16BE() const;
+    auto PeekInt16BE() const -> std::int16_t;
 
-    uint16_t PeekUInt16LE() const;
+    auto PeekUInt16LE() const -> std::uint16_t;
 
-    uint16_t PeekUInt16BE() const;
+    auto PeekUInt16BE() const -> std::uint16_t;
 
-    int32_t PeekInt32LE() const;
+    auto PeekInt32LE() const -> std::int32_t;
 
-    int32_t PeekInt32BE() const;
+    auto PeekInt32BE() const -> std::int32_t;
 
-    uint32_t PeekUInt32LE() const;
+    auto PeekUInt32LE() const -> std::uint32_t;
 
-    uint32_t PeekUInt32BE() const;
+    auto PeekUInt32BE() const -> std::uint32_t;
 
-    int64_t PeekInt64LE() const;
+    auto PeekInt64LE() const -> std::int64_t;
 
-    int64_t PeekInt64BE() const;
+    auto PeekInt64BE() const -> std::int64_t;
 
-    uint64_t PeekUInt64LE() const;
+    auto PeekUInt64LE() const -> std::uint64_t;
 
-    uint64_t PeekUInt64BE() const;
+    auto PeekUInt64BE() const -> std::uint64_t;
 
-    float PeekSingleLE() const;
+    auto PeekSingleLE() const -> float;
 
-    float PeekSingleBE() const;
+    auto PeekSingleBE() const -> float;
 
-    double PeekDoubleLE() const;
+    auto PeekDoubleLE() const -> double;
 
-    double PeekDoubleBE() const;
+    auto PeekDoubleBE() const -> double;
 
-    int8_t PeekInt8(uint64_t offset) const;
+    auto PeekInt8(std::uint64_t offset) const -> std::int8_t;
 
-    uint8_t PeekUInt8(uint64_t offset) const;
+    auto PeekUInt8(std::uint64_t offset) const -> std::uint8_t;
 
-    int16_t PeekInt16LE(uint64_t offset) const;
+    auto PeekInt16LE(std::uint64_t offset) const -> std::int16_t;
 
-    int16_t PeekInt16BE(uint64_t offset) const;
+    auto PeekInt16BE(std::uint64_t offset) const -> std::int16_t;
 
-    uint16_t PeekUInt16LE(uint64_t offset) const;
+    auto PeekUInt16LE(std::uint64_t offset) const -> std::uint16_t;
 
-    uint16_t PeekUInt16BE(uint64_t offset) const;
+    auto PeekUInt16BE(std::uint64_t offset) const -> std::uint16_t;
 
-    int32_t PeekInt32LE(uint64_t offset) const;
+    auto PeekInt32LE(std::uint64_t offset) const -> std::int32_t;
 
-    int32_t PeekInt32BE(uint64_t offset) const;
+    auto PeekInt32BE(std::uint64_t offset) const -> std::int32_t;
 
-    uint32_t PeekUInt32LE(uint64_t offset) const;
+    auto PeekUInt32LE(std::uint64_t offset) const -> std::uint32_t;
 
-    uint32_t PeekUInt32BE(uint64_t offset) const;
+    auto PeekUInt32BE(std::uint64_t offset) const -> std::uint32_t;
 
-    int64_t PeekInt64LE(uint64_t offset) const;
+    auto PeekInt64LE(std::uint64_t offset) const -> std::int64_t;
 
-    int64_t PeekInt64BE(uint64_t offset) const;
+    auto PeekInt64BE(std::uint64_t offset) const -> std::int64_t;
 
-    uint64_t PeekUInt64LE(uint64_t offset) const;
+    auto PeekUInt64LE(std::uint64_t offset) const -> std::uint64_t;
 
-    uint64_t PeekUInt64BE(uint64_t offset) const;
+    auto PeekUInt64BE(std::uint64_t offset) const -> std::uint64_t;
 
-    float PeekSingleLE(uint64_t offset) const;
+    auto PeekSingleLE(std::uint64_t offset) const -> float;
 
-    float PeekSingleBE(uint64_t offset) const;
+    auto PeekSingleBE(std::uint64_t offset) const -> float;
 
-    double PeekDoubleLE(uint64_t offset) const;
+    auto PeekDoubleLE(std::uint64_t offset) const -> double;
 
-    double PeekDoubleBE(uint64_t offset) const;
+    auto PeekDoubleBE(std::uint64_t offset) const -> double;
 
-    static int8_t PeekInt8(IStream *stream);
+    static auto PeekInt8(IStream *stream) -> std::int8_t;
 
-    static uint8_t PeekUInt8(IStream *stream);
+    static auto PeekUInt8(IStream *stream) -> std::uint8_t;
 
-    static int16_t PeekInt16LE(IStream *stream);
+    static auto PeekInt16LE(IStream *stream) -> std::int16_t;
 
-    static int16_t PeekInt16BE(IStream *stream);
+    static auto PeekInt16BE(IStream *stream) -> std::int16_t;
 
-    static uint16_t PeekUInt16LE(IStream *stream);
+    static auto PeekUInt16LE(IStream *stream) -> std::uint16_t;
 
-    static uint16_t PeekUInt16BE(IStream *stream);
+    static auto PeekUInt16BE(IStream *stream) -> std::uint16_t;
 
-    static int32_t PeekInt32LE(IStream *stream);
+    static auto PeekInt32LE(IStream *stream) -> std::int32_t;
 
-    static int32_t PeekInt32BE(IStream *stream);
+    static auto PeekInt32BE(IStream *stream) -> std::int32_t;
 
-    static uint32_t PeekUInt32LE(IStream *stream);
+    static auto PeekUInt32LE(IStream *stream) -> std::uint32_t;
 
-    static uint32_t PeekUInt32BE(IStream *stream);
+    static auto PeekUInt32BE(IStream *stream) -> std::uint32_t;
 
-    static int64_t PeekInt64LE(IStream *stream);
+    static auto PeekInt64LE(IStream *stream) -> std::int64_t;
 
-    static int64_t PeekInt64BE(IStream *stream);
+    static auto PeekInt64BE(IStream *stream) -> std::int64_t;
 
-    static uint64_t PeekUInt64LE(IStream *stream);
+    static auto PeekUInt64LE(IStream *stream) -> std::uint64_t;
 
-    static uint64_t PeekUInt64BE(IStream *stream);
+    static auto PeekUInt64BE(IStream *stream) -> std::uint64_t;
 
-    static float PeekSingleLE(IStream *stream);
+    static auto PeekSingleLE(IStream *stream) -> float;
 
-    static float PeekSingleBE(IStream *stream);
+    static auto PeekSingleBE(IStream *stream) -> float;
 
-    static double PeekDoubleLE(IStream *stream);
+    static auto PeekDoubleLE(IStream *stream) -> double;
 
-    static double PeekDoubleBE(IStream *stream);
+    static auto PeekDoubleBE(IStream *stream) -> double;
 
-    static int8_t PeekInt8(IStream *stream, uint64_t offset);
+    static auto PeekInt8(IStream *stream, std::uint64_t offset) -> std::int8_t;
 
-    static uint8_t PeekUInt8(IStream *stream, uint64_t offset);
+    static auto PeekUInt8(IStream *stream, std::uint64_t offset) -> std::uint8_t;
 
-    static int16_t PeekInt16LE(IStream *stream, uint64_t offset);
+    static auto PeekInt16LE(IStream *stream, std::uint64_t offset) -> std::int16_t;
 
-    static int16_t PeekInt16BE(IStream *stream, uint64_t offset);
+    static auto PeekInt16BE(IStream *stream, std::uint64_t offset) -> std::int16_t;
 
-    static uint16_t PeekUInt16LE(IStream *stream, uint64_t offset);
+    static auto PeekUInt16LE(IStream *stream, std::uint64_t offset) -> std::uint16_t;
 
-    static uint16_t PeekUInt16BE(IStream *stream, uint64_t offset);
+    static auto PeekUInt16BE(IStream *stream, std::uint64_t offset) -> std::uint16_t;
 
-    static int32_t PeekInt32LE(IStream *stream, uint64_t offset);
+    static auto PeekInt32LE(IStream *stream, std::uint64_t offset) -> std::int32_t;
 
-    static int32_t PeekInt32BE(IStream *stream, uint64_t offset);
+    static auto PeekInt32BE(IStream *stream, std::uint64_t offset) -> std::int32_t;
 
-    static uint32_t PeekUInt32LE(IStream *stream, uint64_t offset);
+    static auto PeekUInt32LE(IStream *stream, std::uint64_t offset) -> std::uint32_t;
 
-    static uint32_t PeekUInt32BE(IStream *stream, uint64_t offset);
+    static auto PeekUInt32BE(IStream *stream, std::uint64_t offset) -> std::uint32_t;
 
-    static int64_t PeekInt64LE(IStream *stream, uint64_t offset);
+    static auto PeekInt64LE(IStream *stream, std::uint64_t offset) -> std::int64_t;
 
-    static int64_t PeekInt64BE(IStream *stream, uint64_t offset);
+    static auto PeekInt64BE(IStream *stream, std::uint64_t offset) -> std::int64_t;
 
-    static uint64_t PeekUInt64LE(IStream *stream, uint64_t offset);
+    static auto PeekUInt64LE(IStream *stream, std::uint64_t offset) -> std::uint64_t;
 
-    static uint64_t PeekUInt64BE(IStream *stream, uint64_t offset);
+    static auto PeekUInt64BE(IStream *stream, std::uint64_t offset) -> std::uint64_t;
 
-    static float PeekSingleLE(IStream *stream, uint64_t offset);
+    static auto PeekSingleLE(IStream *stream, std::uint64_t offset) -> float;
 
-    static float PeekSingleBE(IStream *stream, uint64_t offset);
+    static auto PeekSingleBE(IStream *stream, std::uint64_t offset) -> float;
 
-    static double PeekDoubleLE(IStream *stream, uint64_t offset);
+    static auto PeekDoubleLE(IStream *stream, std::uint64_t offset) -> double;
 
-    static double PeekDoubleBE(IStream *stream, uint64_t offset);
+    static auto PeekDoubleBE(IStream *stream, std::uint64_t offset) -> double;
 
-    static uint32_t
-    PeekBytes(IStream *stream, uint8_t *buffer, uint32_t bufferSize, size_t offset, uint32_t count);
+    static auto PeekBytes(
+        IStream *stream,
+        std::uint8_t *buffer,
+        std::uint32_t bufferSize,
+        std::size_t offset,
+        std::uint32_t count
+    ) -> std::uint32_t;
 
-    uint32_t Peek(void *buffer, uint32_t bufferSize, size_t bufferOffset, uint32_t count);
+    auto Peek(void *buffer, std::uint32_t bufferSize, std::size_t bufferOffset, std::uint32_t count)
+        -> std::uint32_t;
 
-    uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
+        -> std::uint32_t override;
 
-    uint32_t Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Write(
+        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t override;
 
-    bool_t IsWritable() const override;
+    auto IsWritable() const -> bool_t override;
 
-    bool_t IsReadable() const override;
+    auto IsReadable() const -> bool_t override;
 
-    bool_t IsSeekable() const override;
+    auto IsSeekable() const -> bool_t override;
 
-    uint64_t GetPosition() override;
+    auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(uint64_t value) override;
+    void SetPosition(std::uint64_t value) override;
 
-    uint64_t GetLength() override;
+    auto GetLength() -> std::uint64_t override;
 
-    void SetLength(uint64_t value) override;
+    void SetLength(std::uint64_t value) override;
 
     void Flush() override;
 
@@ -332,3 +347,5 @@ private:
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_STREAMS_CBINARYREADER_H_

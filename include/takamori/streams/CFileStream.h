@@ -1,9 +1,15 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_STREAMS_CFILESTREAM_H_
+#define CGSS_TAKAMORI_STREAMS_CFILESTREAM_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <string>
 
-#include "CStream.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./CStream.h"
 
 CGSS_NS_BEGIN
 
@@ -28,42 +34,47 @@ public:
 
     CFileStream(CFileStream &&) = delete;
 
-    CFileStream &operator=(const CFileStream &) = delete;
+    auto operator=(const CFileStream &) -> CFileStream & = delete;
 
-    CFileStream &operator=(CFileStream &&) = delete;
+    auto operator=(CFileStream &&) -> CFileStream & = delete;
 
     ~CFileStream() override;
 
-    uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
+        -> std::uint32_t override;
 
-    uint32_t Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Write(
+        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+    ) -> std::uint32_t override;
 
-    bool_t IsWritable() const override;
+    auto IsWritable() const -> bool_t override;
 
-    bool_t IsReadable() const override;
+    auto IsReadable() const -> bool_t override;
 
-    bool_t IsSeekable() const override;
+    auto IsSeekable() const -> bool_t override;
 
-    uint64_t GetPosition() override;
+    auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(uint64_t value) override;
+    void SetPosition(std::uint64_t value) override;
 
-    uint64_t GetLength() override;
+    auto GetLength() -> std::uint64_t override;
 
-    void SetLength(uint64_t value) override;
+    void SetLength(std::uint64_t value) override;
 
     void Flush() override;
 
 private:
-    FILE *OpenFile(const char *fileName);
+    auto OpenFile(const char *fileName) -> std::FILE *;
 
     static void CreateFileInternal(const char *fileName);
 
 private:
-    FILE *_fp;
+    std::FILE *_fp;
     FileMode _mode;
     FileAccess _access;
     bool_t _isReadable, _isWritable, _isSeekable;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_STREAMS_CFILESTREAM_H_

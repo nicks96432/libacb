@@ -1,8 +1,12 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_EXCEPTIONS_CEXCEPTION_H_
+#define CGSS_TAKAMORI_EXCEPTIONS_CEXCEPTION_H_
 
-#include "../../cgss_cenum.h"
-#include "../../cgss_env.h"
+#include <exception>
 #include <string>
+
+#include "cgss_cenum.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -15,7 +19,7 @@ public:
 
     CException(const CException &) noexcept;
 
-    CException &operator=(const CException &) noexcept;
+    auto operator=(const CException &) noexcept -> CException &;
 
     explicit CException(CGSS_OP_RESULT result) noexcept;
 
@@ -25,13 +29,13 @@ public:
 
     CException(CGSS_OP_RESULT result, std::string message) noexcept;
 
-    virtual ~CException() noexcept = default;
+    ~CException() noexcept override = default;
 
-    virtual const std::string &GetExceptionMessage() const noexcept;
+    virtual auto GetExceptionMessage() const noexcept -> const std::string &;
 
-    virtual CGSS_OP_RESULT GetOpResult() const noexcept;
+    virtual auto GetOpResult() const noexcept -> CGSS_OP_RESULT;
 
-    const char *what() const noexcept override;
+    auto what() const noexcept -> const char * override;
 
 protected:
     CGSS_OP_RESULT _result;
@@ -39,3 +43,5 @@ protected:
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_EXCEPTIONS_CEXCEPTION_H_

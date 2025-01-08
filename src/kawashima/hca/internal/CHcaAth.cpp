@@ -1,3 +1,10 @@
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstring>
+
+#include "cgss_env_ns.h"
+
 #include "./CHcaAth.h"
 
 CGSS_NS_BEGIN
@@ -6,7 +13,7 @@ CHcaAth::CHcaAth() {
     Init0();
 }
 
-bool_t CHcaAth::Init(uint16_t type, uint32_t key) {
+auto CHcaAth::Init(std::uint16_t type, std::uint32_t key) -> bool_t {
     switch (type) {
     case 0:
         Init0();
@@ -20,16 +27,16 @@ bool_t CHcaAth::Init(uint16_t type, uint32_t key) {
     return TRUE;
 }
 
-const uint8_t *CHcaAth::GetTable() {
-    return _table;
+auto CHcaAth::GetTable() -> const std::uint8_t * {
+    return _table.data();
 }
 
 void CHcaAth::Init0() {
-    memset(_table, 0, sizeof(_table));
+    _table.fill(0);
 }
 
-void CHcaAth::Init1(uint32_t key) {
-    static uint8_t list[] = {
+void CHcaAth::Init1(std::uint32_t key) {
+    static std::array<std::uint8_t, 656> list = {
         0x78, 0x5F, 0x56, 0x51, 0x4E, 0x4C, 0x4B, 0x49, 0x48, 0x48, 0x47, 0x46, 0x46, 0x45, 0x45,
         0x45, 0x44, 0x44, 0x44, 0x44, 0x43, 0x43, 0x43, 0x43, 0x43, 0x43, 0x42, 0x42, 0x42, 0x42,
         0x42, 0x42, 0x42, 0x42, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x40,
@@ -75,10 +82,10 @@ void CHcaAth::Init1(uint32_t key) {
         0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xED, 0xEE, 0xEF, 0xF0, 0xF1, 0xF2, 0xF3,
         0xF4, 0xF5, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFF, 0xFF,
     };
-    for (uint32_t i = 0, v = 0; i < 0x80; i++, v += key) {
-        uint32_t index = v >> 13;
+    for (std::uint32_t i = 0, v = 0; i < _table.size(); i++, v += key) {
+        std::uint32_t index = v >> 13;
         if (index >= 0x28E) {
-            memset(&_table[i], 0xFF, 0x80 - i);
+            std::fill(_table.begin() + i, _table.end(), 0xFF);
             break;
         }
         _table[i] = list[index];

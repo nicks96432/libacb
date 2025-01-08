@@ -1,27 +1,32 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCADATA_H_
+#define CGSS_KAWASHIMA_HCA_CHCADATA_H_
 
-#include "cgss_env.h"
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
 class CHcaData {
 
 public:
-    CHcaData(uint8_t *data, uint32_t dataSize, uint32_t size);
+    CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::uint32_t size);
 
     CHcaData(CHcaData &) = default;
 
-    int32_t CheckBit(int32_t bitSize);
+    auto CheckBit(std::int32_t bitSize) -> std::int32_t;
 
-    int32_t GetBit(int32_t bitSize);
+    auto GetBit(std::int32_t bitSize) -> std::int32_t;
 
-    void AddBit(int32_t bitSize);
+    void AddBit(std::int32_t bitSize);
 
 private:
-    uint8_t *_data;
-    uint32_t _dataSize;
-    int32_t _size;
-    int32_t _bit;
+    std::uint8_t *_data;
+    std::uint32_t _dataSize;
+    std::int32_t _size;
+    std::int32_t _bit;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCADATA_H_

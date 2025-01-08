@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CGSS_ENV_H_
+#define CGSS_ENV_H_
 
 #include "cgss_env_platform.h"
 
@@ -25,44 +26,26 @@
 #endif
 #endif
 
-#ifdef __cplusplus
-#ifndef EXTERN_C
-#define EXTERN_C extern "C"
-#endif
-#else
-#ifndef EXTERN_C
-#define EXTERN_C
-#endif
-#endif
-
 #ifndef STDCALL
+
 #ifdef __CGSS_OS_WINDOWS__
 #ifndef STDCALL
 #define STDCALL __stdcall
-#endif
+#endif // STDCALL
 #else
 #define STDCALL
-#endif
-#endif
+#endif // __CGSS_OS_WINDOWS__
 
-#ifdef __cplusplus
+#endif // STDCALL
 
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 
-#else
-
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#endif
-
-#include "cdata/bool_t.h"
+using bool_t = std::uint32_t;
 
 #ifndef __CGSS_OS_WINDOWS__
-typedef const char *LPCSTR;
+using LPCSTR = const char *;
 #endif
 #ifndef TRUE
 #define TRUE ((bool_t)1)
@@ -71,18 +54,10 @@ typedef const char *LPCSTR;
 #define FALSE ((bool_t)0)
 #endif
 
-#if defined(_MSC_VER)
-#define CGSS_API_DECL(ret_type) EXTERN_C CGSS_EXPORT ret_type STDCALL
-#else
-#define CGSS_API_DECL(ret_type) EXTERN_C CGSS_EXPORT STDCALL ret_type
-#endif
-#define CGSS_API_IMPL(ret_type) EXTERN_C ret_type STDCALL
-
-#ifdef __cplusplus
 #ifndef PURE
 #define PURE = 0
 #endif
-#endif
+
 #ifndef _OUT_
 #define _OUT_
 #endif
@@ -92,8 +67,6 @@ typedef const char *LPCSTR;
 #ifndef _REF_
 #define _REF_
 #endif
-
-#include "cgss_env_ns.h"
 
 #ifdef __CGSS_OS_WINDOWS__
 
@@ -109,27 +82,23 @@ typedef const char *LPCSTR;
 #define NOMINMAX
 #endif
 
-#endif
+#endif // __CGSS_OS_WINDOWS__
 
-#ifdef __cplusplus
-#define PURE_STATIC(className)                        \
-public:                                               \
-    className()                             = delete; \
-    className(const className &)            = delete; \
-    className(className &&)                 = delete; \
-    className &operator=(const className &) = delete; \
-    className &operator=(className &&)      = delete
-#endif
+#define PURE_STATIC(className)                               \
+public:                                                      \
+    className()                                    = delete; \
+    className(const className &)                   = delete; \
+    className(className &&)                        = delete; \
+    auto operator=(const className &)->className & = delete; \
+    auto operator=(className &&)->className      & = delete
 
-#ifdef __cplusplus
 #define __root_class(cls) \
 private:                  \
     typedef cls MyClass
+
 #define __extends(parent_cls, child_cls) \
 private:                                 \
     typedef parent_cls MyBase;           \
     typedef child_cls MyClass
-#endif
 
-#define cgss_str(x)  #x
-#define cgss_xstr(x) cgss_str(x)
+#endif // CGSS_ENV_H_

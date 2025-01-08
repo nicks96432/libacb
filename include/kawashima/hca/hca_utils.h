@@ -1,7 +1,11 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_HCAUTILS_H_
+#define CGSS_KAWASHIMA_HCA_HCAUTILS_H_
 
-#include "../../cgss_env.h"
-#include "../../takamori/exceptions/CFormatException.h"
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+#include "takamori/exceptions/CFormatException.h"
 
 CGSS_NS_BEGIN
 
@@ -10,13 +14,13 @@ struct WaveSettings final {
      * Bit per channel. Future acceptable values will be 8, 16, 24, 32 and 0 (floating point wave
      * data).
      */
-    static const uint32_t BitPerChannel;
+    static const std::uint32_t BitPerChannel;
     static const bool_t SoftLoop;
 
     PURE_STATIC(WaveSettings);
 };
 
-enum class Magic : uint32_t {
+enum class Magic : std::uint32_t {
 
     HCA      = 0x00414348,
     FORMAT   = 0x00746D66,
@@ -31,16 +35,18 @@ enum class Magic : uint32_t {
 
 };
 
-inline bool_t areMagicMatch(uint32_t toCheck, Magic standard) {
+inline auto areMagicMatch(std::uint32_t toCheck, Magic standard) -> bool_t {
     return static_cast<bool_t>(
         (toCheck & 0x7f7f7f7f) == static_cast<std::underlying_type_t<Magic>>(standard)
     );
 }
 
-inline void ensureMagicMatch(uint32_t toCheck, Magic standard) {
+inline void ensureMagicMatch(std::uint32_t toCheck, Magic standard) {
     if (!areMagicMatch(toCheck, standard)) {
         throw CFormatException();
     }
 }
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_HCAUTILS_H_

@@ -1,8 +1,15 @@
 #include <cinttypes>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
 #include <string>
+#include <type_traits>
+#include <vector>
 
 #include "cgss_cdata.h"
 #include "cgss_cenum.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 #include "common/type_traits.h"
 #include "ichinose/CAcbFile.h"
 #include "ichinose/CAcbHelper.h"
@@ -14,24 +21,27 @@
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CBinaryReader.h"
 #include "takamori/streams/CFileStream.h"
-#include "takamori/streams/CMemoryStream.h"
+#include "takamori/streams/IStream.h"
 
-using namespace cgss;
-using namespace std;
+CGSS_NS_BEGIN
 
 #define DEFAULT_BINARY_FILE_EXTENSION ".bin"
-static const string DefaultBinaryFileExtension(DEFAULT_BINARY_FILE_EXTENSION);
+static const std::string &DefaultBinaryFileExtension = DEFAULT_BINARY_FILE_EXTENSION;
 
-static string GetExtensionForEncodeType(uint8_t encodeType);
+static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string;
 
 template<typename T, typename TNumber = typename std::enable_if<is_numeric<T>::value, T>::type>
-bool_t GetFieldValueAsNumber(CUtfTable *table, uint32_t rowIndex, const char *fieldName, T *result);
+auto GetFieldValueAsNumber(
+    CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, T *result
+) -> bool_t;
 
-bool_t GetFieldValueAsString(CUtfTable *table, uint32_t rowIndex, const char *fieldName, string &s);
+auto GetFieldValueAsString(
+    CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, std::string &s
+) -> bool_t;
 
 CAcbFile::CAcbFile(cgss::IStream *stream, const char *fileName): MyClass(stream, 0, fileName) {}
 
-CAcbFile::CAcbFile(IStream *stream, uint64_t streamOffset, const char *fileName)
+CAcbFile::CAcbFile(IStream *stream, std::uint64_t streamOffset, const char *fileName)
     : MyBase(stream, streamOffset) {
     _internalAwb   = nullptr;
     _externalAwb   = nullptr;
@@ -82,16 +92,16 @@ void CAcbFile::InitializeCueList() {
 
     const auto cueCount = cueTable->GetRows().size();
 
-    uint64_t refItemOffset     = 0;
-    uint32_t refItemSize       = 0;
-    uint32_t refSizeCorrection = 0;
+    std::uint64_t refItemOffset     = 0;
+    std::uint32_t refItemSize       = 0;
+    std::uint32_t refSizeCorrection = 0;
 
-    auto &cues = _cues;
+    auto &cues = this->_cues;
 
     cues.reserve(cueCount);
 
-    for (uint32_t i = 0; i < cueCount; ++i) {
-        ACB_CUE_RECORD cue = {0};
+    for (std::uint32_t i = 0; i < cueCount; ++i) {
+        ACB_CUE_RECORD cue = {};
 
         cue.isWaveformIdentified = FALSE;
         GetFieldValueAsNumber(cueTable, i, "CueId", &cue.cueId);
@@ -123,14 +133,14 @@ void CAcbFile::InitializeCueList() {
 
             cue.waveformIndex = reader.PeekUInt16BE(refItemOffset + refSizeCorrection);
 
-            uint8_t isStreaming;
+            std::uint8_t isStreaming;
             auto hasIsStreaming =
                 GetFieldValueAsNumber(waveformTable, cue.waveformIndex, "Streaming", &isStreaming);
 
             if (hasIsStreaming) {
                 cue.isStreaming = isStreaming;
 
-                uint16_t waveformId;
+                std::uint16_t waveformId;
 
                 if (GetFieldValueAsNumber(waveformTable, cue.waveformIndex, "Id", &waveformId)) {
                     cue.waveformId = waveformId;
@@ -150,7 +160,7 @@ void CAcbFile::InitializeCueList() {
                     }
                 }
 
-                uint8_t encodeType;
+                std::uint8_t encodeType;
                 if (GetFieldValueAsNumber(
                         waveformTable, cue.waveformIndex, "EncodeType", &encodeType
                     )) {
@@ -173,17 +183,17 @@ void CAcbFile::InitializeCueNameToWaveformMap() {
     }
 
     auto cueNameCount = cueNameTable->GetRows().size();
-    for (uint32_t i = 0; i < cueNameCount; ++i) {
-        uint16_t cueIndex;
+    for (std::uint32_t i = 0; i < cueNameCount; ++i) {
+        std::uint16_t cueIndex;
 
         if (!GetFieldValueAsNumber(cueNameTable, i, "CueIndex", &cueIndex)) {
             continue;
         }
 
-        auto &cue = _cues[cueIndex];
+        auto &cue = this->_cues[cueIndex];
 
         if (cue.isWaveformIdentified) {
-            string cueName;
+            std::string cueName;
 
             if (!GetFieldValueAsString(cueNameTable, i, "CueName", cueName)) {
                 continue;
@@ -191,11 +201,11 @@ void CAcbFile::InitializeCueNameToWaveformMap() {
 
             cueName += GetExtensionForEncodeType(cue.encodeType);
 
-            snprintf(cue.cueName, ACB_CUE_RECORD_NAME_MAX_LEN, "%s", cueName.c_str());
+            std::snprintf(cue.cueName, ACB_CUE_RECORD_NAME_MAX_LEN, "%s", cueName.c_str());
 
             _cueNameToWaveform[cueName] = cue.waveformId;
 
-            _fileNames.push_back(cue.cueName);
+            _fileNames.emplace_back(cue.cueName);
         }
     }
 }
@@ -228,16 +238,16 @@ void CAcbFile::InitializeTrackList() {
         throw CFormatException("Number of tracks and number of synthesis records do not match.");
     }
 
-    uint64_t refItemOffset     = 0;
-    uint32_t refItemSize       = 0;
-    uint32_t refSizeCorrection = 0;
+    std::uint64_t refItemOffset     = 0;
+    std::uint32_t refItemSize       = 0;
+    std::uint32_t refSizeCorrection = 0;
 
     CBinaryReader reader(GetStream());
     auto &tracks = _tracks;
 
     tracks.reserve(trackCount);
 
-    for (uint32_t i = 0; i < trackCount; ++i) {
+    for (std::uint32_t i = 0; i < trackCount; ++i) {
         ACB_TRACK_RECORD track = {0};
 
         track.isWaveformIdentified = FALSE;
@@ -248,7 +258,7 @@ void CAcbFile::InitializeTrackList() {
         UTF_FIELD *refItemField = nullptr;
 
         for (const auto &field : synthRow.fields) {
-            if (strcmp(field->name, "ReferenceItems") == 0) {
+            if (std::strcmp(field->name, "ReferenceItems") == 0) {
                 refItemField = field;
                 break;
             }
@@ -290,7 +300,7 @@ void CAcbFile::InitializeTrackList() {
         if (refItemSize != 0) {
             track.waveformIndex = reader.PeekUInt16BE(refItemOffset + refSizeCorrection);
 
-            uint8_t isStreaming;
+            std::uint8_t isStreaming;
             auto hasIsStreaming = GetFieldValueAsNumber(
                 waveformTable, track.waveformIndex, "Streaming", &isStreaming
             );
@@ -298,7 +308,7 @@ void CAcbFile::InitializeTrackList() {
             if (hasIsStreaming) {
                 track.isStreaming = isStreaming;
 
-                uint16_t waveformId;
+                std::uint16_t waveformId;
 
                 if (GetFieldValueAsNumber(waveformTable, track.waveformIndex, "Id", &waveformId)) {
                     track.waveformId = waveformId;
@@ -318,7 +328,7 @@ void CAcbFile::InitializeTrackList() {
                     }
                 }
 
-                uint8_t encodeType;
+                std::uint8_t encodeType;
                 if (GetFieldValueAsNumber(
                         waveformTable, track.waveformIndex, "EncodeType", &encodeType
                     )) {
@@ -334,19 +344,19 @@ void CAcbFile::InitializeTrackList() {
 }
 
 void CAcbFile::InitializeAwbArchives() {
-    uint32_t internalAwbSize;
+    std::uint32_t internalAwbSize;
     if (GetFieldSize(0, "AwbFile", &internalAwbSize) && internalAwbSize > 0) {
         _internalAwb = GetInternalAwb();
     }
 
-    uint32_t externalAwbSize;
+    std::uint32_t externalAwbSize;
     if (GetFieldSize(0, "StreamAwbAfs2Header", &externalAwbSize) && externalAwbSize > 0) {
         _externalAwb = GetExternalAwb();
     }
 }
 
-CUtfTable *CAcbFile::GetTable(const char *tableName) const {
-    string s(tableName);
+auto CAcbFile::GetTable(const char *tableName) const -> CUtfTable * {
+    std::string s(tableName);
 
     CUtfTable *table;
 
@@ -363,14 +373,14 @@ CUtfTable *CAcbFile::GetTable(const char *tableName) const {
     return table;
 }
 
-CUtfTable *CAcbFile::ResolveTable(const char *tableName) const {
-    uint64_t tableOffset;
+auto CAcbFile::ResolveTable(const char *tableName) const -> CUtfTable * {
+    std::uint64_t tableOffset;
 
     if (!GetFieldOffset(0, tableName, &tableOffset)) {
         return nullptr;
     }
 
-    uint32_t tableSize;
+    std::uint32_t tableSize;
 
     if (!GetFieldSize(0, tableName, &tableSize)) {
         return nullptr;
@@ -381,14 +391,14 @@ CUtfTable *CAcbFile::ResolveTable(const char *tableName) const {
     return tbl;
 }
 
-const CAfs2Archive *CAcbFile::GetInternalAwb() const {
-    uint64_t internalAwbOffset;
+auto CAcbFile::GetInternalAwb() const -> const CAfs2Archive * {
+    std::uint64_t internalAwbOffset;
 
     if (!GetFieldOffset(0, "AwbFile", &internalAwbOffset) || internalAwbOffset == 0) {
         return nullptr;
     }
 
-    uint32_t internalAwbSize;
+    std::uint32_t internalAwbSize;
 
     if (!GetFieldSize(0, "AwbFile", &internalAwbSize) || internalAwbSize == 0) {
         return nullptr;
@@ -399,7 +409,7 @@ const CAfs2Archive *CAcbFile::GetInternalAwb() const {
     return internalAwb;
 }
 
-const CAfs2Archive *CAcbFile::GetExternalAwb() const {
+auto CAcbFile::GetExternalAwb() const -> const CAfs2Archive * {
     const auto extAwbFileName = FindExternalAwbFileName();
 
     if (extAwbFileName.empty()) {
@@ -415,11 +425,12 @@ const CAfs2Archive *CAcbFile::GetExternalAwb() const {
     return archive;
 }
 
-const vector<string> &CAcbFile::GetFileNames() const {
+auto CAcbFile::GetFileNames() const -> const std::vector<std::string> & {
     return _fileNames;
 }
 
-IStream *CAcbFile::OpenDataStream(const AFS2_FILE_RECORD *fileRecord, bool_t isStreaming) const {
+auto CAcbFile::OpenDataStream(const AFS2_FILE_RECORD *fileRecord, bool_t isStreaming) const
+    -> IStream * {
     IStream *stream;
 
     if (isStreaming) {
@@ -433,13 +444,13 @@ IStream *CAcbFile::OpenDataStream(const AFS2_FILE_RECORD *fileRecord, bool_t isS
     }
 
     auto result = CAcbHelper::ExtractToNewStream(
-        stream, fileRecord->fileOffsetAligned, static_cast<uint32_t>(fileRecord->fileSize)
+        stream, fileRecord->fileOffsetAligned, static_cast<std::uint32_t>(fileRecord->fileSize)
     );
 
     return result;
 }
 
-IStream *CAcbFile::OpenDataStream(const char *fileName) const {
+auto CAcbFile::OpenDataStream(const char *fileName) const -> IStream * {
     IStream *result = nullptr;
 
     const auto cue = GetCueRecordByWaveformFileName(fileName);
@@ -449,14 +460,14 @@ IStream *CAcbFile::OpenDataStream(const char *fileName) const {
         const auto stream = ChooseSourceStream(cue);
 
         result = CAcbHelper::ExtractToNewStream(
-            stream, file->fileOffsetAligned, static_cast<uint32_t>(file->fileSize)
+            stream, file->fileOffsetAligned, static_cast<std::uint32_t>(file->fileSize)
         );
     }
 
     return result;
 }
 
-IStream *CAcbFile::OpenDataStream(uint32_t cueId) const {
+auto CAcbFile::OpenDataStream(std::uint32_t cueId) const -> IStream * {
     IStream *result = nullptr;
 
     const auto cue = GetCueRecordByCueId(cueId);
@@ -466,18 +477,18 @@ IStream *CAcbFile::OpenDataStream(uint32_t cueId) const {
         const auto stream = ChooseSourceStream(cue);
 
         result = CAcbHelper::ExtractToNewStream(
-            stream, file->fileOffsetAligned, static_cast<uint32_t>(file->fileSize)
+            stream, file->fileOffsetAligned, static_cast<std::uint32_t>(file->fileSize)
         );
     }
 
     return result;
 }
 
-const char *CAcbFile::GetFileName() const {
+auto CAcbFile::GetFileName() const -> const char * {
     return _fileName;
 }
 
-string CAcbFile::GetSymbolicFileNameHintByCueId(uint32_t cueId) const {
+auto CAcbFile::GetSymbolicFileNameHintByCueId(std::uint32_t cueId) const -> std::string {
     auto baseName = GetSymbolicFileBaseNameByCueId(cueId);
 
     const auto extHint = GetFileExtensionHintByCueId(cueId);
@@ -486,15 +497,15 @@ string CAcbFile::GetSymbolicFileNameHintByCueId(uint32_t cueId) const {
     return baseName + ext;
 }
 
-std::string CAcbFile::GetSymbolicFileBaseNameByCueId(uint32_t cueId) {
+auto CAcbFile::GetSymbolicFileBaseNameByCueId(std::uint32_t cueId) -> std::string {
     char buffer[256] = {0};
 
-    sprintf(buffer, "cue_%06" PRIu32, cueId);
+    std::sprintf(buffer, "cue_%06" PRIu32, cueId);
 
-    return string(buffer);
+    return {buffer};
 }
 
-std::string CAcbFile::GetSymbolicFileNameHintByTrackIndex(uint32_t trackIndex) const {
+auto CAcbFile::GetSymbolicFileNameHintByTrackIndex(std::uint32_t trackIndex) const -> std::string {
     auto baseName = GetSymbolicFileBaseNameByTrackIndex(trackIndex);
 
     const auto extHint = GetFileExtensionHintByTrackIndex(trackIndex);
@@ -503,31 +514,31 @@ std::string CAcbFile::GetSymbolicFileNameHintByTrackIndex(uint32_t trackIndex) c
     return baseName + ext;
 }
 
-std::string CAcbFile::GetSymbolicFileBaseNameByTrackIndex(uint32_t trackIndex) {
+auto CAcbFile::GetSymbolicFileBaseNameByTrackIndex(std::uint32_t trackIndex) -> std::string {
     char buffer[256] = {0};
 
-    sprintf(buffer, "track_%06" PRIu32, trackIndex);
+    std::sprintf(buffer, "track_%06" PRIu32, trackIndex);
 
-    return string(buffer);
+    return std::string(buffer);
 }
 
-string CAcbFile::GetCueNameByCueId(uint32_t cueId) const {
+auto CAcbFile::GetCueNameByCueId(std::uint32_t cueId) const -> std::string {
     for (const auto &cue : _cues) {
         if (cue.waveformId == cueId) {
-            return string(cue.cueName);
+            return std::string(cue.cueName);
         }
     }
 
     return GetSymbolicFileNameHintByCueId(cueId);
 }
 
-std::string CAcbFile::GetCueNameByTrackIndex(uint32_t trackIndex) const {
+auto CAcbFile::GetCueNameByTrackIndex(std::uint32_t trackIndex) const -> std::string {
     auto track = GetTrackRecordByTrackIndex(trackIndex);
 
     if (track != nullptr) {
         for (const auto &cue : _cues) {
             if (cue.waveformId == track->waveformId) {
-                return string(cue.cueName);
+                return std::string(cue.cueName);
             }
         }
     }
@@ -535,9 +546,10 @@ std::string CAcbFile::GetCueNameByTrackIndex(uint32_t trackIndex) const {
     return GetSymbolicFileNameHintByTrackIndex(trackIndex);
 }
 
-const ACB_CUE_RECORD *CAcbFile::GetCueRecordByWaveformFileName(const char *waveformFileName) const {
+auto CAcbFile::GetCueRecordByWaveformFileName(const char *waveformFileName
+) const -> const ACB_CUE_RECORD * {
     for (const auto &cue : _cues) {
-        if (strcmp(cue.cueName, waveformFileName) == 0) {
+        if (std::strcmp(cue.cueName, waveformFileName) == 0) {
             return &cue;
         }
     }
@@ -545,7 +557,7 @@ const ACB_CUE_RECORD *CAcbFile::GetCueRecordByWaveformFileName(const char *wavef
     return nullptr;
 }
 
-const ACB_CUE_RECORD *CAcbFile::GetCueRecordByCueId(uint32_t cueId) const {
+auto CAcbFile::GetCueRecordByCueId(std::uint32_t cueId) const -> const ACB_CUE_RECORD * {
     for (const auto &cue : _cues) {
         if (cue.cueId == cueId) {
             return &cue;
@@ -555,8 +567,8 @@ const ACB_CUE_RECORD *CAcbFile::GetCueRecordByCueId(uint32_t cueId) const {
     return nullptr;
 }
 
-const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByWaveformFileName(const char *waveformFileName
-) const {
+auto CAcbFile::GetFileRecordByWaveformFileName(const char *waveformFileName
+) const -> const AFS2_FILE_RECORD * {
     const auto cue = GetCueRecordByWaveformFileName(waveformFileName);
 
     if (cue == nullptr) {
@@ -566,7 +578,7 @@ const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByWaveformFileName(const char *wa
     return GetFileRecordByCueRecord(cue);
 }
 
-const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByCueId(uint32_t cueId) const {
+auto CAcbFile::GetFileRecordByCueId(std::uint32_t cueId) const -> const AFS2_FILE_RECORD * {
     const auto cue = GetCueRecordByCueId(cueId);
 
     if (cue == nullptr) {
@@ -576,7 +588,8 @@ const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByCueId(uint32_t cueId) const {
     return GetFileRecordByCueRecord(cue);
 }
 
-const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByTrackIndex(uint32_t trackIndex) const {
+auto CAcbFile::GetFileRecordByTrackIndex(std::uint32_t trackIndex
+) const -> const AFS2_FILE_RECORD * {
     const ACB_TRACK_RECORD *track = nullptr;
 
     for (const auto &trackRecord : _tracks) {
@@ -629,7 +642,7 @@ const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByTrackIndex(uint32_t trackIndex)
     }
 }
 
-uint32_t CAcbFile::GetTrackCountOfCueByCueId(uint32_t cueId) const {
+auto CAcbFile::GetTrackCountOfCueByCueId(std::uint32_t cueId) const -> std::uint32_t {
     auto cue = GetCueRecordByCueId(cueId);
 
     if (cue == nullptr) {
@@ -642,16 +655,16 @@ uint32_t CAcbFile::GetTrackCountOfCueByCueId(uint32_t cueId) const {
         throw CFormatException("Missing 'Sequence' table.");
     }
 
-    uint16_t numTracks = 0;
+    std::uint16_t numTracks = 0;
 
     GetFieldValueAsNumber(sequenceTable, cue->referenceIndex, "NumTracks", &numTracks);
 
     return numTracks;
 }
 
-bool_t CAcbFile::GetTrackIndicesOfCueByCueId(
-    uint32_t cueId, uint32_t *numberOfTracks, uint32_t *trackIndices
-) const {
+auto CAcbFile::GetTrackIndicesOfCueByCueId(
+    std::uint32_t cueId, std::uint32_t *numberOfTracks, std::uint32_t *trackIndices
+) const -> bool_t {
     if (trackIndices == nullptr) {
         if (numberOfTracks != nullptr) {
             *numberOfTracks = GetTrackCountOfCueByCueId(cueId);
@@ -688,12 +701,12 @@ bool_t CAcbFile::GetTrackIndicesOfCueByCueId(
         return FALSE;
     }
 
-    uint64_t trackIndexOffset = 0;
-    uint32_t trackIndexSize   = 0;
+    std::uint64_t trackIndexOffset = 0;
+    std::uint32_t trackIndexSize   = 0;
     sequenceTable->GetFieldOffset(cue->referenceIndex, "TrackIndex", &trackIndexOffset);
     sequenceTable->GetFieldSize(cue->referenceIndex, "TrackIndex", &trackIndexSize);
 
-    if (trackIndexSize != expectedNumberOfTracks * sizeof(uint16_t)) {
+    if (trackIndexSize != expectedNumberOfTracks * sizeof(std::uint16_t)) {
         throw CFormatException(
             "Track index data error: data size and declared count does not match."
         );
@@ -701,16 +714,17 @@ bool_t CAcbFile::GetTrackIndicesOfCueByCueId(
 
     CBinaryReader reader(GetStream());
 
-    for (uint32_t i = 0; i < expectedNumberOfTracks; i += 1) {
-        auto trackIndex = reader.PeekUInt16BE(trackIndexOffset + sizeof(uint16_t) * i);
+    for (std::uint32_t i = 0; i < expectedNumberOfTracks; i += 1) {
+        auto trackIndex = reader.PeekUInt16BE(trackIndexOffset + sizeof(std::uint16_t) * i);
         trackIndices[i] = trackIndex;
     }
 
     return TRUE;
 }
 
-bool_t
-CAcbFile::GetTrackIndicesOfCueByCueId(uint32_t cueId, std::vector<uint32_t> &trackIndices) const {
+auto CAcbFile::GetTrackIndicesOfCueByCueId(
+    std::uint32_t cueId, std::vector<std::uint32_t> &trackIndices
+) const -> bool_t {
     const auto cue = GetCueRecordByCueId(cueId);
 
     if (cue == nullptr) {
@@ -725,12 +739,12 @@ CAcbFile::GetTrackIndicesOfCueByCueId(uint32_t cueId, std::vector<uint32_t> &tra
 
     const auto expectedNumberOfTracks = GetTrackCountOfCueByCueId(cueId);
 
-    uint64_t trackIndexOffset = 0;
-    uint32_t trackIndexSize   = 0;
+    std::uint64_t trackIndexOffset = 0;
+    std::uint32_t trackIndexSize   = 0;
     sequenceTable->GetFieldOffset(cue->referenceIndex, "TrackIndex", &trackIndexOffset);
     sequenceTable->GetFieldSize(cue->referenceIndex, "TrackIndex", &trackIndexSize);
 
-    if (trackIndexSize != expectedNumberOfTracks * sizeof(uint16_t)) {
+    if (trackIndexSize != expectedNumberOfTracks * sizeof(std::uint16_t)) {
         throw CFormatException(
             "Track index data error: data size and declared count does not match."
         );
@@ -740,19 +754,19 @@ CAcbFile::GetTrackIndicesOfCueByCueId(uint32_t cueId, std::vector<uint32_t> &tra
 
     CBinaryReader reader(GetStream());
 
-    for (uint32_t i = 0; i < expectedNumberOfTracks; i += 1) {
-        auto trackIndex = reader.PeekUInt16BE(trackIndexOffset + sizeof(uint16_t) * i);
+    for (std::uint32_t i = 0; i < expectedNumberOfTracks; i += 1) {
+        auto trackIndex = reader.PeekUInt16BE(trackIndexOffset + sizeof(std::uint16_t) * i);
         trackIndices[i] = trackIndex;
     }
 
     return TRUE;
 }
 
-const std::vector<ACB_TRACK_RECORD> &CAcbFile::GetTrackRecords() const {
+auto CAcbFile::GetTrackRecords() const -> const std::vector<ACB_TRACK_RECORD> & {
     return _tracks;
 }
 
-bool_t CAcbFile::IsCueIdentified(uint32_t cueId) const {
+auto CAcbFile::IsCueIdentified(std::uint32_t cueId) const -> bool_t {
     for (auto &cue : _cues) {
         if (cue.waveformId == cueId) {
             return cue.isWaveformIdentified;
@@ -762,11 +776,11 @@ bool_t CAcbFile::IsCueIdentified(uint32_t cueId) const {
     return FALSE;
 }
 
-uint32_t CAcbFile::GetFormatVersion() const {
+auto CAcbFile::GetFormatVersion() const -> std::uint32_t {
     return _formatVersion;
 }
 
-std::string CAcbFile::GetFileExtensionHintByCueId(uint32_t cueId) const {
+auto CAcbFile::GetFileExtensionHintByCueId(std::uint32_t cueId) const -> std::string {
     const auto cue = GetCueRecordByCueId(cueId);
 
     if (cue == nullptr) {
@@ -776,7 +790,8 @@ std::string CAcbFile::GetFileExtensionHintByCueId(uint32_t cueId) const {
     }
 }
 
-std::string CAcbFile::GetFileExtensionHintByWaveformFileName(const char *waveformFileName) const {
+auto CAcbFile::GetFileExtensionHintByWaveformFileName(const char *waveformFileName
+) const -> std::string {
     const auto cue = GetCueRecordByWaveformFileName(waveformFileName);
 
     if (cue == nullptr) {
@@ -786,7 +801,7 @@ std::string CAcbFile::GetFileExtensionHintByWaveformFileName(const char *wavefor
     }
 }
 
-std::string CAcbFile::GetFileExtensionHintByTrackIndex(uint32_t trackIndex) const {
+auto CAcbFile::GetFileExtensionHintByTrackIndex(std::uint32_t trackIndex) const -> std::string {
     auto track = GetTrackRecordByTrackIndex(trackIndex);
 
     if (track == nullptr) {
@@ -796,7 +811,8 @@ std::string CAcbFile::GetFileExtensionHintByTrackIndex(uint32_t trackIndex) cons
     }
 }
 
-const ACB_TRACK_RECORD *CAcbFile::GetTrackRecordByTrackIndex(uint32_t trackIndex) const {
+auto CAcbFile::GetTrackRecordByTrackIndex(std::uint32_t trackIndex
+) const -> const ACB_TRACK_RECORD * {
     for (const auto &track : _tracks) {
         if (track.trackIndex == trackIndex) {
             return &track;
@@ -806,9 +822,9 @@ const ACB_TRACK_RECORD *CAcbFile::GetTrackRecordByTrackIndex(uint32_t trackIndex
     return nullptr;
 }
 
-std::string CAcbFile::FindExternalAwbFileName() const {
-    const string acbFileName = _fileName;
-    const auto awbDirPath    = CPath::GetDirectoryName(acbFileName);
+auto CAcbFile::FindExternalAwbFileName() const -> std::string {
+    const std::string acbFileName = _fileName;
+    const auto awbDirPath         = CPath::GetDirectoryName(acbFileName);
 
     auto awbBaseFileName = CPath::GetFileBaseName(acbFileName);
 
@@ -835,7 +851,8 @@ std::string CAcbFile::FindExternalAwbFileName() const {
     return "";
 }
 
-const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByCueRecord(const ACB_CUE_RECORD *cue) const {
+auto CAcbFile::GetFileRecordByCueRecord(const ACB_CUE_RECORD *cue
+) const -> const AFS2_FILE_RECORD * {
     if (cue == nullptr) {
         return nullptr;
     }
@@ -878,7 +895,7 @@ const AFS2_FILE_RECORD *CAcbFile::GetFileRecordByCueRecord(const ACB_CUE_RECORD 
     }
 }
 
-IStream *CAcbFile::ChooseSourceStream(const ACB_CUE_RECORD *cue) const {
+auto CAcbFile::ChooseSourceStream(const ACB_CUE_RECORD *cue) const -> IStream * {
     if (cue == nullptr) {
         return nullptr;
     }
@@ -890,7 +907,7 @@ IStream *CAcbFile::ChooseSourceStream(const ACB_CUE_RECORD *cue) const {
     }
 }
 
-static string GetExtensionForEncodeType(uint8_t encodeType) {
+static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string {
     auto type = static_cast<CGSS_ACB_WAVEFORM_ENCODE_TYPE>(encodeType);
 
     switch (type) {
@@ -912,16 +929,19 @@ static string GetExtensionForEncodeType(uint8_t encodeType) {
     }
 
     char buffer[20] = {0};
-    sprintf(buffer, ".et-%" PRId32 DEFAULT_BINARY_FILE_EXTENSION, static_cast<int32_t>(encodeType));
+    std::sprintf(
+        buffer, ".et-%" PRId32 DEFAULT_BINARY_FILE_EXTENSION, static_cast<int32_t>(encodeType)
+    );
 
-    return string(buffer);
+    return {buffer};
 }
 
 template<typename T, typename TNumber>
-bool_t
-GetFieldValueAsNumber(CUtfTable *table, uint32_t rowIndex, const char *fieldName, T *result) {
+auto GetFieldValueAsNumber(
+    CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, T *result
+) -> bool_t {
     if (result) {
-        memset(result, 0, sizeof(TNumber));
+        std::memset(result, 0, sizeof(TNumber));
     }
 
     auto &rows = table->GetRows();
@@ -933,7 +953,7 @@ GetFieldValueAsNumber(CUtfTable *table, uint32_t rowIndex, const char *fieldName
     auto &row = rows[rowIndex];
 
     for (auto &field : row.fields) {
-        if (strcmp(fieldName, field->name) == 0) {
+        if (std::strcmp(fieldName, field->name) == 0) {
             if (result) {
                 switch (field->type) {
                 case CGSS_UTF_COLUMN_TYPE_U8:
@@ -980,8 +1000,9 @@ GetFieldValueAsNumber(CUtfTable *table, uint32_t rowIndex, const char *fieldName
     return FALSE;
 }
 
-bool_t
-GetFieldValueAsString(CUtfTable *table, uint32_t rowIndex, const char *fieldName, string &s) {
+auto GetFieldValueAsString(
+    CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, std::string &s
+) -> bool_t {
     auto &rows = table->GetRows();
 
     if (rowIndex >= rows.size()) {
@@ -991,8 +1012,8 @@ GetFieldValueAsString(CUtfTable *table, uint32_t rowIndex, const char *fieldName
     auto &row = rows[rowIndex];
 
     for (auto &field : row.fields) {
-        if (strcmp(fieldName, field->name) == 0) {
-            s = string(field->value.str);
+        if (std::strcmp(fieldName, field->name) == 0) {
+            s = std::string(field->value.str);
 
             return TRUE;
         }
@@ -1000,3 +1021,5 @@ GetFieldValueAsString(CUtfTable *table, uint32_t rowIndex, const char *fieldName
 
     return FALSE;
 }
+
+CGSS_NS_END

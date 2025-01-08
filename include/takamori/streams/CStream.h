@@ -1,7 +1,12 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_STREAMS_CSTREAM_H_
+#define CGSS_TAKAMORI_STREAMS_CSTREAM_H_
 
-#include "../../cgss_env.h"
-#include "IStream.h"
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./IStream.h"
 
 CGSS_NS_BEGIN
 
@@ -10,20 +15,22 @@ class CGSS_EXPORT CStream: public IStream {
 public:
     CStream(const CStream &) = delete;
 
-    virtual ~CStream() = default;
+    ~CStream() override = default;
 
-    virtual void Seek(int64_t offset, StreamSeekOrigin origin) override;
+    void Seek(std::int64_t offset, StreamSeekOrigin origin) override;
 
-    virtual int32_t ReadByte() override;
+    auto ReadByte() -> std::int32_t override;
 
-    virtual uint32_t WriteByte(uint8_t value) override;
+    auto WriteByte(std::uint8_t value) -> std::uint32_t override;
 
-    virtual void CopyTo(IStream &destination) override;
+    void CopyTo(IStream &destination) override;
 
-    virtual void CopyTo(IStream &destination, uint32_t bufferSize) override;
+    void CopyTo(IStream &destination, std::uint32_t bufferSize) override;
 
 protected:
     CStream() = default;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_STREAMS_CSTREAM_H_

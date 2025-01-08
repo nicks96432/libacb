@@ -1,21 +1,27 @@
-#include "ichinose/CUtfTable.h"
+#include <array>
+#include <cstdint>
+#include <cstring>
+#include <vector>
+
 #include "cgss_cdata.h"
+#include "cgss_env_ns.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CUtfField.h"
 #include "ichinose/CUtfReader.h"
+#include "ichinose/CUtfTable.h"
 #include "takamori/exceptions/CFormatException.h"
-#include "takamori/exceptions/CNotImplementedException.h"
 #include "takamori/streams/CBinaryReader.h"
 #include "takamori/streams/CMemoryStream.h"
 #include "takamori/streams/CStreamExtensions.h"
+#include "takamori/streams/IStream.h"
 
 CGSS_NS_BEGIN
 
-uint8_t UTF_SIGNATURE[] = {'@', 'U', 'T', 'F'};
+constexpr std::array<std::uint8_t, 4> UTF_SIGNATURE = {'@', 'U', 'T', 'F'};
 
-CUtfTable::CUtfTable(IStream *stream, uint64_t streamOffset)
+CUtfTable::CUtfTable(IStream *stream, std::uint64_t streamOffset)
     : _stream(stream), _streamOffset(streamOffset) {
-    memset(_tableName, 0, sizeof(_tableName));
+    std::memset(_tableName, 0, sizeof(_tableName));
     Initialize();
 }
 
@@ -32,7 +38,7 @@ CUtfTable::~CUtfTable() {
     }
 }
 
-IStream *CUtfTable::GetStream() const {
+auto CUtfTable::GetStream() const -> IStream * {
     return _stream;
 }
 
@@ -40,23 +46,23 @@ void CUtfTable::GetHeader(UTF_HEADER &header) const {
     memcpy(&header, &_utfHeader, sizeof(UTF_HEADER));
 }
 
-const UTF_HEADER CUtfTable::GetHeader() const {
+auto CUtfTable::GetHeader() const -> const UTF_HEADER {
     return _utfHeader;
 }
 
-bool_t CUtfTable::IsEncrypted() const {
+auto CUtfTable::IsEncrypted() const -> bool_t {
     return _isEncrypted;
 }
 
-const std::vector<CUtfTable::UtfRow> &CUtfTable::GetRows() const {
+auto CUtfTable::GetRows() const -> const std::vector<CUtfTable::UtfRow> & {
     return _rows;
 }
 
-const char *CUtfTable::GetName() const {
+auto CUtfTable::GetName() const -> const char * {
     return _tableName;
 }
 
-CUtfReader *CUtfTable::GetReader() const {
+auto CUtfTable::GetReader() const -> CUtfReader * {
     return _utfReader;
 }
 
@@ -68,7 +74,7 @@ void CUtfTable::Initialize() {
         stream->Seek(offset, StreamSeekOrigin::Begin);
     }
 
-    uint8_t magic[4];
+    std::uint8_t magic[4];
     CBinaryReader::PeekBytes(stream, magic, 4, 0, 4);
 
     const auto magicFound = CheckEncryption(magic);
@@ -91,13 +97,13 @@ void CUtfTable::Initialize() {
     delete tableDataStream;
 }
 
-bool_t CUtfTable::CheckEncryption(const uint8_t *magic) {
-    if (memcmp(magic, UTF_SIGNATURE, 4) == 0) {
+auto CUtfTable::CheckEncryption(const std::uint8_t *magic) -> bool_t {
+    if (std::memcmp(magic, UTF_SIGNATURE.data(), UTF_SIGNATURE.size()) == 0) {
         _utfReader   = new CUtfReader();
         _isEncrypted = FALSE;
     } else {
         _isEncrypted = TRUE;
-        uint8_t seed, increment;
+        std::uint8_t seed, increment;
         const auto keysFound = GetKeysForEncryptedUtfTable(magic, &seed, &increment);
         if (!keysFound) {
             return FALSE;
@@ -108,7 +114,9 @@ bool_t CUtfTable::CheckEncryption(const uint8_t *magic) {
     return TRUE;
 }
 
-bool_t CUtfTable::GetKeysForEncryptedUtfTable(const uint8_t *magic, uint8_t *seed, uint8_t *incr) {
+auto CUtfTable::GetKeysForEncryptedUtfTable(
+    const std::uint8_t *magic, std::uint8_t *seed, std::uint8_t *incr
+) -> bool_t {
     for (auto s = 0; s <= 0xff; ++s) {
         if ((magic[0] ^ s) != UTF_SIGNATURE[0]) {
             continue;
@@ -128,10 +136,10 @@ bool_t CUtfTable::GetKeysForEncryptedUtfTable(const uint8_t *magic, uint8_t *see
                     continue;
                 }
                 if (seed) {
-                    *seed = static_cast<uint8_t>(s);
+                    *seed = static_cast<std::uint8_t>(s);
                 }
                 if (incr) {
-                    *incr = static_cast<uint8_t>(i);
+                    *incr = static_cast<std::uint8_t>(i);
                 }
                 return TRUE;
             }
@@ -140,7 +148,7 @@ bool_t CUtfTable::GetKeysForEncryptedUtfTable(const uint8_t *magic, uint8_t *see
     return FALSE;
 }
 
-CMemoryStream *CUtfTable::GetTableDataStream() {
+auto CUtfTable::GetTableDataStream() -> CMemoryStream * {
     auto *stream            = _stream;
     const auto streamOffset = _streamOffset;
     auto *reader            = _utfReader;
@@ -150,16 +158,16 @@ CMemoryStream *CUtfTable::GetTableDataStream() {
         return CAcbHelper::ExtractToNewStream(stream, streamOffset, tableSize);
     }
 
-    auto originalPosition   = stream->GetPosition();
-    uint32_t totalBytesRead = 0;
+    auto originalPosition        = stream->GetPosition();
+    std::uint32_t totalBytesRead = 0;
 
-    auto *memoryStream    = new CMemoryStream(tableSize, FALSE);
-    auto currentOffset    = streamOffset;
-    uint8_t *buffer;
+    auto *memoryStream = new CMemoryStream(tableSize, FALSE);
+    auto currentOffset = streamOffset;
+    std::uint8_t *buffer;
 
     do {
         auto shouldRead = tableSize - totalBytesRead;
-        buffer          = static_cast<uint8_t *>(malloc(shouldRead));
+        buffer          = new std::uint8_t[shouldRead];
 
         _utfReader->PeekBytes(stream, buffer, 0, currentOffset, shouldRead, totalBytesRead);
         memoryStream->Write(buffer, shouldRead, 0, shouldRead);
@@ -169,7 +177,7 @@ CMemoryStream *CUtfTable::GetTableDataStream() {
         currentOffset += shouldRead;
         totalBytesRead += shouldRead;
 
-        free(buffer);
+        delete[] buffer;
     } while (totalBytesRead < tableSize);
 
     stream->SetPosition(originalPosition);
@@ -184,7 +192,7 @@ void CUtfTable::ReadUtfHeader(IStream *stream, UTF_HEADER &header, char *tableNa
 }
 
 void CUtfTable::ReadUtfHeader(
-    IStream *stream, uint64_t streamOffset, UTF_HEADER &header, char *tableNameBuffer
+    IStream *stream, std::uint64_t streamOffset, UTF_HEADER &header, char *tableNameBuffer
 ) {
     CBinaryReader reader(stream);
     auto pos = stream->GetPosition();
@@ -193,7 +201,7 @@ void CUtfTable::ReadUtfHeader(
 
     header.tableSize         = reader.ReadUInt32BE();
     header.unk1              = reader.ReadUInt16BE();
-    header.perRowDataOffset  = (uint32_t)reader.ReadUInt16BE() + 8;
+    header.perRowDataOffset  = (std::uint32_t)reader.ReadUInt16BE() + 8;
     header.stringTableOffset = reader.ReadUInt32BE() + 8;
     header.extraDataOffset   = reader.ReadUInt32BE() + 8;
     header.tableNameOffset   = reader.ReadUInt32BE();
@@ -210,7 +218,7 @@ void CUtfTable::ReadUtfHeader(
 }
 
 void CUtfTable::InitializeUtfSchema(
-    IStream *sourceStream, CMemoryStream *tableDataStream, uint64_t schemaOffset
+    IStream *sourceStream, CMemoryStream *tableDataStream, std::uint64_t schemaOffset
 ) {
     const auto &header                           = _utfHeader;
     const auto baseOffset                        = _streamOffset;
@@ -220,8 +228,8 @@ void CUtfTable::InitializeUtfSchema(
     for (std::uint32_t i = 0; i < header.rowCount; ++i) {
         auto currentStreamOffset = schemaOffset;
         UtfRow row;
-        uint32_t currentRowOffset = 0;
-        row.baseOffset            = header.perRowDataOffset + header.rowSize * i;
+        std::uint32_t currentRowOffset = 0;
+        row.baseOffset                 = header.perRowDataOffset + header.rowSize * i;
 
         for (auto j = 0; j < header.fieldCount; ++j) {
             auto field            = new CUtfField();
@@ -246,7 +254,7 @@ void CUtfTable::InitializeUtfSchema(
             switch (storage) {
             case UtfColumnStorage::Const:
             case UtfColumnStorage::Const2: {
-                const auto constantOffset = static_cast<uint32_t>(currentStreamOffset) + 5;
+                const auto constantOffset = static_cast<std::uint32_t>(currentStreamOffset) + 5;
                 field->offsetInRow        = 0; // constant
 
                 switch (type) {
@@ -325,15 +333,15 @@ void CUtfTable::InitializeUtfSchema(
                         CBinaryReader::PeekUInt32BE(tableDataStream, constantOffset);
                     const auto dataSize =
                         CBinaryReader::PeekUInt32BE(tableDataStream, constantOffset + 4);
-                    const auto fieldDataOffset =
-                        static_cast<uint32_t>(baseOffset) + header.extraDataOffset + dataOffset;
+                    const auto fieldDataOffset = static_cast<std::uint32_t>(baseOffset) +
+                                                 header.extraDataOffset + dataOffset;
                     if (dataSize > 0) {
-                        auto dataBuffer = static_cast<uint8_t *>(malloc(dataSize));
-                        memset(dataBuffer, 0, dataSize);
+                        auto dataBuffer = new std::uint8_t[dataSize];
+                        std::memset(dataBuffer, 0, dataSize);
                         sourceStream->Seek(fieldDataOffset, StreamSeekOrigin::Begin);
                         sourceStream->Read(dataBuffer, dataSize, 0, dataSize);
                         field->SetValue(dataBuffer, dataSize, fieldDataOffset);
-                        free(dataBuffer);
+                        delete[] dataBuffer;
                     } else {
                         field->SetValue(nullptr, dataSize, fieldDataOffset);
                     }
@@ -436,15 +444,15 @@ void CUtfTable::InitializeUtfSchema(
                     const auto dataSize = CBinaryReader::PeekUInt32BE(
                         tableDataStream, row.baseOffset + currentRowOffset + 4
                     );
-                    fieldDataOffset =
-                        static_cast<uint32_t>(baseOffset) + header.extraDataOffset + rowDataOffset;
+                    fieldDataOffset = static_cast<std::uint32_t>(baseOffset) +
+                                      header.extraDataOffset + rowDataOffset;
                     if (dataSize > 0) {
-                        auto dataBuffer = static_cast<uint8_t *>(malloc(dataSize));
-                        memset(dataBuffer, 0, dataSize);
+                        auto dataBuffer = new std::uint8_t[dataSize];
+                        std::memset(dataBuffer, 0, dataSize);
                         sourceStream->Seek(fieldDataOffset, StreamSeekOrigin::Begin);
                         sourceStream->Read(dataBuffer, dataSize, 0, dataSize);
                         field->SetValue(dataBuffer, dataSize, fieldDataOffset);
-                        free(dataBuffer);
+                        delete[] dataBuffer;
                     } else {
                         field->SetValue(nullptr, dataSize, fieldDataOffset);
                     }
@@ -469,7 +477,8 @@ void CUtfTable::InitializeUtfSchema(
     }
 }
 
-bool_t CUtfTable::GetFieldOffset(uint32_t rowIndex, const char *fieldName, uint64_t *offset) const {
+auto CUtfTable::GetFieldOffset(std::uint32_t rowIndex, const char *fieldName, std::uint64_t *offset)
+    const -> bool_t {
     if (rowIndex >= _rows.size()) {
         if (offset) {
             *offset = 0;
@@ -481,7 +490,7 @@ bool_t CUtfTable::GetFieldOffset(uint32_t rowIndex, const char *fieldName, uint6
     const auto &row = _rows[rowIndex];
 
     for (auto &field : row.fields) {
-        if (strcmp(fieldName, field->name) == 0) {
+        if (std::strcmp(fieldName, field->name) == 0) {
             if (offset) {
                 *offset = field->offset;
             }
@@ -493,7 +502,8 @@ bool_t CUtfTable::GetFieldOffset(uint32_t rowIndex, const char *fieldName, uint6
     return FALSE;
 }
 
-bool_t CUtfTable::GetFieldSize(uint32_t rowIndex, const char *fieldName, uint32_t *size) const {
+auto CUtfTable::GetFieldSize(std::uint32_t rowIndex, const char *fieldName, std::uint32_t *size)
+    const -> bool_t {
     if (rowIndex >= _rows.size()) {
         if (size) {
             *size = 0;
@@ -505,7 +515,7 @@ bool_t CUtfTable::GetFieldSize(uint32_t rowIndex, const char *fieldName, uint32_
     const auto &row = _rows[rowIndex];
 
     for (auto &field : row.fields) {
-        if (strcmp(fieldName, field->name) == 0) {
+        if (std::strcmp(fieldName, field->name) == 0) {
             if (size) {
                 *size = field->value.data.size;
             }

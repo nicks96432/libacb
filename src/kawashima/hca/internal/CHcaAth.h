@@ -1,6 +1,11 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCAATH_H_
+#define CGSS_KAWASHIMA_HCA_CHCAATH_H_
+
+#include <array>
+#include <cstdint>
 
 #include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -11,16 +16,18 @@ public:
 
     CHcaAth(const CHcaAth &) = default;
 
-    bool_t Init(uint16_t type, uint32_t key);
+    auto Init(std::uint16_t type, std::uint32_t key) -> bool_t;
 
-    const uint8_t *GetTable();
+    auto GetTable() -> const std::uint8_t *;
 
 private:
-    uint8_t _table[0x80];
+    std::array<std::uint8_t, 0x80> _table;
 
     void Init0();
 
-    void Init1(uint32_t key);
+    void Init1(std::uint32_t key);
 };
 
 CGSS_NS_END
+
+#endif

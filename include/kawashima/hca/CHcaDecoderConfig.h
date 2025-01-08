@@ -1,7 +1,9 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
+#define CGSS_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
 
-#include "../../cdata/HCA_DECODER_CONFIG.h"
-#include "../../cgss_env.h"
+#include "cgss_cdata.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -16,3 +18,5 @@ public:
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCADECODERCONFIG_H_

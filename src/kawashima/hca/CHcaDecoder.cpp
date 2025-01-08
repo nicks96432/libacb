@@ -1,14 +1,21 @@
-#include "kawashima/hca/CHcaDecoder.h"
-#include "./internal/CHcaAth.h"
-#include "./internal/CHcaChannel.h"
-#include "./internal/CHcaCipher.h"
-#include "./internal/CHcaData.h"
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+
+#include "cgss_cdata.h"
+#include "cgss_env_ns.h"
 #include "common/quick_utils.h"
+#include "kawashima/hca/CHcaDecoder.h"
 #include "kawashima/hca/hca_utils.h"
 #include "kawashima/wave/wave_native.h"
 #include "takamori/exceptions/CArgumentException.h"
 #include "takamori/streams/CMemoryStream.h"
-#include <algorithm>
+
+#include "./internal/CHcaAth.h"
+#include "./internal/CHcaChannel.h"
+#include "./internal/CHcaCipher.h"
+#include "./internal/CHcaData.h"
 
 #ifdef _MSC_VER
 #undef max
@@ -22,8 +29,8 @@ CHcaDecoder::CHcaDecoder(IStream *stream): MyClass(stream, HCA_DECODER_CONFIG())
 CHcaDecoder::CHcaDecoder(IStream *stream, const HCA_DECODER_CONFIG &decoderConfig): MyBase(stream) {
     _cipher = nullptr;
     _ath    = nullptr;
-    for (auto i = 0; i < ChannelCount; ++i) {
-        _channels[i] = nullptr;
+    for (auto &_channel : _channels) {
+        _channel = nullptr;
     }
     _waveHeaderBuffer = _hcaBlockBuffer = nullptr;
     _waveHeaderSize = _waveBlockSize = 0;
@@ -33,8 +40,9 @@ CHcaDecoder::CHcaDecoder(IStream *stream, const HCA_DECODER_CONFIG &decoderConfi
 }
 
 CHcaDecoder::~CHcaDecoder() {
-    for (const auto &v : _decodedBlocks)
+    for (const auto &v : _decodedBlocks) {
         delete[] v.second;
+    }
     _decodedBlocks.clear();
 
     if (_waveHeaderBuffer) {
@@ -57,11 +65,12 @@ CHcaDecoder::~CHcaDecoder() {
         _cipher = nullptr;
     }
 
-    for (auto i = 0; i < ChannelCount; ++i)
-        if (_channels[i]) {
-            delete _channels[i];
-            _channels[i] = nullptr;
+    for (auto &_channel : _channels) {
+        if (_channel) {
+            delete _channel;
+            _channel = nullptr;
         }
+    }
 }
 
 void CHcaDecoder::InitializeExtra() {
@@ -78,9 +87,9 @@ void CHcaDecoder::InitializeExtra() {
 
     // Prepare the channel decoders.
     memset(_channels, 0, sizeof(_channels));
-    uint8_t r[0x10];
+    std::uint8_t r[0x10];
     memset(r, 0, 0x10);
-    uint32_t b = hcaInfo.channelCount / hcaInfo.compR03;
+    std::uint32_t b = hcaInfo.channelCount / hcaInfo.compR03;
     if (hcaInfo.compR07 && b > 1) {
         auto *c = r;
         for (auto i = 0; i < hcaInfo.compR03; ++i, c += b) {
@@ -123,7 +132,7 @@ void CHcaDecoder::InitializeExtra() {
         }
     }
     auto *channels = _channels;
-    for (uint32_t i = 0; i < hcaInfo.channelCount; ++i) {
+    for (std::uint32_t i = 0; i < hcaInfo.channelCount; ++i) {
         channels[i]         = new CHcaChannel();
         channels[i]->type   = r[i];
         channels[i]->value3 = &channels[i]->value[hcaInfo.compR06 + hcaInfo.compR07];
@@ -131,18 +140,18 @@ void CHcaDecoder::InitializeExtra() {
     }
 }
 
-uint32_t CHcaDecoder::GetWaveHeaderSize() {
+auto CHcaDecoder::GetWaveHeaderSize() -> std::uint32_t {
     if (_waveHeaderSize) {
         return _waveHeaderSize;
     }
 
-    auto &hcaInfo       = _hcaInfo;
-    uint32_t sizeNeeded = sizeof(WaveRiffSection);
+    auto &hcaInfo            = _hcaInfo;
+    std::uint32_t sizeNeeded = sizeof(WaveRiffSection);
     if (hcaInfo.loopExists && !WaveSettings::SoftLoop) {
         sizeNeeded += sizeof(WaveSampleSection);
     }
     if (hcaInfo.commentLength > 0) {
-        uint32_t noteSize = 4 + hcaInfo.commentLength + 1;
+        std::uint32_t noteSize = 4 + hcaInfo.commentLength + 1;
         // Pad by 4
         if (noteSize & 3u) {
             noteSize += 4 - (noteSize & 3u);
@@ -154,27 +163,20 @@ uint32_t CHcaDecoder::GetWaveHeaderSize() {
     return sizeNeeded;
 }
 
-const uint8_t *CHcaDecoder::GenerateWaveHeader() {
+auto CHcaDecoder::GenerateWaveHeader() -> const std::uint8_t * {
     if (_waveHeaderBuffer) {
         return _waveHeaderBuffer;
     }
     const auto &hcaInfo   = _hcaInfo;
     const auto headerSize = GetWaveHeaderSize();
-    auto headerBuffer     = (_waveHeaderBuffer = new uint8_t[headerSize]);
+    auto headerBuffer     = (_waveHeaderBuffer = new std::uint8_t[headerSize]);
     memset(headerBuffer, 0, headerSize);
 
     WaveRiffSection wavRiff = {
         {'R', 'I', 'F', 'F'},
-        0,
-        {'W', 'A', 'V', 'E'},
+        0, {'W', 'A', 'V', 'E'},
         {'f', 'm', 't', ' '},
-        0x10,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
+        0x10, 0, 0, 0, 0, 0, 0
     };
     WaveSampleSection wavSmpl = {
         {'s', 'm', 'p', 'l'},
@@ -199,7 +201,7 @@ const uint8_t *CHcaDecoder::GenerateWaveHeader() {
     wavRiff.fmtSamplesPerSec = wavRiff.fmtSamplingRate * wavRiff.fmtSamplingSize;
     if (hcaInfo.loopExists) {
         wavSmpl.samplePeriod =
-            static_cast<uint32_t>(1 / (double)wavRiff.fmtSamplingRate * 1000000000);
+            static_cast<std::uint32_t>(1 / (double)wavRiff.fmtSamplingRate * 1000000000);
         wavSmpl.loopStart = hcaInfo.loopStart * 0x80 * 8 + hcaInfo.fmtR02; // fmtR02 is muteFooter
         wavSmpl.loopEnd   = hcaInfo.loopEnd * 0x80 * 8;
         wavSmpl.loopPlayCount = (hcaInfo.loopR01 == 0x80) ? 0 : hcaInfo.loopR01;
@@ -216,13 +218,15 @@ const uint8_t *CHcaDecoder::GenerateWaveHeader() {
     wavData.dataSize = wavRiff.fmtSamplingSize *
                        (hcaInfo.blockCount * 0x80 * 8 +
                         (wavSmpl.loopEnd - wavSmpl.loopStart) * _decoderConfig.loopCount);
-    wavRiff.riffSize = static_cast<uint32_t>(
+    wavRiff.riffSize = static_cast<std::uint32_t>(
         0x1C + ((hcaInfo.loopExists && !WaveSettings::SoftLoop) ? sizeof(wavSmpl) : 0) +
         (hcaInfo.commentLength > 0 ? 8 + wavNote.noteSize : 0) + sizeof(wavData) + wavData.dataSize
     );
 
     CMemoryStream memoryStream(headerBuffer, headerSize);
+
 #define WRITE_STRUCT(var) memoryStream.Write(&var, sizeof(var), 0, sizeof(var))
+
     WRITE_STRUCT(wavRiff);
     if (hcaInfo.loopExists && !WaveSettings::SoftLoop) {
         WRITE_STRUCT(wavSmpl);
@@ -234,23 +238,25 @@ const uint8_t *CHcaDecoder::GenerateWaveHeader() {
         );
     }
     WRITE_STRUCT(wavData);
+
 #undef WRITE_STRUCT
 
     return headerBuffer;
 }
 
-uint32_t CHcaDecoder::GetWaveBlockSize() {
+auto CHcaDecoder::GetWaveBlockSize() -> std::uint32_t {
     if (_waveBlockSize) {
         return _waveBlockSize;
     }
-    uint32_t audioBitPerChannel =
+    std::uint32_t audioBitPerChannel =
         WaveSettings::BitPerChannel != 0 ? WaveSettings::BitPerChannel : sizeof(float);
-    uint32_t waveBlockSize = 0x80 * (audioBitPerChannel / sizeof(uint8_t)) * _hcaInfo.channelCount;
-    _waveBlockSize         = waveBlockSize;
+    std::uint32_t waveBlockSize =
+        0x80 * (audioBitPerChannel / sizeof(std::uint8_t)) * _hcaInfo.channelCount;
+    _waveBlockSize = waveBlockSize;
     return waveBlockSize;
 }
 
-const uint8_t *CHcaDecoder::DecodeBlock(uint32_t blockIndex) {
+auto CHcaDecoder::DecodeBlock(std::uint32_t blockIndex) -> const std::uint8_t * {
     auto &decodedBlocks = _decodedBlocks;
     {
         const auto decodedItem = decodedBlocks.find(blockIndex);
@@ -264,7 +270,7 @@ const uint8_t *CHcaDecoder::DecodeBlock(uint32_t blockIndex) {
     const auto waveBlockSize = GetWaveBlockSize();
     const auto *channels     = _channels;
 
-    auto hcaBlockBuffer = _hcaBlockBuffer ? _hcaBlockBuffer : new uint8_t[hcaInfo.blockSize];
+    auto hcaBlockBuffer = _hcaBlockBuffer ? _hcaBlockBuffer : new std::uint8_t[hcaInfo.blockSize];
     _hcaBlockBuffer     = hcaBlockBuffer;
 
     stream->Seek(hcaInfo.dataOffset + hcaInfo.blockSize * blockIndex, StreamSeekOrigin::Begin);
@@ -290,14 +296,14 @@ const uint8_t *CHcaDecoder::DecodeBlock(uint32_t blockIndex) {
 
     // Actual decoding process.
     auto a = (data.GetBit(9) << 8u) - data.GetBit(7);
-    for (uint32_t i = 0; i < hcaInfo.channelCount; ++i) {
+    for (std::uint32_t i = 0; i < hcaInfo.channelCount; ++i) {
         CHcaChannel::Decode1(channels[i], &data, hcaInfo.compR09, a, _ath->GetTable());
     }
     for (auto i = 0; i < 8; ++i) {
-        for (uint32_t j = 0; j < hcaInfo.channelCount; ++j) {
+        for (std::uint32_t j = 0; j < hcaInfo.channelCount; ++j) {
             CHcaChannel::Decode2(channels[j], &data);
         }
-        for (uint32_t j = 0; j < hcaInfo.channelCount; ++j) {
+        for (std::uint32_t j = 0; j < hcaInfo.channelCount; ++j) {
             CHcaChannel::Decode3(
                 channels[j],
                 hcaInfo.compR09,
@@ -306,7 +312,7 @@ const uint8_t *CHcaDecoder::DecodeBlock(uint32_t blockIndex) {
                 hcaInfo.compR05
             );
         }
-        for (uint32_t j = 0; j < hcaInfo.channelCount - 1; ++j) {
+        for (std::uint32_t j = 0; j < hcaInfo.channelCount - 1; ++j) {
             CHcaChannel::Decode4(
                 channels[j],
                 channels[j + 1],
@@ -316,19 +322,19 @@ const uint8_t *CHcaDecoder::DecodeBlock(uint32_t blockIndex) {
                 hcaInfo.compR07
             );
         }
-        for (uint32_t j = 0; j < hcaInfo.channelCount; ++j) {
+        for (std::uint32_t j = 0; j < hcaInfo.channelCount; ++j) {
             CHcaChannel::Decode5(channels[j], i);
         }
     }
 
     // Generate wave data.
-    const auto waveBlockBuffer = new uint8_t[waveBlockSize];
+    const auto waveBlockBuffer = new std::uint8_t[waveBlockSize];
     const auto decodeFunc      = _decoderConfig.decodeFunc;
-    uint32_t cursor            = 0;
+    std::uint32_t cursor       = 0;
     if (decodeFunc) {
         for (auto i = 0; i < 8; ++i) {
             for (auto j = 0; j < 0x80; ++j) {
-                for (uint32_t k = 0; k < hcaInfo.channelCount; ++k) {
+                for (std::uint32_t k = 0; k < hcaInfo.channelCount; ++k) {
                     auto f = channels[k]->wave[i][j] * hcaInfo.rvaVolume;
                     f      = clamp(f, -1.0f, 1.0f);
                     cursor = decodeFunc(f, waveBlockBuffer, cursor);
@@ -341,15 +347,15 @@ const uint8_t *CHcaDecoder::DecodeBlock(uint32_t blockIndex) {
     return waveBlockBuffer;
 }
 
-uint64_t CHcaDecoder::GetPosition() {
+auto CHcaDecoder::GetPosition() -> std::uint64_t {
     return _position;
 }
 
-void CHcaDecoder::SetPosition(uint64_t value) {
+void CHcaDecoder::SetPosition(std::uint64_t value) {
     _position = value;
 }
 
-uint64_t CHcaDecoder::MapLoopedPosition(uint64_t linearPosition) {
+auto CHcaDecoder::MapLoopedPosition(std::uint64_t linearPosition) -> std::uint64_t {
     const auto &decoderConfig = _decoderConfig;
     const auto waveHeaderSize = decoderConfig.waveHeaderEnabled ? GetWaveHeaderSize() : 0;
     const auto &hcaInfo       = _hcaInfo;
@@ -370,18 +376,18 @@ uint64_t CHcaDecoder::MapLoopedPosition(uint64_t linearPosition) {
     }
     auto loopCount = (linearPosition - waveHeaderSize - beforeLoopStart * waveBlockSize) /
                      (inLoop * waveBlockSize);
-    loopCount = std::min(static_cast<uint32_t>(loopCount), decoderConfig.loopCount);
+    loopCount = std::min(static_cast<std::uint32_t>(loopCount), decoderConfig.loopCount);
     return linearPosition - loopCount * inLoop * waveBlockSize - waveHeaderSize;
 }
 
-uint64_t CHcaDecoder::GetLength() {
+auto CHcaDecoder::GetLength() -> std::uint64_t {
     const auto &hcaInfo       = _hcaInfo;
     const auto &decoderConfig = _decoderConfig;
     if (hcaInfo.loopExists && decoderConfig.loopEnabled) {
         if (decoderConfig.loopCount == 0) {
             throw CArgumentException("CHcaDecoder::GetLength");
         }
-        uint64_t total = 0;
+        std::uint64_t total = 0;
         if (decoderConfig.waveHeaderEnabled) {
             total += GetWaveHeaderSize();
         }
@@ -401,15 +407,17 @@ uint64_t CHcaDecoder::GetLength() {
     }
 }
 
-uint32_t CHcaDecoder::Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CHcaDecoder::Read(
+    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     if (!buffer) {
         throw CArgumentException("CHcaDecoder::Read");
     }
-    bufferSize = std::min(count, static_cast<uint32_t>(bufferSize - offset));
+    bufferSize = std::min(count, static_cast<std::uint32_t>(bufferSize - offset));
     if (bufferSize == 0) {
         return bufferSize;
     }
-    auto byteBuffer = static_cast<uint8_t *>(buffer);
+    auto byteBuffer = static_cast<std::uint8_t *>(buffer);
 
     const auto &decoderConfig   = _decoderConfig;
     auto streamPosition         = GetPosition();
@@ -420,10 +428,11 @@ uint32_t CHcaDecoder::Read(void *buffer, uint32_t bufferSize, size_t offset, uin
     }
 
     const auto waveHeaderSize = decoderConfig.waveHeaderEnabled ? GetWaveHeaderSize() : 0;
-    uint32_t totalRead        = 0;
+    std::uint32_t totalRead   = 0;
     if (mappedPosition < waveHeaderSize) {
-        const auto headerLeftLength = static_cast<size_t>(waveHeaderSize - mappedPosition);
-        const auto headerCopyLength = std::min(static_cast<uint32_t>(headerLeftLength), bufferSize);
+        const auto headerLeftLength = static_cast<std::size_t>(waveHeaderSize - mappedPosition);
+        const auto headerCopyLength =
+            std::min(static_cast<std::uint32_t>(headerLeftLength), bufferSize);
         memcpy(byteBuffer + offset, GenerateWaveHeader() + mappedPosition, headerCopyLength);
         streamPosition += headerCopyLength;
         if (bufferSize <= headerCopyLength) {
@@ -440,14 +449,14 @@ uint32_t CHcaDecoder::Read(void *buffer, uint32_t bufferSize, size_t offset, uin
     const auto waveBlockSize = GetWaveBlockSize();
     while (bufferSize > 0 && mappedPosition < waveStreamLength) {
         const auto blockIndex =
-            static_cast<uint32_t>((mappedPosition - waveHeaderSize) / waveBlockSize);
+            static_cast<std::uint32_t>((mappedPosition - waveHeaderSize) / waveBlockSize);
         const auto startOffset = (mappedPosition - waveHeaderSize) % waveBlockSize;
         const auto blockData   = DecodeBlock(blockIndex);
         const auto copyLength  = std::min(
             waveStreamLength - mappedPosition,
-            std::min(waveBlockSize - startOffset, static_cast<uint64_t>(bufferSize))
+            std::min(waveBlockSize - startOffset, static_cast<std::uint64_t>(bufferSize))
         );
-        memcpy(byteBuffer + offset, blockData + startOffset, static_cast<size_t>(copyLength));
+        memcpy(byteBuffer + offset, blockData + startOffset, static_cast<std::size_t>(copyLength));
         streamPosition += copyLength;
         bufferSize -= copyLength;
         offset += copyLength;

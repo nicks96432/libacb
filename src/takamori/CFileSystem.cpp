@@ -1,4 +1,3 @@
-#include "cgss_env.h"
 
 #ifdef __CGSS_OS_WINDOWS__
 
@@ -6,48 +5,53 @@
 
 #else
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #endif
 
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
+#include <string>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 #include "takamori/CFileSystem.h"
 
-using namespace cgss;
+CGSS_NS_BEGIN
 
-bool_t CFileSystem::FileExists(const std::string &path) {
+auto CFileSystem::FileExists(const std::string &path) -> bool_t {
     return FileExists(path.c_str());
 }
 
-bool_t CFileSystem::DirectoryExists(const std::string &path) {
+auto CFileSystem::DirectoryExists(const std::string &path) -> bool_t {
     return DirectoryExists(path.c_str());
 }
 
-bool_t CFileSystem::FileExists(const char *path) {
-    auto fp = fopen(path, "r");
+auto CFileSystem::FileExists(const char *path) -> bool_t {
+    auto fp = std::fopen(path, "r");
 
     if (!fp) {
         return FALSE;
     }
 
-    fclose(fp);
+    std::fclose(fp);
 
     return TRUE;
 }
 
-bool_t CFileSystem::MkDir(const std::string &path) {
+auto CFileSystem::MkDir(const std::string &path) -> bool_t {
     return MkDir(path.c_str());
 }
 
-bool_t CFileSystem::RmFile(const std::string &path) {
+auto CFileSystem::RmFile(const std::string &path) -> bool_t {
     return RmFile(path.c_str());
 }
 
-bool_t CFileSystem::RmFile(const char *path) {
-    const auto success = remove(path) == 0;
+auto CFileSystem::RmFile(const char *path) -> bool_t {
+    const auto success = std::remove(path) == 0;
     return static_cast<bool_t>(success);
 }
 
@@ -103,7 +107,7 @@ bool_t CFileSystem::MkDir(const char *path) {
 
 #else
 
-bool_t CFileSystem::DirectoryExists(const char *path) {
+auto CFileSystem::DirectoryExists(const char *path) -> bool_t {
     struct stat info {};
 
     if (::stat(path, &info) != 0) {
@@ -119,22 +123,22 @@ bool_t CFileSystem::DirectoryExists(const char *path) {
 }
 
 // http://nion.modprobe.de/blog/archives/357-Recursive-directory-creation.html
-bool_t CFileSystem::MkDir(const char *path) {
+auto CFileSystem::MkDir(const char *path) -> bool_t {
     if (path == nullptr) {
         return FALSE;
     }
 
-    if (strlen(path) == 0) {
+    if (std::strlen(path) == 0) {
         return FALSE;
     }
 
     char tmp[256];
     char *p = nullptr;
-    size_t len;
+    std::size_t len;
 
-    strncpy(tmp, path, sizeof(tmp));
+    std::strncpy(tmp, path, sizeof(tmp));
 
-    len = strlen(tmp);
+    len = std::strlen(tmp);
 
     if (tmp[len - 1] == '/') {
         tmp[len - 1] = 0;
@@ -143,13 +147,15 @@ bool_t CFileSystem::MkDir(const char *path) {
     for (p = tmp + 1; *p; p++)
         if (*p == '/') {
             *p = 0;
-            mkdir(tmp, S_IRWXU);
+            ::mkdir(tmp, S_IRWXU);
             *p = '/';
         }
 
-    mkdir(tmp, S_IRWXU);
+    ::mkdir(tmp, S_IRWXU);
 
     return TRUE;
 }
 
 #endif
+
+CGSS_NS_END

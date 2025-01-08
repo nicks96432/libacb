@@ -1,49 +1,54 @@
-#pragma once
+#ifndef CGSS_ICHINOSE_CAFS2ARCHIVE_H_
+#define CGSS_ICHINOSE_CAFS2ARCHIVE_H_
 
-#include "../cdata/AFS2_FILE_RECORD.h"
-#include "../cgss_env.h"
+#include <cstdint>
 #include <map>
 
-CGSS_NS_BEGIN
+#include "cgss_cdata.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+#include "takamori/streams/IStream.h"
 
-struct IStream;
+CGSS_NS_BEGIN
 
 class CGSS_EXPORT CAfs2Archive final {
 
     __root_class(CAfs2Archive);
 
 public:
-    CAfs2Archive(IStream *stream, uint64_t offset, const char *fileName, bool_t disposeStream);
+    CAfs2Archive(IStream *stream, std::uint64_t offset, const char *fileName, bool_t disposeStream);
 
     ~CAfs2Archive();
 
-    static bool_t IsAfs2Archive(IStream *stream, uint64_t offset);
+    static auto IsAfs2Archive(IStream *stream, std::uint64_t offset) -> bool_t;
 
-    const std::map<uint32_t, AFS2_FILE_RECORD> &GetFiles() const;
+    auto GetFiles() const -> const std::map<std::uint32_t, AFS2_FILE_RECORD> &;
 
-    IStream *GetStream() const;
+    auto GetStream() const -> IStream *;
 
-    uint32_t GetByteAlignment() const;
+    auto GetByteAlignment() const -> std::uint32_t;
 
-    uint32_t GetVersion() const;
+    auto GetVersion() const -> std::uint32_t;
 
-    uint16_t GetHcaKeyModifier() const;
+    auto GetHcaKeyModifier() const -> std::uint16_t;
 
-    const char *GetFileName() const;
+    auto GetFileName() const -> const char *;
 
 private:
     void Initialize();
 
     IStream *_stream;
-    uint64_t _streamOffset;
+    std::uint64_t _streamOffset;
     char *_fileName;
     bool_t _disposeStream;
 
-    std::map<uint32_t, AFS2_FILE_RECORD> _files;
+    std::map<std::uint32_t, AFS2_FILE_RECORD> _files;
 
-    uint32_t _byteAlignment;
-    uint16_t _hcaKeyModifier;
-    uint32_t _version;
+    std::uint32_t _byteAlignment;
+    std::uint16_t _hcaKeyModifier;
+    std::uint32_t _version;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_ICHINOSE_CAFS2ARCHIVE_H_

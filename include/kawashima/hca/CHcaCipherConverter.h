@@ -1,8 +1,14 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
+#define CGSS_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
 
-#include "../../cgss_data.h"
-#include "CHcaFormatReader.h"
+#include <cstdint>
 #include <map>
+
+#include "cgss_cdata.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+
+#include "./CHcaFormatReader.h"
 
 CGSS_NS_BEGIN
 
@@ -28,32 +34,35 @@ public:
 
     CHcaCipherConverter(CHcaCipherConverter &&) = delete;
 
-    CHcaCipherConverter &operator=(const CHcaCipherConverter &) = delete;
+    auto operator=(const CHcaCipherConverter &) -> CHcaCipherConverter & = delete;
 
-    CHcaCipherConverter &operator=(CHcaCipherConverter &&) = delete;
+    auto operator=(CHcaCipherConverter &&) -> CHcaCipherConverter & = delete;
 
     ~CHcaCipherConverter() override;
 
-    uint32_t Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) override;
+    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
+        -> std::uint32_t override;
 
-    uint64_t GetPosition() override;
+    auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(uint64_t value) override;
+    void SetPosition(std::uint64_t value) override;
 
-    uint64_t GetLength() override;
+    auto GetLength() -> std::uint64_t override;
 
 private:
-    const uint8_t *ConvertBlock(uint32_t blockIndex);
+    auto ConvertBlock(std::uint32_t blockIndex) -> const std::uint8_t *;
 
-    const uint8_t *ConvertHeader();
+    auto ConvertHeader() -> const std::uint8_t *;
 
     void InitializeExtra();
 
     CHcaCipher *_cipherFrom, *_cipherTo;
     HCA_CIPHER_CONFIG _ccFrom, _ccTo;
-    uint8_t *_headerBuffer;
-    std::map<uint32_t, const uint8_t *> _blockBuffers;
-    uint64_t _position;
+    std::uint8_t *_headerBuffer;
+    std::map<std::uint32_t, const std::uint8_t *> _blockBuffers;
+    std::uint64_t _position;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_

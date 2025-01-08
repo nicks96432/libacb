@@ -1,6 +1,10 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCACHANNEL_H_
+#define CGSS_KAWASHIMA_HCA_CHCACHANNEL_H_
 
-#include "cgss_env.h"
+#include <array>
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -13,31 +17,40 @@ public:
 
     CHcaChannel(const CHcaChannel &) = delete;
 
-    static void
-    Decode1(CHcaChannel *inst, CHcaData *data, uint32_t a, int32_t b, const uint8_t *ath);
+    static void Decode1(
+        CHcaChannel *inst, CHcaData *data, std::uint32_t a, std::int32_t b, const std::uint8_t *ath
+    );
 
     static void Decode2(CHcaChannel *inst, CHcaData *data);
 
-    static void Decode3(CHcaChannel *inst, uint32_t a, uint32_t b, uint32_t c, uint32_t d);
+    static void
+    Decode3(CHcaChannel *inst, std::uint32_t a, std::uint32_t b, std::uint32_t c, std::uint32_t d);
 
     static void Decode4(
-        CHcaChannel *inst1, CHcaChannel *inst2, int32_t index, uint32_t a, uint32_t b, uint32_t c
+        CHcaChannel *inst1,
+        CHcaChannel *inst2,
+        std::int32_t index,
+        std::uint32_t a,
+        std::uint32_t b,
+        std::uint32_t c
     );
 
-    static void Decode5(CHcaChannel *inst, int32_t index);
+    static void Decode5(CHcaChannel *inst, std::int32_t index);
 
-    float block[0x80];
-    float base[0x80];
-    int8_t value[0x80];
-    int8_t scale[0x80];
-    int8_t value2[8];
-    int32_t type;
-    int8_t *value3;
-    uint32_t count;
-    float wav1[0x80];
-    float wav2[0x80];
-    float wav3[0x80];
-    float wave[8][0x80];
+    std::array<float, 0x80> block;
+    std::array<float, 0x80> base;
+    std::array<std::int8_t, 0x80> value;
+    std::array<std::int8_t, 0x80> scale;
+    std::array<std::int8_t, 8> value2;
+    std::int32_t type;
+    std::int8_t *value3;
+    std::uint32_t count;
+    std::array<float, 0x80> wav1;
+    std::array<float, 0x80> wav2;
+    std::array<float, 0x80> wav3;
+    std::array<std::array<float, 0x80>, 8> wave;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCACHANNEL_H_

@@ -1,7 +1,11 @@
-#pragma once
+#ifndef CGSS_ICHINOSE_CUTFREADER_H_
+#define CGSS_ICHINOSE_CUTFREADER_H_
 
-#include "../cgss_env.h"
-#include "../takamori/streams/IStream.h"
+#include <cstdint>
+
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
+#include "takamori/streams/IStream.h"
 
 CGSS_NS_BEGIN
 
@@ -12,52 +16,66 @@ class CGSS_EXPORT CUtfReader final {
 public:
     CUtfReader();
 
-    CUtfReader(uint8_t seed, uint8_t increment);
+    CUtfReader(std::uint8_t seed, std::uint8_t increment);
 
-    bool_t IsEncrypted() const;
+    auto IsEncrypted() const -> bool_t;
 
     void PeekBytes(
-        IStream *stream, uint8_t *buffer, uint64_t streamOffset, uint32_t size, uint64_t utfOffset
+        IStream *stream,
+        std::uint8_t *buffer,
+        std::uint64_t streamOffset,
+        std::uint32_t size,
+        std::uint64_t utfOffset
     );
 
     void PeekBytes(
         IStream *stream,
-        uint8_t *buffer,
-        uint64_t bufferOffset,
-        uint64_t streamOffset,
-        uint32_t size,
-        uint64_t utfOffset
+        std::uint8_t *buffer,
+        std::uint64_t bufferOffset,
+        std::uint64_t streamOffset,
+        std::uint32_t size,
+        std::uint64_t utfOffset
     );
 
-    uint8_t PeekUInt8(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto
+    PeekUInt8(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> std::uint8_t;
 
-    int8_t PeekInt8(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto
+    PeekInt8(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> std::int8_t;
 
-    uint16_t PeekUInt16(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto PeekUInt16(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+        -> std::uint16_t;
 
-    int16_t PeekInt16(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto
+    PeekInt16(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> std::int16_t;
 
-    uint32_t PeekUInt32(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto PeekUInt32(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+        -> std::uint32_t;
 
-    int32_t PeekInt32(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto
+    PeekInt32(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> std::int32_t;
 
-    uint64_t PeekUInt64(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto PeekUInt64(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+        -> std::uint64_t;
 
-    int64_t PeekInt64(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto
+    PeekInt64(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> std::int64_t;
 
-    float PeekSingle(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto PeekSingle(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> float;
 
-    double PeekDouble(IStream *stream, uint64_t streamOffset, uint64_t utfOffset);
+    auto PeekDouble(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset) -> double;
 
 private:
     const bool_t _encrypted;
-    const uint8_t _seed;
-    const uint8_t _increment;
+    const std::uint8_t _seed;
+    const std::uint8_t _increment;
 
-    uint8_t _currentXor;
-    uint64_t _currentUtfOffset;
-    uint8_t _currentStringXor;
-    uint64_t _currentUtfStringOffset;
+    std::uint8_t _currentXor;
+    std::uint64_t _currentUtfOffset;
+    std::uint8_t _currentStringXor;
+    std::uint64_t _currentUtfStringOffset;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_ICHINOSE_CUTFREADER_H_

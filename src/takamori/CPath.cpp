@@ -1,10 +1,12 @@
-#include "takamori/CPath.h"
 #include <algorithm>
+#include <string>
 
-using namespace std;
-using namespace cgss;
+#include "cgss_env_ns.h"
+#include "takamori/CPath.h"
 
-string CPath::Combine(const string &basePath, const string &path1) {
+CGSS_NS_BEGIN
+
+auto CPath::Combine(const std::string &basePath, const std::string &path1) -> std::string {
     if (basePath.empty()) {
         return path1;
     }
@@ -24,10 +26,10 @@ string CPath::Combine(const string &basePath, const string &path1) {
     }
 }
 
-string CPath::GetExtension(const string &path) {
+auto CPath::GetExtension(const std::string &path) -> std::string {
     const auto dotPos = path.rfind('.');
 
-    if (dotPos == string::npos) {
+    if (dotPos == std::string::npos) {
         return "";
     }
 
@@ -37,7 +39,7 @@ string CPath::GetExtension(const string &path) {
 
     const auto slashPos = FindLastSlash(path);
 
-    if (slashPos != string::npos) {
+    if (slashPos != std::string::npos) {
         if (dotPos < slashPos) {
             return "";
         }
@@ -47,10 +49,10 @@ string CPath::GetExtension(const string &path) {
     return path.substr(dotPos);
 }
 
-string CPath::GetFileName(const string &path) {
+auto CPath::GetFileName(const std::string &path) -> std::string {
     const auto slashPos = FindLastSlash(path);
 
-    if (slashPos == string::npos) {
+    if (slashPos == std::string::npos) {
         return path;
     }
 
@@ -61,39 +63,41 @@ string CPath::GetFileName(const string &path) {
     return path.substr(slashPos + 1u);
 }
 
-std::string CPath::GetDirectoryName(const std::string &path) {
+auto CPath::GetDirectoryName(const std::string &path) -> std::string {
     const auto slashPos = FindLastSlash(path);
 
-    if (slashPos == string::npos) {
+    if (slashPos == std::string::npos) {
         return "";
     }
 
     return path.substr(0, slashPos);
 }
 
-string CPath::GetFileBaseName(const string &path) {
+auto CPath::GetFileBaseName(const std::string &path) -> std::string {
     const auto fileName = GetFileName(path);
 
     const auto dotPos = fileName.rfind('.');
 
-    if (dotPos == string::npos) {
+    if (dotPos == std::string::npos) {
         return fileName;
     }
 
     return fileName.substr(0, dotPos);
 }
 
-string::size_type CPath::FindLastSlash(const string &path) {
+auto CPath::FindLastSlash(const std::string &path) -> std::string::size_type {
     const auto forward  = path.rfind('/');
     const auto backward = path.rfind('\\');
 
-    if (forward == string::npos) {
+    if (forward == std::string::npos) {
         return backward;
     }
 
-    if (backward == string::npos) {
+    if (backward == std::string::npos) {
         return forward;
     }
 
-    return max(forward, backward);
+    return std::max(forward, backward);
 }
+
+CGSS_NS_END

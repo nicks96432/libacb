@@ -1,3 +1,6 @@
+#include <string>
+
+#include "cgss_env_ns.h"
 #include "takamori/exceptions/CNotImplementedException.h"
 
 CGSS_NS_BEGIN
@@ -11,7 +14,6 @@ CNotImplementedException::CNotImplementedException(const std::string &message) n
     : MyBase(CGSS_OP_NOT_IMPLEMENTED, message) {}
 
 CNotImplementedException::CNotImplementedException(const cgss::CNotImplementedException &exception
-) noexcept
-    : MyBase(exception) {}
+) noexcept = default;
 
 CGSS_NS_END

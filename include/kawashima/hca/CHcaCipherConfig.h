@@ -1,8 +1,12 @@
-#pragma once
+#ifndef CGSS_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
+#define CGSS_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
 
-#include "../../cdata/HCA_CIPHER_CONFIG.h"
-#include "../../cgss_enum.h"
-#include "../../cgss_env.h"
+#include <cstdint>
+
+#include "cgss_cdata.h"
+#include "cgss_enum.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -17,16 +21,18 @@ public:
 
     explicit CHcaCipherConfig(HcaCipherType cipherType);
 
-    CHcaCipherConfig(uint32_t key1, uint32_t key2);
+    CHcaCipherConfig(std::uint32_t key1, std::uint32_t key2);
 
-    explicit CHcaCipherConfig(uint64_t key);
+    explicit CHcaCipherConfig(std::uint64_t key);
 
-    CHcaCipherConfig(uint32_t key1, uint32_t key2, uint16_t keyModifier);
+    CHcaCipherConfig(std::uint32_t key1, std::uint32_t key2, std::uint16_t keyModifier);
 
-    CHcaCipherConfig(uint64_t key, uint16_t keyModifier);
+    CHcaCipherConfig(std::uint64_t key, std::uint16_t keyModifier);
 
 private:
-    void Initialize(uint32_t key1, uint32_t key2, uint16_t keyModifier);
+    void Initialize(std::uint32_t key1, std::uint32_t key2, std::uint16_t keyModifier);
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_

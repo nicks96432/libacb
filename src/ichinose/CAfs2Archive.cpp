@@ -1,16 +1,23 @@
-#include "ichinose/CAfs2Archive.h"
+#include <array>
+#include <cstdint>
+#include <cstring>
+
+#include "cgss_cdata.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 #include "ichinose/CAcbHelper.h"
+#include "ichinose/CAfs2Archive.h"
 #include "takamori/exceptions/CFormatException.h"
 #include "takamori/streams/CBinaryReader.h"
 #include "takamori/streams/IStream.h"
 
-using namespace cgss;
+CGSS_NS_BEGIN
 
-static const uint8_t Afs2Signature[] = {0x41, 0x46, 0x53, 0x32}; // 'AFS2'
-static const int32_t InvalidCueId    = -1;
+static constexpr std::array<std::uint8_t, 4> Afs2Signature = {0x41, 0x46, 0x53, 0x32}; // 'AFS2'
+static constexpr std::int32_t InvalidCueId                 = -1;
 
 CAfs2Archive::CAfs2Archive(
-    cgss::IStream *stream, uint64_t offset, const char *fileName, bool_t disposeStream
+    cgss::IStream *stream, std::uint64_t offset, const char *fileName, bool_t disposeStream
 ) {
     _stream         = stream;
     _streamOffset   = offset;
@@ -19,10 +26,10 @@ CAfs2Archive::CAfs2Archive(
     _version        = 0;
     _hcaKeyModifier = 0;
 
-    const auto fileNameLength = strlen(fileName);
+    const auto fileNameLength = std::strlen(fileName);
     _fileName                 = new char[fileNameLength + 1];
-    memset(_fileName, 0, fileNameLength + 1);
-    strncpy(_fileName, fileName, fileNameLength);
+    std::memset(_fileName, 0, fileNameLength + 1);
+    std::strncpy(_fileName, fileName, fileNameLength);
 
     Initialize();
 }
@@ -39,17 +46,19 @@ CAfs2Archive::~CAfs2Archive() {
     }
 }
 
-bool_t CAfs2Archive::IsAfs2Archive(IStream *stream, uint64_t offset) {
-    uint8_t fileSignature[4] = {0};
+auto CAfs2Archive::IsAfs2Archive(IStream *stream, std::uint64_t offset) -> bool_t {
+    std::array<std::uint8_t, 4> fileSignature = {};
 
     auto pos = stream->GetPosition();
     stream->SetPosition(offset);
-    CBinaryReader::PeekBytes(stream, fileSignature, 4, 0, 4);
+    CBinaryReader::PeekBytes(
+        stream, fileSignature.data(), fileSignature.size(), 0, fileSignature.size()
+    );
     stream->SetPosition(pos);
 
     bool_t b = TRUE;
 
-    for (auto i = 0; i < 4; ++i) {
+    for (auto i = 0; i < fileSignature.size(); ++i) {
         b = static_cast<bool_t>(b && fileSignature[i] == Afs2Signature[i]);
     }
 
@@ -77,19 +86,19 @@ void CAfs2Archive::Initialize() {
 
     const auto byteAlignment = reader.PeekUInt32LE(offset + 12);
     _byteAlignment           = byteAlignment & 0xffff;
-    _hcaKeyModifier          = static_cast<uint16_t>(byteAlignment >> 16);
+    _hcaKeyModifier          = static_cast<std::uint16_t>(byteAlignment >> 16);
 
     const auto offsetFieldSize = (version >> 8) & 0xff;
-    uint32_t offsetMask        = 0;
+    std::uint32_t offsetMask   = 0;
 
     for (auto i = 0; i < offsetFieldSize; ++i) {
-        offsetMask |= static_cast<uint32_t>(0xff << (i * 8));
+        offsetMask |= static_cast<std::uint32_t>(0xff << (i * 8));
     }
 
     auto prevCueId           = InvalidCueId;
     auto fileOffsetFieldBase = 0x10 + fileCount * 2;
 
-    for (uint32_t i = 0; i < fileCount; ++i) {
+    for (std::uint32_t i = 0; i < fileCount; ++i) {
         auto currentOffsetFieldBase = fileOffsetFieldBase + offsetFieldSize * i;
         AFS2_FILE_RECORD record     = {0};
 
@@ -100,7 +109,7 @@ void CAfs2Archive::Initialize() {
         record.fileOffsetRaw += offset;
 
         record.fileOffsetAligned =
-            CAcbHelper::RoundUpToAlignment(record.fileOffsetRaw, (uint64_t)GetByteAlignment());
+            CAcbHelper::RoundUpToAlignment(record.fileOffsetRaw, (std::uint64_t)GetByteAlignment());
 
         if (i == fileCount - 1) {
             record.fileSize =
@@ -119,26 +128,28 @@ void CAfs2Archive::Initialize() {
     }
 }
 
-const std::map<uint32_t, AFS2_FILE_RECORD> &CAfs2Archive::GetFiles() const {
+auto CAfs2Archive::GetFiles() const -> const std::map<std::uint32_t, AFS2_FILE_RECORD> & {
     return _files;
 }
 
-uint32_t CAfs2Archive::GetVersion() const {
+auto CAfs2Archive::GetVersion() const -> std::uint32_t {
     return _version;
 }
 
-IStream *CAfs2Archive::GetStream() const {
+auto CAfs2Archive::GetStream() const -> IStream * {
     return _stream;
 }
 
-uint32_t CAfs2Archive::GetByteAlignment() const {
+auto CAfs2Archive::GetByteAlignment() const -> std::uint32_t {
     return _byteAlignment;
 }
 
-uint16_t CAfs2Archive::GetHcaKeyModifier() const {
+auto CAfs2Archive::GetHcaKeyModifier() const -> std::uint16_t {
     return _hcaKeyModifier;
 }
 
-const char *CAfs2Archive::GetFileName() const {
+auto CAfs2Archive::GetFileName() const -> const char * {
     return _fileName;
 }
+
+CGSS_NS_END

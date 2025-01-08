@@ -1,4 +1,9 @@
-#include "../../cgss_env.h"
+#ifndef CGSS_KAWASHIMA_WAVE_WAVE_NATIVE_H_
+#define CGSS_KAWASHIMA_WAVE_WAVE_NATIVE_H_
+
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -48,3 +53,5 @@ struct WaveDataSection {
 };
 
 CGSS_NS_END
+
+#endif // CGSS_KAWASHIMA_WAVE_WAVE_NATIVE_H_

@@ -1,10 +1,15 @@
+#include <cstddef>
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 #include "takamori/streams/CStreamExtensions.h"
+#include "takamori/streams/IStream.h"
 
-using namespace cgss;
+CGSS_NS_BEGIN
 
-void CStreamExtensions::ReadNullEndedString(IStream *stream, char *buffer, size_t bufferSize) {
-    uint8_t t  = 1;
-    uint32_t i = 0;
+void CStreamExtensions::ReadNullEndedString(IStream *stream, char *buffer, std::size_t bufferSize) {
+    std::uint8_t t  = 1;
+    std::uint32_t i = 0;
 
     while (t && i < bufferSize) {
         t = stream->ReadByte();
@@ -16,3 +21,5 @@ void CStreamExtensions::ReadNullEndedString(IStream *stream, char *buffer, size_
 
     buffer[bufferSize - 1] = '\0';
 }
+
+CGSS_NS_END

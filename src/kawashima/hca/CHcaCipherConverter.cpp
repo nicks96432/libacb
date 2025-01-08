@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "common/quick_utils.h"
@@ -71,21 +73,21 @@ void CHcaCipherConverter::InitializeExtra() {
     _cipherTo           = new CHcaCipher(ccTo);
 }
 
-const uint8_t *CHcaCipherConverter::ConvertHeader() {
+auto CHcaCipherConverter::ConvertHeader() -> const std::uint8_t * {
     if (_headerBuffer) {
         return _headerBuffer;
     }
     const auto &hcaInfo = _hcaInfo;
     const auto stream   = _baseStream;
-    uint32_t bufferSize;
-    uint32_t actualRead;
+    std::uint32_t bufferSize;
+    std::uint32_t actualRead;
 
-    auto *headerBuffer = new uint8_t[hcaInfo.dataOffset];
+    auto *headerBuffer = new std::uint8_t[hcaInfo.dataOffset];
     _headerBuffer      = headerBuffer;
     stream->Seek(0, StreamSeekOrigin::Begin);
     ENSURE_READ_ALL_BUFFER(headerBuffer, hcaInfo.dataOffset);
 
-    uint32_t cursor = 0;
+    std::uint32_t cursor = 0;
 
     // HCA
     cursor += sizeof(HCA_FILE_HEADER);
@@ -125,18 +127,18 @@ const uint8_t *CHcaCipherConverter::ConvertHeader() {
     // CIPH
     auto *ciph = reinterpret_cast<HCA_CIPHER_HEADER *>(headerBuffer + cursor);
     if (areMagicMatch(ciph->ciph, Magic::CIPHER)) {
-        uint16_t newCipherType = _ccTo.cipherType;
-        newCipherType          = bswap(newCipherType);
-        ciph->type             = newCipherType;
+        std::uint16_t newCipherType = _ccTo.cipherType;
+        newCipherType               = bswap(newCipherType);
+        ciph->type                  = newCipherType;
     }
 
     // Recompute checksum and write to the header.
     const auto newHeaderChecksum = ComputeChecksum(headerBuffer, hcaInfo.dataOffset - 2, 0);
-    *(uint16_t *)(headerBuffer + hcaInfo.dataOffset - 2) = bswap(newHeaderChecksum);
+    *(std::uint16_t *)(headerBuffer + hcaInfo.dataOffset - 2) = bswap(newHeaderChecksum);
     return headerBuffer;
 }
 
-const uint8_t *CHcaCipherConverter::ConvertBlock(uint32_t blockIndex) {
+auto CHcaCipherConverter::ConvertBlock(std::uint32_t blockIndex) -> const std::uint8_t * {
     auto &blockBuffers = _blockBuffers;
     {
         const auto item = blockBuffers.find(blockIndex);
@@ -148,11 +150,11 @@ const uint8_t *CHcaCipherConverter::ConvertBlock(uint32_t blockIndex) {
     const auto &hcaInfo    = _hcaInfo;
     const auto stream      = _baseStream;
     const auto *cipherFrom = _cipherFrom, *cipherTo = _cipherTo;
-    uint32_t bufferSize;
-    uint32_t actualRead;
+    std::uint32_t bufferSize;
+    std::uint32_t actualRead;
 
     stream->Seek(hcaInfo.dataOffset + blockIndex * hcaInfo.blockSize, StreamSeekOrigin::Begin);
-    auto blockBuffer         = new uint8_t[hcaInfo.blockSize];
+    auto blockBuffer         = new std::uint8_t[hcaInfo.blockSize];
     blockBuffers[blockIndex] = blockBuffer;
     ENSURE_READ_ALL_BUFFER(blockBuffer, hcaInfo.blockSize);
 
@@ -165,7 +167,7 @@ const uint8_t *CHcaCipherConverter::ConvertBlock(uint32_t blockIndex) {
     }
 
     // Decipher.
-    const auto validDataSize = static_cast<uint32_t>(hcaInfo.blockSize - 2);
+    const auto validDataSize = static_cast<std::uint32_t>(hcaInfo.blockSize - 2);
     cipherFrom->Decrypt(blockBuffer, validDataSize);
 
     // Check magic piece of plain text.
@@ -183,30 +185,31 @@ const uint8_t *CHcaCipherConverter::ConvertBlock(uint32_t blockIndex) {
     cipherTo->Encrypt(blockBuffer, validDataSize);
 
     // Fix block checksum.
-    const auto checksum                        = ComputeChecksum(blockBuffer, validDataSize, 0);
-    *(uint16_t *)(blockBuffer + validDataSize) = bswap(checksum);
+    const auto checksum = ComputeChecksum(blockBuffer, validDataSize, 0);
+    *(std::uint16_t *)(blockBuffer + validDataSize) = bswap(checksum);
     return blockBuffer;
 }
 
-uint64_t CHcaCipherConverter::GetLength() {
+auto CHcaCipherConverter::GetLength() -> std::uint64_t {
     const auto &hcaInfo = _hcaInfo;
     return hcaInfo.dataOffset + hcaInfo.blockCount * hcaInfo.blockSize;
 }
 
-void CHcaCipherConverter::SetPosition(uint64_t value) {
+void CHcaCipherConverter::SetPosition(std::uint64_t value) {
     _position = value;
 }
 
-uint64_t CHcaCipherConverter::GetPosition() {
+auto CHcaCipherConverter::GetPosition() -> std::uint64_t {
     return _position;
 }
 
-uint32_t
-CHcaCipherConverter::Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CHcaCipherConverter::Read(
+    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     if (!buffer) {
         throw CArgumentException("CHcaCipherConverter::Read");
     }
-    count = std::min(count, static_cast<uint32_t>(bufferSize - offset));
+    count = std::min(count, static_cast<std::uint32_t>(bufferSize - offset));
     if (count == 0) {
         return 0;
     }
@@ -215,13 +218,13 @@ CHcaCipherConverter::Read(void *buffer, uint32_t bufferSize, size_t offset, uint
     if (streamPosition >= streamLength) {
         return 0;
     }
-    auto byteBuffer = static_cast<uint8_t *>(buffer);
+    auto byteBuffer = static_cast<std::uint8_t *>(buffer);
 
-    const auto &hcaInfo = _hcaInfo;
-    uint32_t totalRead  = 0;
+    const auto &hcaInfo     = _hcaInfo;
+    std::uint32_t totalRead = 0;
     if (streamPosition < hcaInfo.dataOffset) {
         const auto headerCopyLength =
-            std::min(count, static_cast<uint32_t>(hcaInfo.dataOffset - streamPosition));
+            std::min(count, static_cast<std::uint32_t>(hcaInfo.dataOffset - streamPosition));
         const auto headerData = ConvertHeader();
         memcpy(byteBuffer + offset, headerData + streamPosition, headerCopyLength);
         streamPosition += headerCopyLength;
@@ -236,16 +239,17 @@ CHcaCipherConverter::Read(void *buffer, uint32_t bufferSize, size_t offset, uint
 
     while (count > 0 && streamPosition < streamLength) {
         const auto blockIndex =
-            static_cast<uint32_t>((streamPosition - hcaInfo.dataOffset) / hcaInfo.blockSize);
+            static_cast<std::uint32_t>((streamPosition - hcaInfo.dataOffset) / hcaInfo.blockSize);
         const auto startOffset = (streamPosition - hcaInfo.dataOffset) % hcaInfo.blockSize;
         const auto blockData   = ConvertBlock(blockIndex);
         const auto copyLength  = std::min(
             streamLength - streamPosition,
             std::min(
-                static_cast<uint64_t>(count), static_cast<uint64_t>(hcaInfo.blockSize - startOffset)
+                static_cast<std::uint64_t>(count),
+                static_cast<std::uint64_t>(hcaInfo.blockSize - startOffset)
             )
         );
-        memcpy(byteBuffer + offset, blockData + startOffset, static_cast<size_t>(copyLength));
+        memcpy(byteBuffer + offset, blockData + startOffset, static_cast<std::size_t>(copyLength));
         streamPosition += copyLength;
         count -= copyLength;
         offset += copyLength;

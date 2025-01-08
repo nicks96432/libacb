@@ -1,8 +1,10 @@
-#pragma once
+#ifndef CGSS_TAKAMORI_CPATH_H_
+#define CGSS_TAKAMORI_CPATH_H_
 
 #include <string>
 
-#include "../cgss_env.h"
+#include "cgss_env.h"
+#include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
@@ -11,18 +13,20 @@ class CGSS_EXPORT CPath final {
     PURE_STATIC(CPath);
 
 public:
-    static std::string Combine(const std::string &basePath, const std::string &path1);
+    static auto Combine(const std::string &basePath, const std::string &path1) -> std::string;
 
-    static std::string GetExtension(const std::string &path);
+    static auto GetExtension(const std::string &path) -> std::string;
 
-    static std::string GetFileName(const std::string &path);
+    static auto GetFileName(const std::string &path) -> std::string;
 
-    static std::string GetDirectoryName(const std::string &path);
+    static auto GetDirectoryName(const std::string &path) -> std::string;
 
-    static std::string GetFileBaseName(const std::string &path);
+    static auto GetFileBaseName(const std::string &path) -> std::string;
 
 private:
-    static std::string::size_type FindLastSlash(const std::string &path);
+    static auto FindLastSlash(const std::string &path) -> std::string::size_type;
 };
 
 CGSS_NS_END
+
+#endif // CGSS_TAKAMORI_CPATH_H_

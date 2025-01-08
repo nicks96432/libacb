@@ -1,7 +1,12 @@
-#include "takamori/streams/CBinaryReader.h"
+#include <cstddef>
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 #include "common/quick_utils.h"
 #include "takamori/exceptions/CException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
+#include "takamori/streams/CBinaryReader.h"
+#include "takamori/streams/IStream.h"
 
 // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
 enum {
@@ -11,8 +16,8 @@ enum {
 };
 
 static const union {
-    uint8_t bytes[4];
-    uint32_t value;
+    std::uint8_t bytes[4];
+    std::uint32_t value;
 } _o32_host_order = {
     {0, 1, 2, 3}
 };
@@ -23,19 +28,19 @@ CGSS_NS_BEGIN
 
 CBinaryReader::CBinaryReader(IStream *baseStream): _baseStream(baseStream) {}
 
-int8_t CBinaryReader::ReadInt8(IStream *stream) {
-    uint8_t u = stream->ReadByte();
-    int8_t i  = *(int8_t *)&u;
+auto CBinaryReader::ReadInt8(IStream *stream) -> std::int8_t {
+    std::uint8_t u = stream->ReadByte();
+    std::int8_t i  = *(std::int8_t *)&u;
     return i;
 }
 
-uint8_t CBinaryReader::ReadUInt8(IStream *stream) {
+auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     return stream->ReadByte();
 }
 
 #define ENSURE_READ(n)                                           \
     static const auto shouldRead = (n);                          \
-    uint8_t buffer[shouldRead];                                  \
+    std::uint8_t buffer[shouldRead];                             \
     auto read = stream->Read(buffer, shouldRead, 0, shouldRead); \
     do {                                                         \
         if (read < shouldRead) {                                 \
@@ -43,110 +48,112 @@ uint8_t CBinaryReader::ReadUInt8(IStream *stream) {
         }                                                        \
     } while (0)
 
-#define READ_INT(bit, hostEndian)               \
-    ENSURE_READ((bit) / 8);                     \
-    int##bit##_t ret = *(int##bit##_t *)buffer; \
-    if (O32_HOST_ORDER != (hostEndian)) {       \
-        ret = bswap(ret);                       \
-    }                                           \
+#define READ_INT(bit, hostEndian)                         \
+    ENSURE_READ((bit) / 8);                               \
+    std::int##bit##_t ret = *(std::int##bit##_t *)buffer; \
+    if (O32_HOST_ORDER != (hostEndian)) {                 \
+        ret = bswap(ret);                                 \
+    }                                                     \
     return ret
 
-#define READ_UINT(bit, hostEndian)                \
-    ENSURE_READ((bit) / 8);                       \
-    uint##bit##_t ret = *(uint##bit##_t *)buffer; \
-    if (O32_HOST_ORDER != (hostEndian)) {         \
-        ret = bswap(ret);                         \
-    }                                             \
+#define READ_UINT(bit, hostEndian)                          \
+    ENSURE_READ((bit) / 8);                                 \
+    std::uint##bit##_t ret = *(std::uint##bit##_t *)buffer; \
+    if (O32_HOST_ORDER != (hostEndian)) {                   \
+        ret = bswap(ret);                                   \
+    }                                                       \
     return ret
 
-int16_t CBinaryReader::ReadInt16LE(IStream *stream) {
+auto CBinaryReader::ReadInt16LE(IStream *stream) -> std::int16_t {
     READ_INT(16, O32_LITTLE_ENDIAN);
 }
 
-int16_t CBinaryReader::ReadInt16BE(IStream *stream) {
+auto CBinaryReader::ReadInt16BE(IStream *stream) -> std::int16_t {
     READ_INT(16, O32_BIG_ENDIAN);
 }
 
-uint16_t CBinaryReader::ReadUInt16LE(IStream *stream) {
+auto CBinaryReader::ReadUInt16LE(IStream *stream) -> std::uint16_t {
     READ_UINT(16, O32_LITTLE_ENDIAN);
 }
 
-uint16_t CBinaryReader::ReadUInt16BE(IStream *stream) {
+auto CBinaryReader::ReadUInt16BE(IStream *stream) -> std::uint16_t {
     READ_UINT(16, O32_BIG_ENDIAN);
 }
 
-int32_t CBinaryReader::ReadInt32LE(IStream *stream) {
+auto CBinaryReader::ReadInt32LE(IStream *stream) -> std::int32_t {
     READ_INT(32, O32_LITTLE_ENDIAN);
 }
 
-int32_t CBinaryReader::ReadInt32BE(IStream *stream) {
+auto CBinaryReader::ReadInt32BE(IStream *stream) -> std::int32_t {
     READ_INT(32, O32_BIG_ENDIAN);
 }
 
-uint32_t CBinaryReader::ReadUInt32LE(IStream *stream) {
+auto CBinaryReader::ReadUInt32LE(IStream *stream) -> std::uint32_t {
     READ_UINT(32, O32_LITTLE_ENDIAN);
 }
 
-uint32_t CBinaryReader::ReadUInt32BE(IStream *stream) {
+auto CBinaryReader::ReadUInt32BE(IStream *stream) -> std::uint32_t {
     READ_UINT(32, O32_BIG_ENDIAN);
 }
 
-int64_t CBinaryReader::ReadInt64LE(IStream *stream) {
+auto CBinaryReader::ReadInt64LE(IStream *stream) -> int64_t {
     READ_INT(64, O32_LITTLE_ENDIAN);
 }
 
-int64_t CBinaryReader::ReadInt64BE(IStream *stream) {
+auto CBinaryReader::ReadInt64BE(IStream *stream) -> int64_t {
     READ_INT(64, O32_BIG_ENDIAN);
 }
 
-uint64_t CBinaryReader::ReadUInt64LE(IStream *stream) {
+auto CBinaryReader::ReadUInt64LE(IStream *stream) -> std::uint64_t {
     READ_UINT(64, O32_LITTLE_ENDIAN);
 }
 
-uint64_t CBinaryReader::ReadUInt64BE(IStream *stream) {
+auto CBinaryReader::ReadUInt64BE(IStream *stream) -> std::uint64_t {
     READ_UINT(64, O32_BIG_ENDIAN);
 }
 
-float CBinaryReader::ReadSingleLE(IStream *stream) {
+auto CBinaryReader::ReadSingleLE(IStream *stream) -> float {
     auto i = ReadInt32LE(stream);
     auto f = *(float *)&i;
     return f;
 }
 
-float CBinaryReader::ReadSingleBE(IStream *stream) {
+auto CBinaryReader::ReadSingleBE(IStream *stream) -> float {
     auto i = ReadInt32BE(stream);
     auto f = *(float *)&i;
     return f;
 }
 
-double CBinaryReader::ReadDoubleLE(IStream *stream) {
+auto CBinaryReader::ReadDoubleLE(IStream *stream) -> double {
     auto i = ReadInt64LE(stream);
     auto f = *(double *)&i;
     return f;
 }
 
-double CBinaryReader::ReadDoubleBE(IStream *stream) {
+auto CBinaryReader::ReadDoubleBE(IStream *stream) -> double {
     auto i = ReadInt64BE(stream);
     auto f = *(double *)&i;
     return f;
 }
 
-#define READ_U_FUNC_O(bit, suffix)                                                         \
-    uint##bit##_t CBinaryReader::ReadUInt##bit##suffix(IStream *stream, uint64_t offset) { \
-        auto position = stream->GetPosition();                                             \
-        stream->Seek(offset, StreamSeekOrigin::Begin);                                     \
-        auto value = ReadUInt##bit##suffix(stream);                                        \
-        stream->SetPosition(position);                                                     \
-        return value;                                                                      \
+#define READ_U_FUNC_O(bit, suffix)                                                   \
+    auto CBinaryReader::ReadUInt##bit##suffix(IStream *stream, std::uint64_t offset) \
+        ->std::uint##bit##_t {                                                       \
+        auto position = stream->GetPosition();                                       \
+        stream->Seek(offset, StreamSeekOrigin::Begin);                               \
+        auto value = ReadUInt##bit##suffix(stream);                                  \
+        stream->SetPosition(position);                                               \
+        return value;                                                                \
     }
 
-#define READ_S_FUNC_O(bit, suffix)                                                       \
-    int##bit##_t CBinaryReader::ReadInt##bit##suffix(IStream *stream, uint64_t offset) { \
-        auto position = stream->GetPosition();                                           \
-        stream->Seek(offset, StreamSeekOrigin::Begin);                                   \
-        auto value = ReadInt##bit##suffix(stream);                                       \
-        stream->SetPosition(position);                                                   \
-        return value;                                                                    \
+#define READ_S_FUNC_O(bit, suffix)                                                  \
+    auto CBinaryReader::ReadInt##bit##suffix(IStream *stream, std::uint64_t offset) \
+        ->std::int##bit##_t {                                                       \
+        auto position = stream->GetPosition();                                      \
+        stream->Seek(offset, StreamSeekOrigin::Begin);                              \
+        auto value = ReadInt##bit##suffix(stream);                                  \
+        stream->SetPosition(position);                                              \
+        return value;                                                               \
     }
 
 READ_S_FUNC_O(8, )
@@ -177,13 +184,13 @@ READ_S_FUNC_O(64, BE)
 
 READ_U_FUNC_O(64, BE)
 
-#define READ_R_FUNC(type, Cap, suffix)                                        \
-    type CBinaryReader::Read##Cap##suffix(IStream *stream, uint64_t offset) { \
-        auto position = stream->GetPosition();                                \
-        stream->Seek(offset, StreamSeekOrigin::Begin);                        \
-        auto value = Read##Cap##suffix(stream);                               \
-        stream->SetPosition(position);                                        \
-        return value;                                                         \
+#define READ_R_FUNC(type, Cap, suffix)                                                   \
+    auto CBinaryReader::Read##Cap##suffix(IStream *stream, std::uint64_t offset)->type { \
+        auto position = stream->GetPosition();                                           \
+        stream->Seek(offset, StreamSeekOrigin::Begin);                                   \
+        auto value = Read##Cap##suffix(stream);                                          \
+        stream->SetPosition(position);                                                   \
+        return value;                                                                    \
     }
 
 READ_R_FUNC(float, Single, LE)
@@ -194,20 +201,20 @@ READ_R_FUNC(double, Double, LE)
 
 READ_R_FUNC(double, Double, BE)
 
-#define PEEK_U_FUNC(bit, suffix)                                          \
-    uint##bit##_t CBinaryReader::PeekUInt##bit##suffix(IStream *stream) { \
-        auto position = stream->GetPosition();                            \
-        auto value    = ReadUInt##bit##suffix(stream);                    \
-        stream->SetPosition(position);                                    \
-        return value;                                                     \
+#define PEEK_U_FUNC(bit, suffix)                                                     \
+    auto CBinaryReader::PeekUInt##bit##suffix(IStream *stream)->std::uint##bit##_t { \
+        auto position = stream->GetPosition();                                       \
+        auto value    = ReadUInt##bit##suffix(stream);                               \
+        stream->SetPosition(position);                                               \
+        return value;                                                                \
     }
 
-#define PEEK_S_FUNC(bit, suffix)                                        \
-    int##bit##_t CBinaryReader::PeekInt##bit##suffix(IStream *stream) { \
-        auto position = stream->GetPosition();                          \
-        auto value    = ReadInt##bit##suffix(stream);                   \
-        stream->SetPosition(position);                                  \
-        return value;                                                   \
+#define PEEK_S_FUNC(bit, suffix)                                                   \
+    auto CBinaryReader::PeekInt##bit##suffix(IStream *stream)->std::int##bit##_t { \
+        auto position = stream->GetPosition();                                     \
+        auto value    = ReadInt##bit##suffix(stream);                              \
+        stream->SetPosition(position);                                             \
+        return value;                                                              \
     }
 
 PEEK_S_FUNC(8, )
@@ -238,12 +245,12 @@ PEEK_S_FUNC(64, BE)
 
 PEEK_U_FUNC(64, BE)
 
-#define PEEK_R_FUNC(type, Cap, suffix)                       \
-    type CBinaryReader::Peek##Cap##suffix(IStream *stream) { \
-        auto position = stream->GetPosition();               \
-        auto value    = Read##Cap##suffix(stream);           \
-        stream->SetPosition(position);                       \
-        return value;                                        \
+#define PEEK_R_FUNC(type, Cap, suffix)                             \
+    auto CBinaryReader::Peek##Cap##suffix(IStream *stream)->type { \
+        auto position = stream->GetPosition();                     \
+        auto value    = Read##Cap##suffix(stream);                 \
+        stream->SetPosition(position);                             \
+        return value;                                              \
     }
 
 PEEK_R_FUNC(float, Single, LE)
@@ -254,14 +261,14 @@ PEEK_R_FUNC(double, Double, LE)
 
 PEEK_R_FUNC(double, Double, BE)
 
-#define READ_INSTANCE_WRAP_S(bit, suffix)                      \
-    int##bit##_t CBinaryReader::ReadInt##bit##suffix() const { \
-        return ReadInt##bit##suffix(_baseStream);              \
+#define READ_INSTANCE_WRAP_S(bit, suffix)                                 \
+    auto CBinaryReader::ReadInt##bit##suffix() const->std::int##bit##_t { \
+        return ReadInt##bit##suffix(_baseStream);                         \
     }
 
-#define READ_INSTANCE_WRAP_U(bit, suffix)                        \
-    uint##bit##_t CBinaryReader::ReadUInt##bit##suffix() const { \
-        return ReadUInt##bit##suffix(_baseStream);               \
+#define READ_INSTANCE_WRAP_U(bit, suffix)                                   \
+    auto CBinaryReader::ReadUInt##bit##suffix() const->std::uint##bit##_t { \
+        return ReadUInt##bit##suffix(_baseStream);                          \
     }
 
 READ_INSTANCE_WRAP_S(8, )
@@ -292,14 +299,14 @@ READ_INSTANCE_WRAP_U(64, LE)
 
 READ_INSTANCE_WRAP_U(64, BE)
 
-#define READ_INSTANCE_WRAP_S_O(bit, suffix)                                   \
-    int##bit##_t CBinaryReader::ReadInt##bit##suffix(uint64_t offset) const { \
-        return ReadInt##bit##suffix(_baseStream, offset);                     \
+#define READ_INSTANCE_WRAP_S_O(bit, suffix)                                                   \
+    auto CBinaryReader::ReadInt##bit##suffix(std::uint64_t offset) const->std::int##bit##_t { \
+        return ReadInt##bit##suffix(_baseStream, offset);                                     \
     }
 
-#define READ_INSTANCE_WRAP_U_O(bit, suffix)                                     \
-    uint##bit##_t CBinaryReader::ReadUInt##bit##suffix(uint64_t offset) const { \
-        return ReadUInt##bit##suffix(_baseStream, offset);                      \
+#define READ_INSTANCE_WRAP_U_O(bit, suffix)                                                     \
+    auto CBinaryReader::ReadUInt##bit##suffix(std::uint64_t offset) const->std::uint##bit##_t { \
+        return ReadUInt##bit##suffix(_baseStream, offset);                                      \
     }
 
 READ_INSTANCE_WRAP_S_O(8, )
@@ -330,14 +337,14 @@ READ_INSTANCE_WRAP_U_O(64, LE)
 
 READ_INSTANCE_WRAP_U_O(64, BE)
 
-#define PEEK_INSTANCE_WRAP_S(bit, suffix)                      \
-    int##bit##_t CBinaryReader::PeekInt##bit##suffix() const { \
-        return PeekInt##bit##suffix(_baseStream);              \
+#define PEEK_INSTANCE_WRAP_S(bit, suffix)                                 \
+    auto CBinaryReader::PeekInt##bit##suffix() const->std::int##bit##_t { \
+        return PeekInt##bit##suffix(_baseStream);                         \
     }
 
-#define PEEK_INSTANCE_WRAP_U(bit, suffix)                        \
-    uint##bit##_t CBinaryReader::PeekUInt##bit##suffix() const { \
-        return PeekUInt##bit##suffix(_baseStream);               \
+#define PEEK_INSTANCE_WRAP_U(bit, suffix)                                   \
+    auto CBinaryReader::PeekUInt##bit##suffix() const->std::uint##bit##_t { \
+        return PeekUInt##bit##suffix(_baseStream);                          \
     }
 
 PEEK_INSTANCE_WRAP_S(8, )
@@ -368,9 +375,9 @@ PEEK_INSTANCE_WRAP_U(64, LE)
 
 PEEK_INSTANCE_WRAP_U(64, BE)
 
-#define READ_INSTANCE_WRAP_R(type, Cap, suffix)     \
-    type CBinaryReader::Read##Cap##suffix() const { \
-        return Read##Cap##suffix(_baseStream);      \
+#define READ_INSTANCE_WRAP_R(type, Cap, suffix)           \
+    auto CBinaryReader::Read##Cap##suffix() const->type { \
+        return Read##Cap##suffix(_baseStream);            \
     }
 
 READ_INSTANCE_WRAP_R(float, Single, LE)
@@ -381,9 +388,9 @@ READ_INSTANCE_WRAP_R(double, Double, LE)
 
 READ_INSTANCE_WRAP_R(double, Double, BE)
 
-#define READ_INSTANCE_WRAP_R_O(type, Cap, suffix)                  \
-    type CBinaryReader::Read##Cap##suffix(uint64_t offset) const { \
-        return Read##Cap##suffix(_baseStream, offset);             \
+#define READ_INSTANCE_WRAP_R_O(type, Cap, suffix)                             \
+    auto CBinaryReader::Read##Cap##suffix(std::uint64_t offset) const->type { \
+        return Read##Cap##suffix(_baseStream, offset);                        \
     }
 
 READ_INSTANCE_WRAP_R_O(float, Single, LE)
@@ -394,9 +401,9 @@ READ_INSTANCE_WRAP_R_O(double, Double, LE)
 
 READ_INSTANCE_WRAP_R_O(double, Double, BE)
 
-#define PEEK_INSTANCE_WRAP_R(type, Cap, suffix)     \
-    type CBinaryReader::Peek##Cap##suffix() const { \
-        return Peek##Cap##suffix(_baseStream);      \
+#define PEEK_INSTANCE_WRAP_R(type, Cap, suffix)           \
+    auto CBinaryReader::Peek##Cap##suffix() const->type { \
+        return Peek##Cap##suffix(_baseStream);            \
     }
 
 PEEK_INSTANCE_WRAP_R(float, Single, LE)
@@ -407,9 +414,9 @@ PEEK_INSTANCE_WRAP_R(double, Double, LE)
 
 PEEK_INSTANCE_WRAP_R(double, Double, BE)
 
-#define PEEK_INSTANCE_WRAP_R_O(type, Cap, suffix)                  \
-    type CBinaryReader::Peek##Cap##suffix(uint64_t offset) const { \
-        return Peek##Cap##suffix(_baseStream);                     \
+#define PEEK_INSTANCE_WRAP_R_O(type, Cap, suffix)                             \
+    auto CBinaryReader::Peek##Cap##suffix(std::uint64_t offset) const->type { \
+        return Peek##Cap##suffix(_baseStream);                                \
     }
 
 PEEK_INSTANCE_WRAP_R_O(float, Single, LE)
@@ -420,26 +427,28 @@ PEEK_INSTANCE_WRAP_R_O(double, Double, LE)
 
 PEEK_INSTANCE_WRAP_R_O(double, Double, BE)
 
-#define PEEK_WRAP_S_O(bit, suffix)                                                       \
-    int##bit##_t CBinaryReader::PeekInt##bit##suffix(IStream *stream, uint64_t offset) { \
-        auto position = stream->GetPosition();                                           \
-        if (stream->GetPosition() != offset) {                                           \
-            stream->Seek(offset, StreamSeekOrigin::Begin);                               \
-        }                                                                                \
-        auto value = ReadInt##bit##suffix(stream);                                       \
-        stream->Seek(position, StreamSeekOrigin::Begin);                                 \
-        return value;                                                                    \
+#define PEEK_WRAP_S_O(bit, suffix)                                                  \
+    auto CBinaryReader::PeekInt##bit##suffix(IStream *stream, std::uint64_t offset) \
+        ->std::int##bit##_t {                                                       \
+        auto position = stream->GetPosition();                                      \
+        if (stream->GetPosition() != offset) {                                      \
+            stream->Seek(offset, StreamSeekOrigin::Begin);                          \
+        }                                                                           \
+        auto value = ReadInt##bit##suffix(stream);                                  \
+        stream->Seek(position, StreamSeekOrigin::Begin);                            \
+        return value;                                                               \
     }
 
-#define PEEK_WRAP_U_O(bit, suffix)                                                         \
-    uint##bit##_t CBinaryReader::PeekUInt##bit##suffix(IStream *stream, uint64_t offset) { \
-        auto position = stream->GetPosition();                                             \
-        if (stream->GetPosition() != offset) {                                             \
-            stream->Seek(offset, StreamSeekOrigin::Begin);                                 \
-        }                                                                                  \
-        auto value = ReadUInt##bit##suffix(stream);                                        \
-        stream->Seek(position, StreamSeekOrigin::Begin);                                   \
-        return value;                                                                      \
+#define PEEK_WRAP_U_O(bit, suffix)                                                   \
+    auto CBinaryReader::PeekUInt##bit##suffix(IStream *stream, std::uint64_t offset) \
+        ->std::uint##bit##_t {                                                       \
+        auto position = stream->GetPosition();                                       \
+        if (stream->GetPosition() != offset) {                                       \
+            stream->Seek(offset, StreamSeekOrigin::Begin);                           \
+        }                                                                            \
+        auto value = ReadUInt##bit##suffix(stream);                                  \
+        stream->Seek(position, StreamSeekOrigin::Begin);                             \
+        return value;                                                                \
     }
 
 PEEK_WRAP_S_O(8, )
@@ -470,14 +479,14 @@ PEEK_WRAP_S_O(64, BE)
 
 PEEK_WRAP_U_O(64, BE)
 
-#define PEEK_INSTANCE_WRAP_S_O(bit, suffix)                                   \
-    int##bit##_t CBinaryReader::PeekInt##bit##suffix(uint64_t offset) const { \
-        return PeekInt##bit##suffix(_baseStream, offset);                     \
+#define PEEK_INSTANCE_WRAP_S_O(bit, suffix)                                                   \
+    auto CBinaryReader::PeekInt##bit##suffix(std::uint64_t offset) const->std::int##bit##_t { \
+        return PeekInt##bit##suffix(_baseStream, offset);                                     \
     }
 
-#define PEEK_INSTANCE_WRAP_U_O(bit, suffix)                                     \
-    uint##bit##_t CBinaryReader::PeekUInt##bit##suffix(uint64_t offset) const { \
-        return PeekUInt##bit##suffix(_baseStream, offset);                      \
+#define PEEK_INSTANCE_WRAP_U_O(bit, suffix)                                                     \
+    auto CBinaryReader::PeekUInt##bit##suffix(std::uint64_t offset) const->std::uint##bit##_t { \
+        return PeekUInt##bit##suffix(_baseStream, offset);                                      \
     }
 
 PEEK_INSTANCE_WRAP_S_O(8, )
@@ -508,15 +517,15 @@ PEEK_INSTANCE_WRAP_U_O(64, LE)
 
 PEEK_INSTANCE_WRAP_U_O(64, BE)
 
-#define PEEK_WRAP_R_O(type, Cap, suffix)                                      \
-    type CBinaryReader::Peek##Cap##suffix(IStream *stream, uint64_t offset) { \
-        auto position = stream->GetPosition();                                \
-        if (stream->GetPosition() != offset) {                                \
-            stream->Seek(offset, StreamSeekOrigin::Begin);                    \
-        }                                                                     \
-        auto value = Read##Cap##suffix(stream);                               \
-        stream->Seek(position, StreamSeekOrigin::Begin);                      \
-        return value;                                                         \
+#define PEEK_WRAP_R_O(type, Cap, suffix)                                                 \
+    auto CBinaryReader::Peek##Cap##suffix(IStream *stream, std::uint64_t offset)->type { \
+        auto position = stream->GetPosition();                                           \
+        if (stream->GetPosition() != offset) {                                           \
+            stream->Seek(offset, StreamSeekOrigin::Begin);                               \
+        }                                                                                \
+        auto value = Read##Cap##suffix(stream);                                          \
+        stream->Seek(position, StreamSeekOrigin::Begin);                                 \
+        return value;                                                                    \
     }
 
 PEEK_WRAP_R_O(float, Single, LE)
@@ -527,45 +536,51 @@ PEEK_WRAP_R_O(double, Double, LE)
 
 PEEK_WRAP_R_O(double, Double, BE)
 
-uint32_t
-CBinaryReader::Peek(void *buffer, uint32_t bufferSize, size_t bufferOffset, uint32_t count) {
-    return PeekBytes(_baseStream, static_cast<uint8_t *>(buffer), bufferSize, bufferOffset, count);
+auto CBinaryReader::Peek(
+    void *buffer, std::uint32_t bufferSize, std::size_t bufferOffset, std::uint32_t count
+) -> std::uint32_t {
+    return PeekBytes(
+        _baseStream, static_cast<std::uint8_t *>(buffer), bufferSize, bufferOffset, count
+    );
 }
 
-uint32_t CBinaryReader::Read(void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CBinaryReader::Read(
+    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     return _baseStream->Read(buffer, bufferSize, offset, count);
 }
 
-uint32_t
-CBinaryReader::Write(const void *buffer, uint32_t bufferSize, size_t offset, uint32_t count) {
+auto CBinaryReader::Write(
+    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
+) -> std::uint32_t {
     throw CInvalidOperationException("CBinaryReader::Write");
 }
 
-bool_t CBinaryReader::IsReadable() const {
+auto CBinaryReader::IsReadable() const -> bool_t {
     return _baseStream->IsReadable();
 }
 
-bool_t CBinaryReader::IsWritable() const {
+auto CBinaryReader::IsWritable() const -> bool_t {
     return FALSE;
 }
 
-bool_t CBinaryReader::IsSeekable() const {
+auto CBinaryReader::IsSeekable() const -> bool_t {
     return _baseStream->IsSeekable();
 }
 
-uint64_t CBinaryReader::GetPosition() {
+auto CBinaryReader::GetPosition() -> std::uint64_t {
     return _baseStream->GetPosition();
 }
 
-void CBinaryReader::SetPosition(uint64_t value) {
+void CBinaryReader::SetPosition(std::uint64_t value) {
     _baseStream->SetPosition(value);
 }
 
-uint64_t CBinaryReader::GetLength() {
+auto CBinaryReader::GetLength() -> std::uint64_t {
     return _baseStream->GetLength();
 }
 
-void CBinaryReader::SetLength(uint64_t value) {
+void CBinaryReader::SetLength(std::uint64_t value) {
     _baseStream->SetLength(value);
 }
 
@@ -573,9 +588,13 @@ void CBinaryReader::Flush() {
     throw CInvalidOperationException("CBinaryReader::Flush");
 }
 
-uint32_t CBinaryReader::PeekBytes(
-    IStream *stream, uint8_t *buffer, uint32_t bufferSize, size_t offset, uint32_t count
-) {
+auto CBinaryReader::PeekBytes(
+    IStream *stream,
+    std::uint8_t *buffer,
+    std::uint32_t bufferSize,
+    std::size_t offset,
+    std::uint32_t count
+) -> std::uint32_t {
     const auto position = stream->GetPosition();
     const auto v        = stream->Read(buffer, bufferSize, offset, count);
     stream->Seek(position, StreamSeekOrigin::Begin);

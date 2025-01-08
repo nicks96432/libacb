@@ -1,11 +1,14 @@
-#include "takamori/streams/CStream.h"
+#include <cstdint>
+
+#include "cgss_env_ns.h"
 #include "takamori/exceptions/CArgumentException.h"
-#include "takamori/exceptions/CException.h"
+#include "takamori/streams/CStream.h"
+#include "takamori/streams/IStream.h"
 
 CGSS_NS_BEGIN
 
-void CStream::Seek(int64_t offset, StreamSeekOrigin origin) {
-    int64_t position;
+void CStream::Seek(std::int64_t offset, StreamSeekOrigin origin) {
+    std::int64_t position;
     switch (origin) {
     case StreamSeekOrigin::Begin:
         position = offset;
@@ -18,20 +21,20 @@ void CStream::Seek(int64_t offset, StreamSeekOrigin origin) {
         break;
     }
     if (position != GetPosition()) {
-        SetPosition((uint64_t)position);
+        SetPosition((std::uint64_t)position);
     }
 }
 
-int32_t CStream::ReadByte() {
-    uint8_t b = 0;
-    auto read = Read(&b, 1, 0, 1);
+auto CStream::ReadByte() -> std::int32_t {
+    std::uint8_t b = 0;
+    auto read      = Read(&b, 1, 0, 1);
     if (read < 1) {
         b = -1;
     }
     return b;
 }
 
-uint32_t CStream::WriteByte(const uint8_t value) {
+auto CStream::WriteByte(const std::uint8_t value) -> std::uint32_t {
     return Write(&value, 1, 0, 1);
 }
 
@@ -39,7 +42,7 @@ void CStream::CopyTo(IStream &destination) {
     CopyTo(destination, 10240);
 }
 
-void CStream::CopyTo(IStream &destination, uint32_t bufferSize) {
+void CStream::CopyTo(IStream &destination, std::uint32_t bufferSize) {
     if (this == &destination) {
         throw CArgumentException("CStream::CopyTo");
     }
@@ -49,8 +52,8 @@ void CStream::CopyTo(IStream &destination, uint32_t bufferSize) {
     if (!IsReadable()) {
         return;
     }
-    uint8_t *buffer = new uint8_t[bufferSize];
-    uint32_t read   = 1;
+    auto *buffer       = new std::uint8_t[bufferSize];
+    std::uint32_t read = 1;
     while (read > 0) {
         read = Read(buffer, bufferSize, 0, bufferSize);
         if (read > 0) {

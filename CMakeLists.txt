@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.21)
 project(cgss)
 
 option(LIBCGSS_BUILD_STATIC_LIBS "Build the static library" ON)
@@ -8,6 +8,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
     set(TARGET_ARCH x86)
