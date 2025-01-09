@@ -74,8 +74,9 @@ configure_file(include/acb_env.h.in include/acb_env.h @ONLY)
 
 file(GLOB_RECURSE LIBACB_SOURCE_FILES "src/**/*.cpp" "src/**/*.h")
 add_library(acb-objects OBJECT ${LIBACB_SOURCE_FILES})
+set(${LIBACB_INCLUDE_DIRECTORY} ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include)
 
-target_include_directories(acb-objects PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include)
+target_include_directories(acb-objects PUBLIC ${LIBACB_INCLUDE_DIRECTORY})
 set_property(TARGET acb-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if(UNIX AND NOT (CYGWIN OR MINGW))
