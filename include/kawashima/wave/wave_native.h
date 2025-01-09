@@ -7,50 +7,54 @@
 
 CGSS_NS_BEGIN
 
+// NOLINTBEGIN(modernize-avoid-c-arrays)
+
 struct WaveRiffSection {
-    uint8_t riff[4];
-    uint32_t riffSize;
-    uint8_t wave[4];
-    uint8_t fmt[4];
-    uint32_t fmtSize;
-    uint16_t fmtType;
-    uint16_t fmtChannelCount;
-    uint32_t fmtSamplingRate;
-    uint32_t fmtSamplesPerSec;
-    uint16_t fmtSamplingSize;
-    uint16_t fmtBitCount;
+    std::uint8_t riff[4];
+    std::uint32_t riffSize;
+    std::uint8_t wave[4];
+    std::uint8_t fmt[4];
+    std::uint32_t fmtSize;
+    std::uint16_t fmtType;
+    std::uint16_t fmtChannelCount;
+    std::uint32_t fmtSamplingRate;
+    std::uint32_t fmtSamplesPerSec;
+    std::uint16_t fmtSamplingSize;
+    std::uint16_t fmtBitCount;
 };
 
 struct WaveSampleSection {
-    uint8_t smpl[4];
-    uint32_t smplSize;
-    uint32_t manufacturer;
-    uint32_t product;
-    uint32_t samplePeriod;
-    uint32_t midiUnityNote;
-    uint32_t midiPitchFraction;
-    uint32_t smpteFormat;
-    uint32_t smpteOffset;
-    uint32_t sampleLoops;
-    uint32_t samplerData;
-    uint32_t loopIdentifier;
-    uint32_t loopType;
-    uint32_t loopStart;
-    uint32_t loopEnd;
-    uint32_t loopFraction;
-    uint32_t loopPlayCount;
+    std::uint8_t smpl[4];
+    std::uint32_t smplSize;
+    std::uint32_t manufacturer;
+    std::uint32_t product;
+    std::uint32_t samplePeriod;
+    std::uint32_t midiUnityNote;
+    std::uint32_t midiPitchFraction;
+    std::uint32_t smpteFormat;
+    std::uint32_t smpteOffset;
+    std::uint32_t sampleLoops;
+    std::uint32_t samplerData;
+    std::uint32_t loopIdentifier;
+    std::uint32_t loopType;
+    std::uint32_t loopStart;
+    std::uint32_t loopEnd;
+    std::uint32_t loopFraction;
+    std::uint32_t loopPlayCount;
 };
 
 struct WaveNoteSection {
-    uint8_t note[4];
-    uint32_t noteSize;
-    uint32_t dwName;
+    std::uint8_t note[4];
+    std::uint32_t noteSize;
+    std::uint32_t dwName;
 };
 
 struct WaveDataSection {
-    uint8_t data[4];
-    uint32_t dataSize;
+    std::uint8_t data[4];
+    std::uint32_t dataSize;
 };
+
+// NOLINTEND(modernize-avoid-c-arrays)
 
 CGSS_NS_END
 

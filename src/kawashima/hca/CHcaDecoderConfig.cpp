@@ -1,11 +1,12 @@
-#include "kawashima/hca/CHcaDecoderConfig.h"
+#include <cstring>
 
 #include "cgss_env_ns.h"
+#include "kawashima/hca/CHcaDecoderConfig.h"
 
 CGSS_NS_BEGIN
 
 CHcaDecoderConfig::CHcaDecoderConfig() {
-    memset(this, 0, sizeof(CHcaDecoderConfig));
+    std::memset(this, 0, sizeof(CHcaDecoderConfig));
 }
 
 CGSS_NS_END

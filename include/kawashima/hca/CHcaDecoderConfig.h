@@ -13,8 +13,6 @@ class CGSS_EXPORT CHcaDecoderConfig final: public HCA_DECODER_CONFIG {
 
 public:
     CHcaDecoderConfig();
-
-    CHcaDecoderConfig(const CHcaDecoderConfig &) = default;
 };
 
 CGSS_NS_END

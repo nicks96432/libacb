@@ -2,6 +2,7 @@
 #define CGSS_ICHINOSE_CUTF_FIELD_H_
 
 #include <cstdint>
+#include <string>
 
 #include "cgss_cdata.h"
 #include "cgss_env.h"
@@ -20,7 +21,7 @@ public:
 
     ~CUtfField();
 
-    void SetName(const char *name);
+    void SetName(const std::string &new_name);
 
     void SetValue(const void *data, std::uint32_t size, std::uint32_t fieldOffset);
 

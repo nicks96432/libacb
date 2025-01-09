@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstdint>
 
 #include "cgss_env_ns.h"
@@ -32,9 +33,9 @@ auto CUtfReader::IsEncrypted() const -> bool_t {
 void CUtfReader::PeekBytes(
     IStream *stream,
     std::uint8_t *buffer,
-    std::uint64_t streamOffset,
-    std::uint32_t size,
-    std::uint64_t utfOffset
+    std::size_t streamOffset,
+    std::size_t size,
+    std::size_t utfOffset
 ) {
     PeekBytes(stream, buffer, 0, streamOffset, size, utfOffset);
 }
@@ -42,10 +43,10 @@ void CUtfReader::PeekBytes(
 void CUtfReader::PeekBytes(
     IStream *stream,
     std::uint8_t *buffer,
-    std::uint64_t bufferOffset,
-    std::uint64_t streamOffset,
-    std::uint32_t size,
-    std::uint64_t utfOffset
+    std::size_t bufferOffset,
+    std::size_t streamOffset,
+    std::size_t size,
+    std::size_t utfOffset
 ) {
     stream->Seek(streamOffset + utfOffset, StreamSeekOrigin::Begin);
 
@@ -70,7 +71,7 @@ void CUtfReader::PeekBytes(
         ++_currentUtfOffset;
     }
 
-    for (std::uint32_t i = 0; i < size; ++i) {
+    for (std::size_t i = 0; i < size; ++i) {
         if (_currentUtfOffset != 0 || i > 0) {
             _currentXor *= _increment;
         }
@@ -79,7 +80,7 @@ void CUtfReader::PeekBytes(
     }
 }
 
-auto CUtfReader::PeekUInt8(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+auto CUtfReader::PeekUInt8(IStream *stream, std::size_t streamOffset, std::size_t utfOffset)
     -> std::uint8_t {
     auto value = CBinaryReader::PeekUInt8(stream, streamOffset + utfOffset);
     if (!IsEncrypted()) {
@@ -105,27 +106,27 @@ auto CUtfReader::PeekUInt8(IStream *stream, std::uint64_t streamOffset, std::uin
     return value;
 }
 
-auto CUtfReader::PeekInt8(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+auto CUtfReader::PeekInt8(IStream *stream, std::size_t streamOffset, std::size_t utfOffset)
     -> std::int8_t {
     const auto u = PeekUInt8(stream, streamOffset, utfOffset);
     return *(std::int8_t *)&u;
 }
 
-auto CUtfReader::PeekSingle(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+auto CUtfReader::PeekSingle(IStream *stream, std::size_t streamOffset, std::size_t utfOffset)
     -> float {
-    const auto i = PeekInt32(stream, streamOffset, utfOffset);
-    return *(float *)&i;
+    std::int32_t i = PeekInt32(stream, streamOffset, utfOffset);
+    return std::bit_cast<float>(i);
 }
 
-auto CUtfReader::PeekDouble(IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset)
+auto CUtfReader::PeekDouble(IStream *stream, std::size_t streamOffset, std::size_t utfOffset)
     -> double {
-    const auto i = PeekInt64(stream, streamOffset, utfOffset);
-    return *(double *)&i;
+    std::int64_t i = PeekInt64(stream, streamOffset, utfOffset);
+    return std::bit_cast<double>(i);
 }
 
 #define PEEK_FUNC(bit, u, U)                                                  \
     auto CUtfReader::Peek##U##Int##bit(                                       \
-        IStream *stream, std::uint64_t streamOffset, std::uint64_t utfOffset  \
+        IStream *stream, std::size_t streamOffset, std::size_t utfOffset      \
     )                                                                         \
         ->u##int##bit##_t {                                                   \
         std::array<std::uint8_t, ((bit) / 8)> temp;                           \
@@ -133,7 +134,7 @@ auto CUtfReader::PeekDouble(IStream *stream, std::uint64_t streamOffset, std::ui
         if (CBitConverter::IsLittleEndian()) {                                \
             std::reverse(temp.begin(), temp.end());                           \
         }                                                                     \
-        return CBitConverter::To##U##Int##bit(temp.data());                          \
+        return CBitConverter::To##U##Int##bit(temp.data());                   \
     }
 
 PEEK_FUNC(16, , )

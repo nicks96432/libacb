@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <cstring>
 
 #include "cgss_env_ns.h"
 
@@ -85,7 +84,7 @@ void CHcaAth::Init1(std::uint32_t key) {
     for (std::uint32_t i = 0, v = 0; i < _table.size(); i++, v += key) {
         std::uint32_t index = v >> 13;
         if (index >= 0x28E) {
-            std::fill(_table.begin() + i, _table.end(), 0xFF);
+            std::fill(_table.begin() + i, _table.end(), std::uint8_t{0xFF});
             break;
         }
         _table[i] = list[index];

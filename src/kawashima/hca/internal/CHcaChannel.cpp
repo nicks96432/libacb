@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <tuple>
 
 #include "cgss_env_ns.h"
 
@@ -11,7 +13,7 @@
 CGSS_NS_BEGIN
 
 CHcaChannel::CHcaChannel() {
-    memset(this, 0, sizeof(CHcaChannel));
+    std::memset(this, 0, sizeof(CHcaChannel));
 }
 
 void CHcaChannel::Decode1(
@@ -105,7 +107,7 @@ void CHcaChannel::Decode1(
         }
         inst->scale[i] = (std::int8_t)v;
     }
-    std::fill(inst->scale.begin() + inst->count, inst->scale.end(), 0);
+    std::fill(inst->scale.begin() + inst->count, inst->scale.end(), std::int8_t{0});
     for (std::uint32_t i = 0; i < inst->count; i++) {
         inst->base[i] = valueFloat[inst->value[i]] * scaleFloat[inst->scale[i]];
     }
@@ -158,7 +160,7 @@ void CHcaChannel::Decode2(CHcaChannel *inst, CHcaData *data) {
         }
         inst->block[i] = inst->base[i] * f;
     }
-    std::fill(inst->block.begin() + inst->count, inst->block.end(), 0);
+    std::fill(inst->block.begin() + inst->count, inst->block.end(), float{0.0f});
 }
 
 void CHcaChannel::Decode3(
@@ -410,12 +412,14 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
     // clang-format on
 
     {
-        float *s = inst->block.begin();
-        float *d = inst->wav1.begin();
-        for (std::int32_t i = 0, count1 = 1, count2 = 0x40; i < list1Int.size();
+        auto s = inst->block.begin();
+        auto d = inst->wav1.begin();
+        for (auto [i, count1, count2] =
+                 std::tuple{std::size_t{0}, std::int32_t{1}, std::int32_t{0x40}};
+             i < list1Int.size();
              i++, count1 <<= 1, count2 >>= 1) {
-            float *d1 = d;
-            float *d2 = &d[count2];
+            auto d1 = d;
+            auto d2 = d + count2;
             for (std::int32_t j = 0; j < count1; j++) {
                 for (std::int32_t k = 0; k < count2; k++) {
                     float a = *(s++);
@@ -426,23 +430,25 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
                 d1 += count2;
                 d2 += count2;
             }
-            float *w = s - 0x80;
-            s        = d;
-            d        = w;
+            auto w = s - inst->block.size();
+            s      = d;
+            d      = w;
         }
     }
 
     {
-        float *s = inst->wav1.begin();
-        float *d = inst->block.begin();
-        for (std::int32_t i = 0, count1 = 0x40, count2 = 1; i < list1Int.size();
+        auto s = inst->wav1.begin();
+        auto d = inst->block.begin();
+        for (auto [i, count1, count2] =
+                 std::tuple{std::size_t{0}, std::int32_t{0x40}, std::int32_t{1}};
+             i < list1Int.size();
              i++, count1 >>= 1, count2 <<= 1) {
             auto *list1Float = reinterpret_cast<const float *>(list1Int[i].data());
             auto *list2Float = reinterpret_cast<const float *>(list2Int[i].data());
-            float *sa1       = s;
-            float *sa2       = &sa1[count2];
-            float *d1        = d;
-            float *d2        = &d1[count2 * 2 - 1];
+            auto sa1         = s;
+            auto sa2         = sa1 + count2;
+            auto d1          = d;
+            auto d2          = d1 + count2 * 2 - 1;
             for (std::int32_t j = 0; j < count1; j++) {
                 for (std::int32_t k = 0; k < count2; k++) {
                     float fa = *(sa1++);
@@ -457,9 +463,7 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
                 d1 += count2;
                 d2 += count2 * 3;
             }
-            float *w = s;
-            s        = d;
-            d        = w;
+            std::swap(s, d);
         }
         d = inst->wav2.begin();
         for (std::int32_t i = 0; i < 0x80; i++) {
@@ -467,24 +471,26 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
         }
     }
 
-    const auto *s = reinterpret_cast<const float *>(list3Int.begin());
-    float *d      = inst->wave[index].begin();
-    float *s1     = &inst->wav2[inst->wav2.size() / 2];
-    float *s2     = inst->wav3.begin();
+    {
+        const auto *s = reinterpret_cast<const float *>(list3Int.data());
+        auto d        = inst->wave[index].begin();
+        auto s1       = inst->wav2.begin() + inst->wav2.size() / 2;
+        auto s2       = inst->wav3.begin();
 
-    for (std::int32_t i = 0; i < list3Int.size() / 2; i++) {
-        *(d++) = *(s1++) * *(s++) + *(s2++);
-    }
-    for (std::int32_t i = 0; i < list3Int.size() / 2; i++) {
-        *(d++) = *(s++) * *(--s1) - *(s2++);
-    }
-    s1 = &inst->wav2[inst->wav2.size() / 2 - 1];
-    s2 = inst->wav3.begin();
-    for (std::int32_t i = 0; i < list3Int.size() / 2; i++) {
-        *(s2++) = *(s1--) * *(--s);
-    }
-    for (std::int32_t i = 0; i < list3Int.size() / 2; i++) {
-        *(s2++) = *(--s) * *(++s1);
+        for (std::size_t i = 0; i < list3Int.size() / 2; ++i) {
+            *(d++) = *(s1++) * *(s++) + *(s2++);
+        }
+        for (std::size_t i = 0; i < list3Int.size() / 2; ++i) {
+            *(d++) = *(s++) * *(--s1) - *(s2++);
+        }
+        s1 = inst->wav2.begin() + inst->wav2.size() / 2 - 1;
+        s2 = inst->wav3.begin();
+        for (std::size_t i = 0; i < list3Int.size() / 2; ++i) {
+            *(s2++) = *(s1--) * *(--s);
+        }
+        for (std::size_t i = 0; i < list3Int.size() / 2; ++i) {
+            *(s2++) = *(--s) * *(++s1);
+        }
     }
 }
 

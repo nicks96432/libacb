@@ -1,7 +1,7 @@
-#include <cinttypes>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <format>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -10,7 +10,7 @@
 #include "cgss_cenum.h"
 #include "cgss_env.h"
 #include "cgss_env_ns.h"
-#include "common/type_traits.h"
+#include "cgss_env_platform.h"
 #include "ichinose/CAcbFile.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CAfs2Archive.h"
@@ -30,10 +30,10 @@ static const std::string &DefaultBinaryFileExtension = DEFAULT_BINARY_FILE_EXTEN
 
 static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string;
 
-template<typename T, typename TNumber = typename std::enable_if<is_numeric<T>::value, T>::type>
+template<typename T>
 auto GetFieldValueAsNumber(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, T *result
-) -> bool_t;
+) -> bool_t requires(std::is_arithmetic_v<T>);
 
 auto GetFieldValueAsString(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, std::string &s
@@ -106,7 +106,15 @@ void CAcbFile::InitializeCueList() {
         cue.isWaveformIdentified = FALSE;
         GetFieldValueAsNumber(cueTable, i, "CueId", &cue.cueId);
         GetFieldValueAsNumber(cueTable, i, "ReferenceType", &cue.referenceType);
+
+#ifdef __CGSS_OS_WINDOWS__
+#pragma warning(push)
+#pragma warning(disable: 4366)
+#endif
         GetFieldValueAsNumber(cueTable, i, "ReferenceIndex", &cue.referenceIndex);
+#ifdef __CGSS_OS_WINDOWS__
+#pragma warning(pop)
+#endif
 
         switch (cue.referenceType) {
         case 2:
@@ -248,11 +256,11 @@ void CAcbFile::InitializeTrackList() {
     tracks.reserve(trackCount);
 
     for (std::uint32_t i = 0; i < trackCount; ++i) {
-        ACB_TRACK_RECORD track = {0};
+        ACB_TRACK_RECORD track = {};
 
         track.isWaveformIdentified = FALSE;
         track.trackIndex           = i;
-        track.synthIndex           = track.trackIndex;
+        track.synthIndex           = static_cast<std::uint16_t>(track.trackIndex);
 
         const auto &synthRow    = synthRows[i];
         UTF_FIELD *refItemField = nullptr;
@@ -498,11 +506,7 @@ auto CAcbFile::GetSymbolicFileNameHintByCueId(std::uint32_t cueId) const -> std:
 }
 
 auto CAcbFile::GetSymbolicFileBaseNameByCueId(std::uint32_t cueId) -> std::string {
-    char buffer[256] = {0};
-
-    std::sprintf(buffer, "cue_%06" PRIu32, cueId);
-
-    return {buffer};
+    return std::format("cue_{:06d}", cueId);
 }
 
 auto CAcbFile::GetSymbolicFileNameHintByTrackIndex(std::uint32_t trackIndex) const -> std::string {
@@ -515,17 +519,13 @@ auto CAcbFile::GetSymbolicFileNameHintByTrackIndex(std::uint32_t trackIndex) con
 }
 
 auto CAcbFile::GetSymbolicFileBaseNameByTrackIndex(std::uint32_t trackIndex) -> std::string {
-    char buffer[256] = {0};
-
-    std::sprintf(buffer, "track_%06" PRIu32, trackIndex);
-
-    return std::string(buffer);
+    return std::format("track_{:06d}", trackIndex);
 }
 
 auto CAcbFile::GetCueNameByCueId(std::uint32_t cueId) const -> std::string {
     for (const auto &cue : _cues) {
         if (cue.waveformId == cueId) {
-            return std::string(cue.cueName);
+            return {cue.cueName};
         }
     }
 
@@ -538,7 +538,7 @@ auto CAcbFile::GetCueNameByTrackIndex(std::uint32_t trackIndex) const -> std::st
     if (track != nullptr) {
         for (const auto &cue : _cues) {
             if (cue.waveformId == track->waveformId) {
-                return std::string(cue.cueName);
+                return {cue.cueName};
             }
         }
     }
@@ -784,7 +784,7 @@ auto CAcbFile::GetFileExtensionHintByCueId(std::uint32_t cueId) const -> std::st
     const auto cue = GetCueRecordByCueId(cueId);
 
     if (cue == nullptr) {
-        return std::string();
+        return "";
     } else {
         return GetExtensionForEncodeType(cue->encodeType);
     }
@@ -795,7 +795,7 @@ auto CAcbFile::GetFileExtensionHintByWaveformFileName(const char *waveformFileNa
     const auto cue = GetCueRecordByWaveformFileName(waveformFileName);
 
     if (cue == nullptr) {
-        return std::string();
+        return "";
     } else {
         return GetExtensionForEncodeType(cue->encodeType);
     }
@@ -928,20 +928,16 @@ static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string {
         break;
     }
 
-    char buffer[20] = {0};
-    std::sprintf(
-        buffer, ".et-%" PRId32 DEFAULT_BINARY_FILE_EXTENSION, static_cast<int32_t>(encodeType)
-    );
-
-    return {buffer};
+    return std::format(".et-{:d}", encodeType);
 }
 
-template<typename T, typename TNumber>
+template<typename T>
 auto GetFieldValueAsNumber(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, T *result
-) -> bool_t {
+) -> bool_t requires(std::is_arithmetic_v<T>)
+{
     if (result) {
-        std::memset(result, 0, sizeof(TNumber));
+        std::memset(result, 0, sizeof(T));
     }
 
     auto &rows = table->GetRows();
@@ -957,34 +953,34 @@ auto GetFieldValueAsNumber(
             if (result) {
                 switch (field->type) {
                 case CGSS_UTF_COLUMN_TYPE_U8:
-                    *result = field->value.u8;
+                    *result = static_cast<T>(field->value.u8);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_S8:
-                    *result = field->value.s8;
+                    *result = static_cast<T>(field->value.s8);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_U16:
-                    *result = field->value.u16;
+                    *result = static_cast<T>(field->value.u16);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_S16:
-                    *result = field->value.s16;
+                    *result = static_cast<T>(field->value.s16);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_U32:
-                    *result = field->value.u32;
+                    *result = static_cast<T>(field->value.u32);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_S32:
-                    *result = field->value.s32;
+                    *result = static_cast<T>(field->value.s32);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_U64:
-                    *result = field->value.u64;
+                    *result = static_cast<T>(field->value.u64);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_S64:
-                    *result = field->value.s64;
+                    *result = static_cast<T>(field->value.s64);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_R32:
-                    *result = field->value.r32;
+                    *result = static_cast<T>(field->value.r32);
                     break;
                 case CGSS_UTF_COLUMN_TYPE_R64:
-                    *result = field->value.r64;
+                    *result = static_cast<T>(field->value.r64);
                     break;
                 default:
                     throw CInvalidOperationException(

@@ -10,18 +10,18 @@
 
 CGSS_NS_BEGIN
 
-class CGSS_EXPORT CInvalidOperationException: public CException {
+class CInvalidOperationException: public CException {
 
     __extends(CException, CInvalidOperationException);
 
 public:
-    CInvalidOperationException() noexcept;
+    CGSS_EXPORT CInvalidOperationException() noexcept;
 
-    CInvalidOperationException(const CInvalidOperationException &) noexcept;
+    CGSS_EXPORT CInvalidOperationException(const CInvalidOperationException &) noexcept;
 
-    explicit CInvalidOperationException(const char *message) noexcept;
+    CGSS_EXPORT explicit CInvalidOperationException(const char *message) noexcept;
 
-    explicit CInvalidOperationException(const std::string &message) noexcept;
+    CGSS_EXPORT explicit CInvalidOperationException(const std::string &message) noexcept;
 };
 
 CGSS_NS_END

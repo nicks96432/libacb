@@ -17,8 +17,6 @@ class CGSS_EXPORT CHcaCipherConfig final: public HCA_CIPHER_CONFIG {
 public:
     CHcaCipherConfig();
 
-    CHcaCipherConfig(const CHcaCipherConfig &) = default;
-
     explicit CHcaCipherConfig(HcaCipherType cipherType);
 
     CHcaCipherConfig(std::uint32_t key1, std::uint32_t key2);
@@ -30,7 +28,7 @@ public:
     CHcaCipherConfig(std::uint64_t key, std::uint16_t keyModifier);
 
 private:
-    void Initialize(std::uint32_t key1, std::uint32_t key2, std::uint16_t keyModifier);
+    void Initialize(std::uint32_t key1, std::uint32_t key2, std::uint16_t modifier);
 };
 
 CGSS_NS_END

@@ -20,54 +20,53 @@ public:
 
     CBinaryWriter(const CBinaryWriter &) = delete;
 
-    auto WriteInt8(std::int8_t v) -> std::uint32_t;
+    auto WriteInt8(std::int8_t v) -> std::size_t;
 
-    auto WriteUInt8(std::uint8_t v) -> std::uint32_t;
+    auto WriteUInt8(std::uint8_t v) -> std::size_t;
 
-    auto WriteInt16LE(std::int16_t v) -> std::uint32_t;
+    auto WriteInt16LE(std::int16_t v) -> std::size_t;
 
-    auto WriteInt16BE(std::int16_t v) -> std::uint32_t;
+    auto WriteInt16BE(std::int16_t v) -> std::size_t;
 
-    auto WriteUInt16LE(std::uint16_t v) -> std::uint32_t;
+    auto WriteUInt16LE(std::uint16_t v) -> std::size_t;
 
-    auto WriteUInt16BE(std::uint16_t v) -> std::uint32_t;
+    auto WriteUInt16BE(std::uint16_t v) -> std::size_t;
 
-    auto WriteInt32LE(std::int32_t v) -> std::uint32_t;
+    auto WriteInt32LE(std::int32_t v) -> std::size_t;
 
-    auto WriteInt32BE(std::int32_t v) -> std::uint32_t;
+    auto WriteInt32BE(std::int32_t v) -> std::size_t;
 
-    auto WriteUInt32LE(std::uint32_t v) -> std::uint32_t;
+    auto WriteUInt32LE(std::uint32_t v) -> std::size_t;
 
-    auto WriteUInt32BE(std::uint32_t v) -> std::uint32_t;
+    auto WriteUInt32BE(std::uint32_t v) -> std::size_t;
 
-    auto WriteInt64LE(std::int64_t v) -> std::uint32_t;
+    auto WriteInt64LE(std::int64_t v) -> std::size_t;
 
-    auto WriteInt64BE(std::int64_t v) -> std::uint32_t;
+    auto WriteInt64BE(std::int64_t v) -> std::size_t;
 
-    auto WriteUInt64LE(std::uint64_t v) -> std::uint32_t;
+    auto WriteUInt64LE(std::uint64_t v) -> std::size_t;
 
-    auto WriteUInt64BE(std::uint64_t v) -> std::uint32_t;
+    auto WriteUInt64BE(std::uint64_t v) -> std::size_t;
 
-    auto WriteSingleLE(float v) -> std::uint32_t;
+    auto WriteSingleLE(float v) -> std::size_t;
 
-    auto WriteSingleBE(float v) -> std::uint32_t;
+    auto WriteSingleBE(float v) -> std::size_t;
 
-    auto WriteDoubleLE(double v) -> std::uint32_t;
+    auto WriteDoubleLE(double v) -> std::size_t;
 
-    auto WriteDoubleBE(double v) -> std::uint32_t;
+    auto WriteDoubleBE(double v) -> std::size_t;
 
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override;
+    auto Read(void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto Write(
-        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t override;
+    auto Write(const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto IsWritable() const -> bool_t override;
+    [[nodiscard]] auto IsWritable() const -> bool_t override;
 
-    auto IsReadable() const -> bool_t override;
+    [[nodiscard]] auto IsReadable() const -> bool_t override;
 
-    auto IsSeekable() const -> bool_t override;
+    [[nodiscard]] auto IsSeekable() const -> bool_t override;
 
     auto GetPosition() -> std::uint64_t override;
 

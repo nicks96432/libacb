@@ -3,43 +3,48 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
 
 #include "cgss_cdata.h"
 #include "cgss_env.h"
 #include "cgss_env_ns.h"
+#include "cgss_env_platform.h"
 #include "takamori/streams/IStream.h"
 
 CGSS_NS_BEGIN
 
-class CGSS_EXPORT CAfs2Archive final {
+class CAfs2Archive final {
 
     __root_class(CAfs2Archive);
 
 public:
-    CAfs2Archive(IStream *stream, std::uint64_t offset, const char *fileName, bool_t disposeStream);
+    CGSS_EXPORT CAfs2Archive(
+        IStream *stream, std::uint64_t offset, const std::string &fileName, bool_t disposeStream
+    );
 
-    ~CAfs2Archive();
+    CGSS_EXPORT ~CAfs2Archive();
 
-    static auto IsAfs2Archive(IStream *stream, std::uint64_t offset) -> bool_t;
+    CGSS_EXPORT static auto IsAfs2Archive(IStream *stream, std::uint64_t offset) -> bool_t;
 
-    auto GetFiles() const -> const std::map<std::uint32_t, AFS2_FILE_RECORD> &;
+    [[nodiscard]] CGSS_EXPORT auto
+    GetFiles() const -> const std::map<std::uint32_t, AFS2_FILE_RECORD> &;
 
-    auto GetStream() const -> IStream *;
+    [[nodiscard]] CGSS_EXPORT auto GetStream() const -> IStream *;
 
-    auto GetByteAlignment() const -> std::uint32_t;
+    [[nodiscard]] CGSS_EXPORT auto GetByteAlignment() const -> std::uint32_t;
 
-    auto GetVersion() const -> std::uint32_t;
+    [[nodiscard]] CGSS_EXPORT auto GetVersion() const -> std::uint32_t;
 
-    auto GetHcaKeyModifier() const -> std::uint16_t;
+    [[nodiscard]] CGSS_EXPORT auto GetHcaKeyModifier() const -> std::uint16_t;
 
-    auto GetFileName() const -> const char *;
+    [[nodiscard]] CGSS_EXPORT auto GetFileName() const -> const std::string &;
 
 private:
     void Initialize();
 
     IStream *_stream;
     std::uint64_t _streamOffset;
-    char *_fileName;
+    std::string _fileName;
     bool_t _disposeStream;
 
     std::map<std::uint32_t, AFS2_FILE_RECORD> _files;

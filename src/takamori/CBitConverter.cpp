@@ -1,3 +1,4 @@
+#include <bit>
 #include <cstdint>
 
 #include "cgss_env.h"
@@ -27,13 +28,11 @@ auto CBitConverter::IsLittleEndian() -> bool_t {
 }
 
 auto CBitConverter::ToSingle(const void *p) -> float {
-    const auto v = ToInt32(p);
-    return *(float *)&v;
+    return std::bit_cast<float>(ToInt32(p));
 }
 
 auto CBitConverter::ToDouble(const void *p) -> double {
-    const auto v = ToInt64(p);
-    return *(double *)&v;
+    return std::bit_cast<double>(ToInt64(p));
 }
 
 #define TO_INT(bit, u, U)                                                      \

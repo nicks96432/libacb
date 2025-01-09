@@ -34,7 +34,7 @@ CHcaCipher::CHcaCipher() {
 }
 
 CHcaCipher::CHcaCipher(const HCA_CIPHER_CONFIG &config) {
-    CHcaCipherConfig cfg(config.key, config.keyModifier);
+    CHcaCipherConfig cfg(config.key.key, config.keyModifier);
     Init(cfg);
 }
 
@@ -51,13 +51,13 @@ CHcaCipher::CHcaCipher(const CHcaCipher &other) {
 auto CHcaCipher::Init(const CHcaCipherConfig &config) -> bool_t {
     auto type = static_cast<HcaCipherType>(config.cipherType);
 
-    if (config.key == 0 && type == HcaCipherType::WithKey) {
+    if (config.key.key == 0 && type == HcaCipherType::WithKey) {
         type = HcaCipherType::NoCipher;
     }
 
-    std::uint32_t key1 = config.keyParts.key1, key2 = config.keyParts.key2;
+    std::uint32_t key1 = config.key.keyParts.key1, key2 = config.key.keyParts.key2;
 
-    if (config.key != 0 && type == HcaCipherType::WithKey && config.keyModifier) {
+    if (config.key.key != 0 && type == HcaCipherType::WithKey && config.keyModifier) {
         TransformKey(key1, key2, config.keyModifier, &key1, &key2);
     }
 
@@ -156,7 +156,7 @@ void CHcaCipher::Init56(std::uint32_t key1, std::uint32_t key2) {
     }
 
     // Generate CIPH table
-    t = &_decryptTable[1];
+    t = _decryptTable.begin() + 1;
     for (std::uint32_t i = 0, v = 0; i < TableSize; i++) {
         v              = (v + 0x11u) & 0xFFu;
         std::uint8_t a = t3[v];

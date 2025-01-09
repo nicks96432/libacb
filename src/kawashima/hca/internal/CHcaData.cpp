@@ -1,4 +1,5 @@
 #include <array>
+#include <cstddef>
 #include <cstdint>
 
 #include "cgss_env_ns.h"
@@ -15,18 +16,17 @@ CHcaData::CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::uint32_t siz
 }
 
 auto CHcaData::CheckBit(std::int32_t bitSize) -> std::int32_t {
-#define SAFE_ACCESS(array, length, index) \
-    ((0 <= (index) && (index) < (length)) ? (array)[(index)] : 0)
+#define SAFE_ACCESS(array, length, index) (((index) < (length)) ? (array)[(index)] : 0)
 
     std::int32_t v = 0;
     if (_bit + bitSize <= _size) {
         static std::array<std::int32_t, 8> mask = {
             0xFFFFFF, 0x7FFFFF, 0x3FFFFF, 0x1FFFFF, 0x0FFFFF, 0x07FFFF, 0x03FFFF, 0x01FFFF
         };
-        std::int32_t i = _bit >> 3;
-        v              = SAFE_ACCESS(_data, _dataSize, i);
-        v              = (v << 8) | SAFE_ACCESS(_data, _dataSize, i + 1);
-        v              = (v << 8) | SAFE_ACCESS(_data, _dataSize, i + 2);
+        std::size_t i = _bit >> 3;
+        v             = SAFE_ACCESS(_data, _dataSize, i);
+        v             = (v << 8) | SAFE_ACCESS(_data, _dataSize, i + 1);
+        v             = (v << 8) | SAFE_ACCESS(_data, _dataSize, i + 2);
         v &= mask[_bit & 7];
         v >>= 24 - (_bit & 7) - bitSize;
     }

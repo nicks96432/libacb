@@ -48,31 +48,30 @@ CFileStream::~CFileStream() {
     _fp = nullptr;
 }
 
-auto CFileStream::Read(
-    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+auto CFileStream::Read(void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+    -> std::size_t {
     if (!buffer) {
         throw CArgumentException("FileStream::Read()");
     }
     if (!IsReadable()) {
         throw CInvalidOperationException("FileStream::Read()");
     }
-    const auto actualCount = std::min(static_cast<std::uint32_t>(bufferSize - offset), count);
+    const auto actualCount = std::min(bufferSize - offset, count);
     const auto byteBuffer  = static_cast<std::uint8_t *>(buffer);
     const auto actualRead  = std::fread(byteBuffer + offset, 1, actualCount, _fp);
-    return static_cast<std::uint32_t>(actualRead);
+    return actualRead;
 }
 
 auto CFileStream::Write(
-    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+    const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+) -> std::size_t {
     if (!buffer) {
         throw CArgumentException("FileStream::Write()");
     }
     if (!IsWritable()) {
         throw CInvalidOperationException("FileStream::Write()");
     }
-    const auto actualCount = std::min(static_cast<std::uint32_t>(bufferSize - offset), count);
+    const auto actualCount = std::min(bufferSize - offset, count);
     const auto byteBuffer  = static_cast<const std::uint8_t *>(buffer);
     std::fwrite(byteBuffer + offset, 1, actualCount, _fp);
     return actualCount;

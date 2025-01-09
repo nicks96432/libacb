@@ -1,3 +1,8 @@
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -23,11 +28,15 @@ class NullHcaReader final: public CHcaFormatReader {
     __extends(CHcaFormatReader, NullHcaReader);
 
 public:
-    explicit NullHcaReader(IStream *baseStream): MyBase(baseStream) {}
+    explicit NullHcaReader(IStream *baseStream): MyBase{baseStream} {}
 
 private:
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override {
+    auto Read(
+        [[maybe_unused]] void *buffer,
+        [[maybe_unused]] std::size_t bufferSize,
+        [[maybe_unused]] std::size_t offset,
+        [[maybe_unused]] std::size_t count
+    ) -> std::size_t override {
         return 0;
     }
 
@@ -35,19 +44,18 @@ private:
         return 0;
     }
 
-    void SetPosition(std::uint64_t value) override {}
+    void SetPosition([[maybe_unused]] std::uint64_t value) override {}
 
     auto GetLength() -> std::uint64_t override {
         return 0;
     }
 };
 
-CHcaFormatReader::CHcaFormatReader(IStream *baseStream): _baseStream(baseStream) {
-    memset(&_hcaInfo, 0, sizeof(HCA_INFO));
+CHcaFormatReader::CHcaFormatReader(IStream *baseStream): _hcaInfo{}, _baseStream{baseStream} {
     Initialize();
 }
 
-const std::uint16_t *CHcaFormatReader::ChecksumTable = new std::uint16_t[256]{
+constexpr std::array<std::uint16_t, 256> CHcaFormatReader::ChecksumTable = {
     0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011, 0x8033, 0x0036, 0x003C, 0x8039,
     0x0028, 0x802D, 0x8027, 0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D, 0x8077, 0x0072,
     0x0050, 0x8055, 0x805F, 0x005A, 0x804B, 0x004E, 0x0044, 0x8041, 0x80C3, 0x00C6, 0x00CC, 0x80C9,
@@ -83,25 +91,25 @@ auto CHcaFormatReader::ComputeChecksum(
 }
 
 auto CHcaFormatReader::GetHcaInfo() const -> const HCA_INFO & {
-    return _hcaInfo;
+    return this->_hcaInfo;
 }
 
 void CHcaFormatReader::GetHcaInfo(HCA_INFO &info) const {
-    memcpy(&info, &_hcaInfo, sizeof(HCA_INFO));
+    info = this->_hcaInfo;
 }
 
 void CHcaFormatReader::GetHcaInfo(HCA_INFO *pInfo) const {
     if (!pInfo) {
         return;
     }
-    memcpy(pInfo, &_hcaInfo, sizeof(HCA_INFO));
+    std::memcpy(pInfo, &_hcaInfo, sizeof(HCA_INFO));
 }
 
 void CHcaFormatReader::Initialize() {
     auto stream   = _baseStream;
     auto &hcaInfo = _hcaInfo;
-    std::uint32_t bufferSize;
-    std::uint32_t actualRead;
+    std::size_t bufferSize;
+    std::size_t actualRead;
 
 #define ENSURE_READ_ALL(var)                                    \
     bufferSize = sizeof(var);                                   \
@@ -134,7 +142,7 @@ void CHcaFormatReader::Initialize() {
         hcaInfo.dataOffset        = dataOffset;
 
         // Read the whole headers section and verify checksum.
-        auto *headerContents = new uint8_t[dataOffset];
+        auto *headerContents = new std::uint8_t[dataOffset];
         stream->Seek(0, StreamSeekOrigin::Begin);
         ENSURE_READ_ALL_BUFFER(headerContents, dataOffset);
         const auto headerChecksum = ComputeChecksum(headerContents, dataOffset, 0);
@@ -180,12 +188,10 @@ void CHcaFormatReader::Initialize() {
             hcaInfo.compR06   = hcaCompressHeader.r06;
             hcaInfo.compR07   = hcaCompressHeader.r07;
             hcaInfo.compR08   = hcaCompressHeader.r08;
-            if (!((hcaInfo.blockSize >= 8 && hcaInfo.blockSize <= 0xFFFF) ||
-                  (hcaInfo.blockSize == 0))) {
+            if (!((hcaInfo.blockSize >= 8) || (hcaInfo.blockSize == 0))) {
                 throw CFormatException("Block size is out of range.");
             }
-            if (!(hcaInfo.compR01 >= 0 && hcaInfo.compR01 <= hcaInfo.compR02 &&
-                  hcaInfo.compR02 <= 0x1f)) {
+            if (!(hcaInfo.compR01 <= hcaInfo.compR02 && hcaInfo.compR02 <= 0x1f)) {
                 throw CFormatException("Compression: r-fields are out of range.");
             }
         } else if (areMagicMatch(magic, Magic::DECODE)) {
@@ -246,8 +252,7 @@ void CHcaFormatReader::Initialize() {
             hcaInfo.loopEnd    = bswap(hcaLoopHeader.loopEnd);
             hcaInfo.loopR01    = bswap(hcaLoopHeader.r01);
             hcaInfo.loopR02    = bswap(hcaLoopHeader.r02);
-            if (!(0 <= hcaInfo.loopStart && hcaInfo.loopStart <= hcaInfo.loopEnd &&
-                  hcaInfo.loopEnd < hcaInfo.blockCount)) {
+            if (!(hcaInfo.loopStart <= hcaInfo.loopEnd && hcaInfo.loopEnd < hcaInfo.blockCount)) {
                 throw CFormatException("Loop information is invalid.");
             }
         } else {
@@ -293,12 +298,12 @@ void CHcaFormatReader::Initialize() {
     {
         CBinaryReader binaryReader(stream);
         auto magic = binaryReader.PeekUInt32LE();
-        memset(hcaInfo.comment, 0, 0x100);
+        std::memset(hcaInfo.comment, 0, sizeof(hcaInfo.comment));
         if (areMagicMatch(magic, Magic::COMMENT)) {
             HCA_COMMENT_HEADER hcaCommentHeader;
             ENSURE_READ_ALL(hcaCommentHeader);
             hcaInfo.commentLength = hcaCommentHeader.length;
-            strncpy(hcaInfo.comment, hcaCommentHeader.comment, hcaInfo.commentLength);
+            std::strncpy(hcaInfo.comment, hcaCommentHeader.comment, hcaInfo.commentLength);
         } else {
             hcaInfo.commentLength = 0;
         }
@@ -333,13 +338,16 @@ void CHcaFormatReader::Flush() {
     throw CInvalidOperationException();
 }
 
-void CHcaFormatReader::SetLength(std::uint64_t value) {
+void CHcaFormatReader::SetLength([[maybe_unused]] std::uint64_t value) {
     throw CInvalidOperationException();
 }
 
 auto CHcaFormatReader::Write(
-    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+    [[maybe_unused]] const void *buffer,
+    [[maybe_unused]] std::size_t bufferSize,
+    [[maybe_unused]] std::size_t offset,
+    [[maybe_unused]] std::size_t count
+) -> std::size_t {
     throw CInvalidOperationException();
 }
 

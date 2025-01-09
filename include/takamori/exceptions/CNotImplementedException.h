@@ -10,18 +10,18 @@
 
 CGSS_NS_BEGIN
 
-class CGSS_EXPORT CNotImplementedException: public CException {
+class CNotImplementedException: public CException {
 
     __extends(CException, CNotImplementedException);
 
 public:
-    CNotImplementedException() noexcept;
+    CGSS_EXPORT CNotImplementedException() noexcept;
 
-    CNotImplementedException(const CNotImplementedException &) noexcept;
+    CGSS_EXPORT CNotImplementedException(const CNotImplementedException &) noexcept;
 
-    explicit CNotImplementedException(const char *message) noexcept;
+    CGSS_EXPORT explicit CNotImplementedException(const char *message) noexcept;
 
-    explicit CNotImplementedException(const std::string &message) noexcept;
+    CGSS_EXPORT explicit CNotImplementedException(const std::string &message) noexcept;
 };
 
 CGSS_NS_END

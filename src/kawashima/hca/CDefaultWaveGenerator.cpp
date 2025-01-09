@@ -39,18 +39,19 @@ auto CDefaultWaveGenerator::Decode24BitS(
     } b24;
 
     typedef union _b32 {
-        struct {
+        struct _Inner {
             b24 v;
             std::uint8_t a;
         };
 
+        _Inner inner;
         std::int32_t dummy;
     } b32;
 
     b32 v;
     auto i                    = (std::int32_t)(data * 0x7fffff);
     v.dummy                   = i;
-    *(b24 *)(buffer + cursor) = v.v;
+    *(b24 *)(buffer + cursor) = v.inner.v;
     return cursor + 3;
 }
 

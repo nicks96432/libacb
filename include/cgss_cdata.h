@@ -54,14 +54,14 @@ struct AFS2_FILE_RECORD {
 
 struct HCA_CIPHER_CONFIG {
 
-    union {
-        struct {
+    union Key {
+        struct KeyParts {
             std::uint32_t key2;
             std::uint32_t key1;
         } keyParts;
 
         std::uint64_t key;
-    };
+    } key;
 
     CGSS_HCA_CIPHER_TYPE cipherType;
 

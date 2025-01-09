@@ -1,0 +1,5 @@
+If:
+  PathMatch: .*\.(cpp|h)
+
+CompileFlags:
+  Add: [-I./libcgss/include, -std=c++20]

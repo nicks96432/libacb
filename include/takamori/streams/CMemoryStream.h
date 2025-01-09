@@ -36,18 +36,17 @@ public:
 
     ~CMemoryStream() override;
 
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override;
+    auto Read(void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto Write(
-        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t override;
+    auto Write(const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto IsWritable() const -> bool_t override;
+    [[nodiscard]] auto IsWritable() const -> bool_t override;
 
-    auto IsReadable() const -> bool_t override;
+    [[nodiscard]] auto IsReadable() const -> bool_t override;
 
-    auto IsSeekable() const -> bool_t override;
+    [[nodiscard]] auto IsSeekable() const -> bool_t override;
 
     auto GetPosition() -> std::uint64_t override;
 
@@ -59,20 +58,20 @@ public:
 
     void Flush() override;
 
-    virtual auto GetCapacity() const -> std::uint64_t;
+    [[nodiscard]] virtual auto GetCapacity() const -> std::uint64_t;
 
     virtual void SetCapacity(std::uint64_t value);
 
     virtual void TrimExcess();
 
-    virtual auto GetBuffer() const -> std::uint8_t *;
+    [[nodiscard]] virtual auto GetBuffer() const -> std::uint8_t *;
 
     virtual auto ToArray() -> const std::uint8_t *;
 
 private:
-    auto IsResizable() const -> bool_t;
+    [[nodiscard]] auto IsResizable() const -> bool_t;
 
-    auto IsExternalBuffer() const -> bool_t;
+    [[nodiscard]] auto IsExternalBuffer() const -> bool_t;
 
     void EnsureCapacity(std::uint64_t requestedLength);
 

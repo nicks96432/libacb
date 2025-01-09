@@ -40,18 +40,17 @@ public:
 
     ~CFileStream() override;
 
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override;
+    auto Read(void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto Write(
-        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t override;
+    auto Write(const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto IsWritable() const -> bool_t override;
+    [[nodiscard]] auto IsWritable() const -> bool_t override;
 
-    auto IsReadable() const -> bool_t override;
+    [[nodiscard]] auto IsReadable() const -> bool_t override;
 
-    auto IsSeekable() const -> bool_t override;
+    [[nodiscard]] auto IsSeekable() const -> bool_t override;
 
     auto GetPosition() -> std::uint64_t override;
 

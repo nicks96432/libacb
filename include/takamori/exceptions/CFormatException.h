@@ -10,18 +10,18 @@
 
 CGSS_NS_BEGIN
 
-class CGSS_EXPORT CFormatException: public CException {
+class CFormatException: public CException {
 
     __extends(CException, CFormatException);
 
 public:
-    CFormatException() noexcept;
+    CGSS_EXPORT CFormatException() noexcept;
 
-    CFormatException(const CFormatException &) noexcept;
+    CGSS_EXPORT CFormatException(const CFormatException &) noexcept;
 
-    explicit CFormatException(const char *message) noexcept;
+    CGSS_EXPORT explicit CFormatException(const char *message) noexcept;
 
-    explicit CFormatException(const std::string &message) noexcept;
+    CGSS_EXPORT explicit CFormatException(const std::string &message) noexcept;
 };
 
 CGSS_NS_END

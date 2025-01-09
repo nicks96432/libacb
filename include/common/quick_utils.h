@@ -1,24 +1,17 @@
 #ifndef QUICK_UTILS_H_
 #define QUICK_UTILS_H_
 
+#include <bit>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <type_traits>
 
 #include "cgss_env_ns.h"
 
 CGSS_NS_BEGIN
 
-template<typename T>
-void clone(const T &src, T &dst) {
-    memcpy(&dst, &src, sizeof(T));
-}
-
-template<typename T>
-auto clamp(T value, T min, T max) -> T {
-    return value < min ? min : (value > max ? max : value);
-}
-
-inline auto bswap(std::uint16_t v) -> std::uint16_t {
+inline auto _bswap(std::uint16_t v) -> std::uint16_t {
 #if defined(__GNUC__)
     return __builtin_bswap16(v);
 #elif defined(_MSC_VER)
@@ -32,13 +25,7 @@ inline auto bswap(std::uint16_t v) -> std::uint16_t {
 #endif
 }
 
-inline auto bswap(std::int16_t v) -> std::int16_t {
-    auto v2 = *(std::uint16_t *)&v;
-    v2      = bswap(v2);
-    return *(std::int16_t *)&v2;
-}
-
-inline auto bswap(std::uint32_t v) -> std::uint32_t {
+inline auto _bswap(std::uint32_t v) -> std::uint32_t {
 #if defined(__GNUC__)
     return __builtin_bswap32(v);
 #elif defined(_MSC_VER)
@@ -56,13 +43,7 @@ inline auto bswap(std::uint32_t v) -> std::uint32_t {
 #endif
 }
 
-inline auto bswap(std::int32_t v) -> std::int32_t {
-    auto v2 = *(std::uint32_t *)&v;
-    v2      = bswap(v2);
-    return *(std::int32_t *)&v2;
-}
-
-inline auto bswap(std::uint64_t v) -> std::uint64_t {
+inline auto _bswap(std::uint64_t v) -> std::uint64_t {
 #if defined(__GNUC__)
     return __builtin_bswap64(v);
 #elif defined(_MSC_VER)
@@ -80,20 +61,19 @@ inline auto bswap(std::uint64_t v) -> std::uint64_t {
 #endif
 }
 
-inline auto bswap(std::int64_t v) -> std::int64_t {
-    auto v2 = *(std::uint64_t *)&v;
-    v2      = bswap(v2);
-    return *(std::int64_t *)&v2;
-}
-
-inline auto bswap(float v) -> float {
-    std::uint32_t i = bswap(*(std::uint32_t *)&v);
-    return *(float *)&i;
-}
-
-inline auto bswap(double v) -> double {
-    std::uint64_t i = bswap(*(std::uint64_t *)&v);
-    return *(double *)&i;
+template<typename T>
+[[nodiscard]] inline constexpr auto bswap(T v) -> T
+    requires std::is_arithmetic_v<T> && (sizeof(T) >= 2)
+{
+    if constexpr (sizeof(T) == 8) {
+        return std::bit_cast<T>(_bswap(std::bit_cast<std::uint64_t>(v)));
+    } else if constexpr (sizeof(T) == 4) {
+        return std::bit_cast<T>(_bswap(std::bit_cast<std::uint32_t>(v)));
+    } else if constexpr (sizeof(T) == 2) {
+        return std::bit_cast<T>(_bswap(std::bit_cast<std::uint16_t>(v)));
+    } else {
+        static_assert(false, "Unsupported type");
+    }
 }
 
 inline auto ceil2(std::uint32_t a, std::uint32_t b) -> std::uint32_t {

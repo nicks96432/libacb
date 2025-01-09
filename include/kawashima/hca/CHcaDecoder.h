@@ -1,6 +1,7 @@
 #ifndef CGSS_KAWASHIMA_HCA_CHCADECODER_H_
 #define CGSS_KAWASHIMA_HCA_CHCADECODER_H_
 
+#include <array>
 #include <cstdint>
 #include <map>
 
@@ -16,14 +17,14 @@ class CHcaCipher;
 class CHcaAth;
 class CHcaChannel;
 
-class CGSS_EXPORT CHcaDecoder: public CHcaFormatReader {
+class CHcaDecoder: public CHcaFormatReader {
 
     __extends(CHcaFormatReader, CHcaDecoder);
 
 public:
-    explicit CHcaDecoder(IStream *stream);
+    CGSS_EXPORT explicit CHcaDecoder(IStream *stream);
 
-    CHcaDecoder(IStream *stream, const HCA_DECODER_CONFIG &decoderConfig);
+    CGSS_EXPORT CHcaDecoder(IStream *stream, const HCA_DECODER_CONFIG &decoderConfig);
 
     CHcaDecoder(const CHcaDecoder &) = delete;
 
@@ -33,16 +34,17 @@ public:
 
     auto operator=(CHcaDecoder &&) -> CHcaDecoder & = delete;
 
-    ~CHcaDecoder() override;
+    CGSS_EXPORT ~CHcaDecoder() override;
 
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override;
+    CGSS_EXPORT auto Read(
+        void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+    ) -> std::size_t override;
 
-    auto GetPosition() -> std::uint64_t override;
+    CGSS_EXPORT auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(std::uint64_t value) override;
+    CGSS_EXPORT void SetPosition(std::uint64_t value) override;
 
-    auto GetLength() -> std::uint64_t override;
+    CGSS_EXPORT auto GetLength() -> std::uint64_t override;
 
 private:
     void InitializeExtra();
@@ -89,12 +91,12 @@ private:
 
     std::map<std::uint32_t, const std::uint8_t *> _decodedBlocks;
 
-    static const std::uint32_t ChannelCount = 0x10;
+    static constexpr std::uint32_t ChannelCount = 0x10;
 
     CHcaAth *_ath;
     CHcaCipher *_cipher;
     HCA_DECODER_CONFIG _decoderConfig;
-    CHcaChannel *_channels[ChannelCount];
+    std::array<CHcaChannel *, ChannelCount> _channels;
     std::uint32_t _waveHeaderSize;
     std::uint8_t *_waveHeaderBuffer;
     std::uint32_t _waveBlockSize;

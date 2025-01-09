@@ -1,6 +1,7 @@
 #ifndef CGSS_TAKAMORI_STREAMS_CSTREAM_H_
 #define CGSS_TAKAMORI_STREAMS_CSTREAM_H_
 
+#include <cstddef>
 #include <cstdint>
 
 #include "cgss_env.h"
@@ -19,9 +20,9 @@ public:
 
     void Seek(std::int64_t offset, StreamSeekOrigin origin) override;
 
-    auto ReadByte() -> std::int32_t override;
+    auto ReadByte() -> std::uint8_t override;
 
-    auto WriteByte(std::uint8_t value) -> std::uint32_t override;
+    auto WriteByte(std::uint8_t value) -> std::size_t override;
 
     void CopyTo(IStream &destination) override;
 

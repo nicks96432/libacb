@@ -1,6 +1,7 @@
 #ifndef CGSS_KAWASHIMA_HCA_CHCAFORMATREADER_H_
 #define CGSS_KAWASHIMA_HCA_CHCAFORMATREADER_H_
 
+#include <array>
 #include <cstdint>
 
 #include "cgss_cdata.h"
@@ -10,12 +11,12 @@
 
 CGSS_NS_BEGIN
 
-class CGSS_EXPORT CHcaFormatReader: public CStream {
+class CHcaFormatReader: public CStream {
 
     __extends(CStream, CHcaFormatReader);
 
 public:
-    explicit CHcaFormatReader(IStream *baseStream);
+    CGSS_EXPORT explicit CHcaFormatReader(IStream *baseStream);
 
     CHcaFormatReader(const CHcaFormatReader &) = delete;
 
@@ -26,27 +27,27 @@ public:
      * @param info Retrieved HCA information.
      * @return
      */
-    void GetHcaInfo(HCA_INFO &info) const;
+    CGSS_EXPORT void GetHcaInfo(HCA_INFO &info) const;
 
-    void GetHcaInfo(HCA_INFO *pInfo) const;
+    CGSS_EXPORT void GetHcaInfo(HCA_INFO *pInfo) const;
 
-    auto GetHcaInfo() const -> const HCA_INFO &;
+    [[nodiscard]] CGSS_EXPORT auto GetHcaInfo() const -> const HCA_INFO &;
 
-    auto Write(
-        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t final;
+    CGSS_EXPORT auto Write(
+        const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+    ) -> std::size_t final;
 
-    auto IsWritable() const -> bool_t final;
+    [[nodiscard]] CGSS_EXPORT auto IsWritable() const -> bool_t final;
 
-    auto IsReadable() const -> bool_t final;
+    [[nodiscard]] CGSS_EXPORT auto IsReadable() const -> bool_t final;
 
-    auto IsSeekable() const -> bool_t final;
+    [[nodiscard]] CGSS_EXPORT auto IsSeekable() const -> bool_t final;
 
-    void SetLength(std::uint64_t value) final;
+    CGSS_EXPORT void SetLength(std::uint64_t value) final;
 
-    void Flush() final;
+    CGSS_EXPORT void Flush() final;
 
-    static auto IsPossibleHcaStream(IStream *stream) -> bool_t;
+    CGSS_EXPORT static auto IsPossibleHcaStream(IStream *stream) -> bool_t;
 
 protected:
     static auto
@@ -61,7 +62,7 @@ private:
 
     void PrintHcaInfo();
 
-    static const std::uint16_t *ChecksumTable;
+    static const std::array<std::uint16_t, 256> ChecksumTable;
 };
 
 CGSS_NS_END

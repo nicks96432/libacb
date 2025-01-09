@@ -5,7 +5,7 @@
 
 CGSS_NS_BEGIN
 
-auto CAcbHelper::ExtractToNewStream(IStream *stream, std::uint64_t offset, std::uint32_t size)
+auto CAcbHelper::ExtractToNewStream(IStream *stream, std::size_t offset, std::size_t size)
     -> CMemoryStream * {
     const auto originalPosition = stream->GetPosition();
 

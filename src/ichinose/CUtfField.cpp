@@ -46,8 +46,9 @@ CUtfField::~CUtfField() {
     std::memset(&value, 0, sizeof(value));
 }
 
-void CUtfField::SetName(const char *name) {
-    std::strncpy(this->name, name, UTF_FIELD_MAX_NAME_LEN);
+void CUtfField::SetName(const std::string &new_name) {
+    std::strncpy(this->name, new_name.c_str(), UTF_FIELD_MAX_NAME_LEN);
+    this->name[UTF_FIELD_MAX_NAME_LEN - 1] = '\0';
 }
 
 void CUtfField::ReleaseData() {
@@ -92,7 +93,7 @@ void CUtfField::SetValue(const char *str, std::uint32_t fieldOffset) {
     const auto strLength = std::strlen(str);
 
     value.str = new char[strLength + 1];
-    std::strncpy(value.str, str, strLength);
+    std::memcpy(value.str, str, strLength);
     value.str[strLength] = '\0';
 
     offset = fieldOffset;

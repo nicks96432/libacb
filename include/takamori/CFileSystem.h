@@ -17,17 +17,9 @@ public:
 
     static auto DirectoryExists(const std::string &path) -> bool_t;
 
-    static auto FileExists(const char *path) -> bool_t;
-
-    static auto DirectoryExists(const char *path) -> bool_t;
-
     static auto MkDir(const std::string &path) -> bool_t;
 
-    static auto MkDir(const char *path) -> bool_t;
-
     static auto RmFile(const std::string &path) -> bool_t;
-
-    static auto RmFile(const char *path) -> bool_t;
 };
 
 CGSS_NS_END

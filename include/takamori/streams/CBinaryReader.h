@@ -20,77 +20,77 @@ public:
 
     CBinaryReader(const CBinaryReader &) = delete;
 
-    auto ReadInt8() const -> std::int8_t;
+    [[nodiscard]] auto ReadInt8() const -> std::int8_t;
 
-    auto ReadUInt8() const -> std::uint8_t;
+    [[nodiscard]] auto ReadUInt8() const -> std::uint8_t;
 
-    auto ReadInt16LE() const -> std::int16_t;
+    [[nodiscard]] auto ReadInt16LE() const -> std::int16_t;
 
-    auto ReadInt16BE() const -> std::int16_t;
+    [[nodiscard]] auto ReadInt16BE() const -> std::int16_t;
 
-    auto ReadUInt16LE() const -> std::uint16_t;
+    [[nodiscard]] auto ReadUInt16LE() const -> std::uint16_t;
 
-    auto ReadUInt16BE() const -> std::uint16_t;
+    [[nodiscard]] auto ReadUInt16BE() const -> std::uint16_t;
 
-    auto ReadInt32LE() const -> std::int32_t;
+    [[nodiscard]] auto ReadInt32LE() const -> std::int32_t;
 
-    auto ReadInt32BE() const -> std::int32_t;
+    [[nodiscard]] auto ReadInt32BE() const -> std::int32_t;
 
-    auto ReadUInt32LE() const -> std::uint32_t;
+    [[nodiscard]] auto ReadUInt32LE() const -> std::uint32_t;
 
-    auto ReadUInt32BE() const -> std::uint32_t;
+    [[nodiscard]] auto ReadUInt32BE() const -> std::uint32_t;
 
-    auto ReadInt64LE() const -> std::int64_t;
+    [[nodiscard]] auto ReadInt64LE() const -> std::int64_t;
 
-    auto ReadInt64BE() const -> std::int64_t;
+    [[nodiscard]] auto ReadInt64BE() const -> std::int64_t;
 
-    auto ReadUInt64LE() const -> std::uint64_t;
+    [[nodiscard]] auto ReadUInt64LE() const -> std::uint64_t;
 
-    auto ReadUInt64BE() const -> std::uint64_t;
+    [[nodiscard]] auto ReadUInt64BE() const -> std::uint64_t;
 
-    auto ReadSingleLE() const -> float;
+    [[nodiscard]] auto ReadSingleLE() const -> float;
 
-    auto ReadSingleBE() const -> float;
+    [[nodiscard]] auto ReadSingleBE() const -> float;
 
-    auto ReadDoubleLE() const -> double;
+    [[nodiscard]] auto ReadDoubleLE() const -> double;
 
-    auto ReadDoubleBE() const -> double;
+    [[nodiscard]] auto ReadDoubleBE() const -> double;
 
-    auto ReadInt8(std::uint64_t offset) const -> std::int8_t;
+    [[nodiscard]] auto ReadInt8(std::uint64_t offset) const -> std::int8_t;
 
-    auto ReadUInt8(std::uint64_t offset) const -> std::uint8_t;
+    [[nodiscard]] auto ReadUInt8(std::uint64_t offset) const -> std::uint8_t;
 
-    auto ReadInt16LE(std::uint64_t offset) const -> std::int16_t;
+    [[nodiscard]] auto ReadInt16LE(std::uint64_t offset) const -> std::int16_t;
 
-    auto ReadInt16BE(std::uint64_t offset) const -> std::int16_t;
+    [[nodiscard]] auto ReadInt16BE(std::uint64_t offset) const -> std::int16_t;
 
-    auto ReadUInt16LE(std::uint64_t offset) const -> std::uint16_t;
+    [[nodiscard]] auto ReadUInt16LE(std::uint64_t offset) const -> std::uint16_t;
 
-    auto ReadUInt16BE(std::uint64_t offset) const -> std::uint16_t;
+    [[nodiscard]] auto ReadUInt16BE(std::uint64_t offset) const -> std::uint16_t;
 
-    auto ReadInt32LE(std::uint64_t offset) const -> std::int32_t;
+    [[nodiscard]] auto ReadInt32LE(std::uint64_t offset) const -> std::int32_t;
 
-    auto ReadInt32BE(std::uint64_t offset) const -> std::int32_t;
+    [[nodiscard]] auto ReadInt32BE(std::uint64_t offset) const -> std::int32_t;
 
-    auto ReadUInt32LE(std::uint64_t offset) const -> std::uint32_t;
+    [[nodiscard]] auto ReadUInt32LE(std::uint64_t offset) const -> std::uint32_t;
 
-    auto ReadUInt32BE(std::uint64_t offset) const -> std::uint32_t;
+    [[nodiscard]] auto ReadUInt32BE(std::uint64_t offset) const -> std::uint32_t;
 
-    auto ReadInt64LE(std::uint64_t offset) const -> std::int64_t;
+    [[nodiscard]] auto ReadInt64LE(std::uint64_t offset) const -> std::int64_t;
 
-    auto ReadInt64BE(std::uint64_t offset) const -> std::int64_t;
+    [[nodiscard]] auto ReadInt64BE(std::uint64_t offset) const -> std::int64_t;
 
-    auto ReadUInt64LE(std::uint64_t offset) const -> std::uint64_t;
+    [[nodiscard]] auto ReadUInt64LE(std::uint64_t offset) const -> std::uint64_t;
 
-    auto ReadUInt64BE(std::uint64_t offset) const -> std::uint64_t;
+    [[nodiscard]] auto ReadUInt64BE(std::uint64_t offset) const -> std::uint64_t;
 
-    auto ReadSingleLE(std::uint64_t offset) const -> float;
+    [[nodiscard]] auto ReadSingleLE(std::uint64_t offset) const -> float;
 
-    auto ReadSingleBE(std::uint64_t offset) const -> float;
+    [[nodiscard]] auto ReadSingleBE(std::uint64_t offset) const -> float;
 
-    auto ReadDoubleLE(std::uint64_t offset) const -> double;
+    [[nodiscard]] auto ReadDoubleLE(std::uint64_t offset) const -> double;
 
-    auto ReadDoubleBE(std::uint64_t offset) const -> double;
+    [[nodiscard]] auto ReadDoubleBE(std::uint64_t offset) const -> double;
 
     static auto ReadInt8(IStream *stream) -> std::int8_t;
 
@@ -164,77 +164,77 @@ public:
 
     static auto ReadDoubleBE(IStream *stream, std::uint64_t offset) -> double;
 
-    auto PeekInt8() const -> std::int8_t;
+    [[nodiscard]] auto PeekInt8() const -> std::int8_t;
 
-    auto PeekUInt8() const -> std::uint8_t;
+    [[nodiscard]] auto PeekUInt8() const -> std::uint8_t;
 
-    auto PeekInt16LE() const -> std::int16_t;
+    [[nodiscard]] auto PeekInt16LE() const -> std::int16_t;
 
-    auto PeekInt16BE() const -> std::int16_t;
+    [[nodiscard]] auto PeekInt16BE() const -> std::int16_t;
 
-    auto PeekUInt16LE() const -> std::uint16_t;
+    [[nodiscard]] auto PeekUInt16LE() const -> std::uint16_t;
 
-    auto PeekUInt16BE() const -> std::uint16_t;
+    [[nodiscard]] auto PeekUInt16BE() const -> std::uint16_t;
 
-    auto PeekInt32LE() const -> std::int32_t;
+    [[nodiscard]] auto PeekInt32LE() const -> std::int32_t;
 
-    auto PeekInt32BE() const -> std::int32_t;
+    [[nodiscard]] auto PeekInt32BE() const -> std::int32_t;
 
-    auto PeekUInt32LE() const -> std::uint32_t;
+    [[nodiscard]] auto PeekUInt32LE() const -> std::uint32_t;
 
-    auto PeekUInt32BE() const -> std::uint32_t;
+    [[nodiscard]] auto PeekUInt32BE() const -> std::uint32_t;
 
-    auto PeekInt64LE() const -> std::int64_t;
+    [[nodiscard]] auto PeekInt64LE() const -> std::int64_t;
 
-    auto PeekInt64BE() const -> std::int64_t;
+    [[nodiscard]] auto PeekInt64BE() const -> std::int64_t;
 
-    auto PeekUInt64LE() const -> std::uint64_t;
+    [[nodiscard]] auto PeekUInt64LE() const -> std::uint64_t;
 
-    auto PeekUInt64BE() const -> std::uint64_t;
+    [[nodiscard]] auto PeekUInt64BE() const -> std::uint64_t;
 
-    auto PeekSingleLE() const -> float;
+    [[nodiscard]] auto PeekSingleLE() const -> float;
 
-    auto PeekSingleBE() const -> float;
+    [[nodiscard]] auto PeekSingleBE() const -> float;
 
-    auto PeekDoubleLE() const -> double;
+    [[nodiscard]] auto PeekDoubleLE() const -> double;
 
-    auto PeekDoubleBE() const -> double;
+    [[nodiscard]] auto PeekDoubleBE() const -> double;
 
-    auto PeekInt8(std::uint64_t offset) const -> std::int8_t;
+    [[nodiscard]] auto PeekInt8(std::uint64_t offset) const -> std::int8_t;
 
-    auto PeekUInt8(std::uint64_t offset) const -> std::uint8_t;
+    [[nodiscard]] auto PeekUInt8(std::uint64_t offset) const -> std::uint8_t;
 
-    auto PeekInt16LE(std::uint64_t offset) const -> std::int16_t;
+    [[nodiscard]] auto PeekInt16LE(std::uint64_t offset) const -> std::int16_t;
 
-    auto PeekInt16BE(std::uint64_t offset) const -> std::int16_t;
+    [[nodiscard]] auto PeekInt16BE(std::uint64_t offset) const -> std::int16_t;
 
-    auto PeekUInt16LE(std::uint64_t offset) const -> std::uint16_t;
+    [[nodiscard]] auto PeekUInt16LE(std::uint64_t offset) const -> std::uint16_t;
 
-    auto PeekUInt16BE(std::uint64_t offset) const -> std::uint16_t;
+    [[nodiscard]] auto PeekUInt16BE(std::uint64_t offset) const -> std::uint16_t;
 
-    auto PeekInt32LE(std::uint64_t offset) const -> std::int32_t;
+    [[nodiscard]] auto PeekInt32LE(std::uint64_t offset) const -> std::int32_t;
 
-    auto PeekInt32BE(std::uint64_t offset) const -> std::int32_t;
+    [[nodiscard]] auto PeekInt32BE(std::uint64_t offset) const -> std::int32_t;
 
-    auto PeekUInt32LE(std::uint64_t offset) const -> std::uint32_t;
+    [[nodiscard]] auto PeekUInt32LE(std::uint64_t offset) const -> std::uint32_t;
 
-    auto PeekUInt32BE(std::uint64_t offset) const -> std::uint32_t;
+    [[nodiscard]] auto PeekUInt32BE(std::uint64_t offset) const -> std::uint32_t;
 
-    auto PeekInt64LE(std::uint64_t offset) const -> std::int64_t;
+    [[nodiscard]] auto PeekInt64LE(std::uint64_t offset) const -> std::int64_t;
 
-    auto PeekInt64BE(std::uint64_t offset) const -> std::int64_t;
+    [[nodiscard]] auto PeekInt64BE(std::uint64_t offset) const -> std::int64_t;
 
-    auto PeekUInt64LE(std::uint64_t offset) const -> std::uint64_t;
+    [[nodiscard]] auto PeekUInt64LE(std::uint64_t offset) const -> std::uint64_t;
 
-    auto PeekUInt64BE(std::uint64_t offset) const -> std::uint64_t;
+    [[nodiscard]] auto PeekUInt64BE(std::uint64_t offset) const -> std::uint64_t;
 
-    auto PeekSingleLE(std::uint64_t offset) const -> float;
+    [[nodiscard]] auto PeekSingleLE(std::uint64_t offset) const -> float;
 
-    auto PeekSingleBE(std::uint64_t offset) const -> float;
+    [[nodiscard]] auto PeekSingleBE(std::uint64_t offset) const -> float;
 
-    auto PeekDoubleLE(std::uint64_t offset) const -> double;
+    [[nodiscard]] auto PeekDoubleLE(std::uint64_t offset) const -> double;
 
-    auto PeekDoubleBE(std::uint64_t offset) const -> double;
+    [[nodiscard]] auto PeekDoubleBE(std::uint64_t offset) const -> double;
 
     static auto PeekInt8(IStream *stream) -> std::int8_t;
 
@@ -311,26 +311,25 @@ public:
     static auto PeekBytes(
         IStream *stream,
         std::uint8_t *buffer,
-        std::uint32_t bufferSize,
+        std::size_t bufferSize,
         std::size_t offset,
-        std::uint32_t count
-    ) -> std::uint32_t;
+        std::size_t count
+    ) -> std::size_t;
 
-    auto Peek(void *buffer, std::uint32_t bufferSize, std::size_t bufferOffset, std::uint32_t count)
-        -> std::uint32_t;
+    auto Peek(void *buffer, std::size_t bufferSize, std::size_t bufferOffset, std::size_t count)
+        -> std::size_t;
 
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override;
+    auto Read(void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto Write(
-        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t override;
+    auto Write(const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t override;
 
-    auto IsWritable() const -> bool_t override;
+    [[nodiscard]] auto IsWritable() const -> bool_t override;
 
-    auto IsReadable() const -> bool_t override;
+    [[nodiscard]] auto IsReadable() const -> bool_t override;
 
-    auto IsSeekable() const -> bool_t override;
+    [[nodiscard]] auto IsSeekable() const -> bool_t override;
 
     auto GetPosition() -> std::uint64_t override;
 

@@ -7,13 +7,14 @@
 #include "cgss_env_platform.h"
 
 #ifdef __CGSS_OS_WINDOWS__
+#pragma warning(push)
 #pragma warning(disable: 4200)
 #endif
 
+CGSS_NS_BEGIN
+
 #pragma pack(push)
 #pragma pack(1)
-
-CGSS_NS_BEGIN
 
 // NOLINTBEGIN(modernize-avoid-c-arrays)
 
@@ -275,7 +276,7 @@ struct HCA_COMMENT_HEADER {
      * Comment length?
      */
     std::uint8_t length;
-    char comment[0];
+    char comment[4];
 };
 
 /**
@@ -286,13 +287,17 @@ struct HCA_PADDING_HEADER {
      * Magic: 'pad' XORed with 0x80
      */
     std::uint32_t pad;
-    char padding[0];
+    char padding[4];
 };
 
 // NOLINTEND(modernize-avoid-c-arrays)
 
+#pragma pack(pop)
+
 CGSS_NS_END
 
-#pragma pack(pop)
+#ifdef __CGSS_OS_WINDOWS__
+#pragma warning(pop)
+#endif
 
 #endif // CGSS_KAWASHIMA_HCA_HCA_NATIVE_H_

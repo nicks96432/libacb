@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstring>
 
 #include "cgss_env_ns.h"
 #include "kawashima/hca/CHcaCipherConfig.h"
@@ -6,40 +7,45 @@
 CGSS_NS_BEGIN
 
 CHcaCipherConfig::CHcaCipherConfig(): MyBase() {
-    memset(this, 0, sizeof(CHcaCipherConfig));
+    std::memset(this, 0, sizeof(CHcaCipherConfig));
 }
 
 CHcaCipherConfig::CHcaCipherConfig(HcaCipherType cipherType): MyClass() {
-    keyParts.key1 = keyParts.key2 = 0;
+    this->key.key = 0;
     if (cipherType == HcaCipherType::WithKey) {
         cipherType = HcaCipherType::NoCipher;
     }
     this->cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(cipherType);
 }
 
-CHcaCipherConfig::CHcaCipherConfig(uint32_t key1, uint32_t key2): MyClass() {
+CHcaCipherConfig::CHcaCipherConfig(std::uint32_t key1, std::uint32_t key2): MyClass() {
     Initialize(key1, key2, 0);
 }
 
-CHcaCipherConfig::CHcaCipherConfig(uint64_t key)
-    : MyClass((uint32_t)(key >> 32u), (uint32_t)(key & 0xffffffff)) {}
+CHcaCipherConfig::CHcaCipherConfig(std::uint64_t key)
+    : MyClass((std::uint32_t)(key >> 32u), (std::uint32_t)(key & 0xffffffff)) {}
 
-CHcaCipherConfig::CHcaCipherConfig(uint32_t key1, uint32_t key2, uint16_t keyModifier): MyClass() {
+CHcaCipherConfig::CHcaCipherConfig(
+    std::uint32_t key1, std::uint32_t key2, std::uint16_t keyModifier
+)
+    : MyClass() {
     Initialize(key1, key2, keyModifier);
 }
 
-CHcaCipherConfig::CHcaCipherConfig(uint64_t key, uint16_t keyModifier)
-    : MyClass((uint32_t)(key >> 32u), (uint32_t)(key & 0xffffffff), keyModifier) {}
+CHcaCipherConfig::CHcaCipherConfig(std::uint64_t key, std::uint16_t keyModifier)
+    : MyClass((std::uint32_t)(key >> 32u), (std::uint32_t)(key & 0xffffffff), keyModifier) {}
 
-void CHcaCipherConfig::Initialize(uint32_t key1, uint32_t key2, uint16_t keyModifier) {
+void CHcaCipherConfig::Initialize(
+    std::uint32_t key1, std::uint32_t key2, std::uint16_t modifier
+) {
     if (key1 == 0 && key2 == 0) {
         cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(HcaCipherType::NoCipher);
     } else {
         cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(HcaCipherType::WithKey);
     }
-    keyParts.key1     = key1;
-    keyParts.key2     = key2;
-    this->keyModifier = keyModifier;
+    this->key.keyParts.key1 = key1;
+    this->key.keyParts.key2 = key2;
+    this->keyModifier       = modifier;
 }
 
 CGSS_NS_END

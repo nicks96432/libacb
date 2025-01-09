@@ -14,7 +14,7 @@ CGSS_NS_BEGIN
 
 class CHcaCipher;
 
-class CGSS_EXPORT CHcaCipherConverter: public CHcaFormatReader {
+class CHcaCipherConverter: public CHcaFormatReader {
 
     __extends(CHcaFormatReader, CHcaFormatReader);
 
@@ -26,7 +26,7 @@ public:
      * @param cryptTo Wanted cipher type.
      * @return
      */
-    CHcaCipherConverter(
+    CGSS_EXPORT CHcaCipherConverter(
         IStream *stream, const HCA_CIPHER_CONFIG &cryptFrom, const HCA_CIPHER_CONFIG &cryptTo
     );
 
@@ -38,16 +38,17 @@ public:
 
     auto operator=(CHcaCipherConverter &&) -> CHcaCipherConverter & = delete;
 
-    ~CHcaCipherConverter() override;
+    CGSS_EXPORT ~CHcaCipherConverter() override;
 
-    auto Read(void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count)
-        -> std::uint32_t override;
+    CGSS_EXPORT auto Read(
+        void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+    ) -> std::size_t override;
 
-    auto GetPosition() -> std::uint64_t override;
+    CGSS_EXPORT auto GetPosition() -> std::uint64_t override;
 
-    void SetPosition(std::uint64_t value) override;
+    CGSS_EXPORT void SetPosition(std::uint64_t value) override;
 
-    auto GetLength() -> std::uint64_t override;
+    CGSS_EXPORT auto GetLength() -> std::uint64_t override;
 
 private:
     auto ConvertBlock(std::uint32_t blockIndex) -> const std::uint8_t *;
@@ -56,7 +57,8 @@ private:
 
     void InitializeExtra();
 
-    CHcaCipher *_cipherFrom, *_cipherTo;
+    CHcaCipher *_cipherFrom = nullptr;
+    CHcaCipher *_cipherTo   = nullptr;
     HCA_CIPHER_CONFIG _ccFrom, _ccTo;
     std::uint8_t *_headerBuffer;
     std::map<std::uint32_t, const std::uint8_t *> _blockBuffers;

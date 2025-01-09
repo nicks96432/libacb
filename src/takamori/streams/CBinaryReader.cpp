@@ -1,3 +1,5 @@
+#include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 
@@ -16,7 +18,7 @@ enum {
 };
 
 static const union {
-    std::uint8_t bytes[4];
+    std::uint8_t bytes[4]; // NOLINT(modernize-avoid-c-arrays)
     std::uint32_t value;
 } _o32_host_order = {
     {0, 1, 2, 3}
@@ -38,30 +40,30 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     return stream->ReadByte();
 }
 
-#define ENSURE_READ(n)                                           \
-    static const auto shouldRead = (n);                          \
-    std::uint8_t buffer[shouldRead];                             \
-    auto read = stream->Read(buffer, shouldRead, 0, shouldRead); \
-    do {                                                         \
-        if (read < shouldRead) {                                 \
-            throw CException(CGSS_OP_BUFFER_TOO_SMALL);          \
-        }                                                        \
+#define ENSURE_READ(n)                                                        \
+    static constexpr auto shouldRead = (n);                                   \
+    std::array<std::uint8_t, shouldRead> buffer;                              \
+    auto read = stream->Read(buffer.data(), buffer.size(), 0, buffer.size()); \
+    do {                                                                      \
+        if (read < buffer.size()) {                                           \
+            throw CException(CGSS_OP_BUFFER_TOO_SMALL);                       \
+        }                                                                     \
     } while (0)
 
-#define READ_INT(bit, hostEndian)                         \
-    ENSURE_READ((bit) / 8);                               \
-    std::int##bit##_t ret = *(std::int##bit##_t *)buffer; \
-    if (O32_HOST_ORDER != (hostEndian)) {                 \
-        ret = bswap(ret);                                 \
-    }                                                     \
+#define READ_INT(bit, hostEndian)                                                  \
+    ENSURE_READ((bit) / 8);                                                        \
+    std::int##bit##_t ret = *reinterpret_cast<std::int##bit##_t *>(buffer.data()); \
+    if (O32_HOST_ORDER != (hostEndian)) {                                          \
+        ret = bswap(ret);                                                          \
+    }                                                                              \
     return ret
 
-#define READ_UINT(bit, hostEndian)                          \
-    ENSURE_READ((bit) / 8);                                 \
-    std::uint##bit##_t ret = *(std::uint##bit##_t *)buffer; \
-    if (O32_HOST_ORDER != (hostEndian)) {                   \
-        ret = bswap(ret);                                   \
-    }                                                       \
+#define READ_UINT(bit, hostEndian)                                                   \
+    ENSURE_READ((bit) / 8);                                                          \
+    std::uint##bit##_t ret = *reinterpret_cast<std::uint##bit##_t *>(buffer.data()); \
+    if (O32_HOST_ORDER != (hostEndian)) {                                            \
+        ret = bswap(ret);                                                            \
+    }                                                                                \
     return ret
 
 auto CBinaryReader::ReadInt16LE(IStream *stream) -> std::int16_t {
@@ -113,27 +115,19 @@ auto CBinaryReader::ReadUInt64BE(IStream *stream) -> std::uint64_t {
 }
 
 auto CBinaryReader::ReadSingleLE(IStream *stream) -> float {
-    auto i = ReadInt32LE(stream);
-    auto f = *(float *)&i;
-    return f;
+    return std::bit_cast<float>(ReadInt32LE(stream));
 }
 
 auto CBinaryReader::ReadSingleBE(IStream *stream) -> float {
-    auto i = ReadInt32BE(stream);
-    auto f = *(float *)&i;
-    return f;
+    return std::bit_cast<float>(ReadInt32BE(stream));
 }
 
 auto CBinaryReader::ReadDoubleLE(IStream *stream) -> double {
-    auto i = ReadInt64LE(stream);
-    auto f = *(double *)&i;
-    return f;
+    return std::bit_cast<double>(ReadInt64LE(stream));
 }
 
 auto CBinaryReader::ReadDoubleBE(IStream *stream) -> double {
-    auto i = ReadInt64BE(stream);
-    auto f = *(double *)&i;
-    return f;
+    return std::bit_cast<double>(ReadInt64BE(stream));
 }
 
 #define READ_U_FUNC_O(bit, suffix)                                                   \
@@ -414,9 +408,9 @@ PEEK_INSTANCE_WRAP_R(double, Double, LE)
 
 PEEK_INSTANCE_WRAP_R(double, Double, BE)
 
-#define PEEK_INSTANCE_WRAP_R_O(type, Cap, suffix)                             \
-    auto CBinaryReader::Peek##Cap##suffix(std::uint64_t offset) const->type { \
-        return Peek##Cap##suffix(_baseStream);                                \
+#define PEEK_INSTANCE_WRAP_R_O(type, Cap, suffix)                                              \
+    auto CBinaryReader::Peek##Cap##suffix([[maybe_unused]] std::uint64_t offset) const->type { \
+        return Peek##Cap##suffix(_baseStream);                                                 \
     }
 
 PEEK_INSTANCE_WRAP_R_O(float, Single, LE)
@@ -537,22 +531,25 @@ PEEK_WRAP_R_O(double, Double, LE)
 PEEK_WRAP_R_O(double, Double, BE)
 
 auto CBinaryReader::Peek(
-    void *buffer, std::uint32_t bufferSize, std::size_t bufferOffset, std::uint32_t count
-) -> std::uint32_t {
+    void *buffer, std::size_t bufferSize, std::size_t bufferOffset, std::size_t count
+) -> std::size_t {
     return PeekBytes(
         _baseStream, static_cast<std::uint8_t *>(buffer), bufferSize, bufferOffset, count
     );
 }
 
 auto CBinaryReader::Read(
-    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+    void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+) -> std::size_t {
     return _baseStream->Read(buffer, bufferSize, offset, count);
 }
 
 auto CBinaryReader::Write(
-    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+    [[maybe_unused]] const void *buffer,
+    [[maybe_unused]] std::size_t bufferSize,
+    [[maybe_unused]] std::size_t offset,
+    [[maybe_unused]] std::size_t count
+) -> std::size_t {
     throw CInvalidOperationException("CBinaryReader::Write");
 }
 
@@ -591,10 +588,10 @@ void CBinaryReader::Flush() {
 auto CBinaryReader::PeekBytes(
     IStream *stream,
     std::uint8_t *buffer,
-    std::uint32_t bufferSize,
+    std::size_t bufferSize,
     std::size_t offset,
-    std::uint32_t count
-) -> std::uint32_t {
+    std::size_t count
+) -> std::size_t {
     const auto position = stream->GetPosition();
     const auto v        = stream->Read(buffer, bufferSize, offset, count);
     stream->Seek(position, StreamSeekOrigin::Begin);

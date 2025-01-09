@@ -16,21 +16,20 @@ struct CGSS_EXPORT IStream {
 
     virtual ~IStream() = default;
 
-    virtual auto Read(
-        void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t PURE;
+    virtual auto Read(void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count)
+        -> std::size_t PURE;
 
     virtual auto Write(
-        const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-    ) -> std::uint32_t PURE;
+        const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+    ) -> std::size_t PURE;
 
     virtual void Seek(std::int64_t offset, StreamSeekOrigin origin) PURE;
 
-    virtual auto IsWritable() const -> bool_t PURE;
+    [[nodiscard]] virtual auto IsWritable() const -> bool_t PURE;
 
-    virtual auto IsReadable() const -> bool_t PURE;
+    [[nodiscard]] virtual auto IsReadable() const -> bool_t PURE;
 
-    virtual auto IsSeekable() const -> bool_t PURE;
+    [[nodiscard]] virtual auto IsSeekable() const -> bool_t PURE;
 
     virtual auto GetPosition() -> std::uint64_t PURE;
 
@@ -40,9 +39,9 @@ struct CGSS_EXPORT IStream {
 
     virtual void SetLength(std::uint64_t value) PURE;
 
-    virtual auto ReadByte() -> std::int32_t PURE;
+    virtual auto ReadByte() -> std::uint8_t PURE;
 
-    virtual auto WriteByte(std::uint8_t value) -> std::uint32_t PURE;
+    virtual auto WriteByte(std::uint8_t value) -> std::size_t PURE;
 
     virtual void Flush() PURE;
 

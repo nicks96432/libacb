@@ -2,6 +2,7 @@
 #define CGSS_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_
 
 #include <cstddef>
+#include <string>
 
 #include "cgss_env.h"
 #include "cgss_env_ns.h"
@@ -23,7 +24,7 @@ public:
 
     auto operator=(CStreamExtensions &&) -> CStreamExtensions & = delete;
 
-    static void ReadNullEndedString(IStream *stream, char *buffer, std::size_t bufferSize);
+    static void ReadNullEndedString(IStream *stream, std::string &buffer, std::size_t bufferSize);
 };
 
 CGSS_NS_END

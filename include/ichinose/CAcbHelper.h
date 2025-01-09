@@ -1,6 +1,7 @@
 #ifndef CGSS_ICHINOSE_CACBHELPER_H_
 #define CGSS_ICHINOSE_CACBHELPER_H_
 
+#include <cstddef>
 #include <cstdint>
 
 #include "cgss_env.h"
@@ -17,7 +18,7 @@ class CGSS_EXPORT CAcbHelper final {
     __root_class(CAcbHelper);
 
 public:
-    static auto ExtractToNewStream(IStream *stream, std::uint64_t offset, std::uint32_t size)
+    static auto ExtractToNewStream(IStream *stream, std::size_t offset, std::size_t size)
         -> CMemoryStream *;
 
     static auto RoundUpToAlignment(std::uint64_t value, std::uint64_t alignment) -> std::uint64_t;

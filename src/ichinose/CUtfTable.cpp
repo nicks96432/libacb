@@ -1,6 +1,7 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <string>
 #include <vector>
 
 #include "cgss_cdata.h"
@@ -21,7 +22,6 @@ constexpr std::array<std::uint8_t, 4> UTF_SIGNATURE = {'@', 'U', 'T', 'F'};
 
 CUtfTable::CUtfTable(IStream *stream, std::uint64_t streamOffset)
     : _stream(stream), _streamOffset(streamOffset) {
-    std::memset(_tableName, 0, sizeof(_tableName));
     Initialize();
 }
 
@@ -43,7 +43,7 @@ auto CUtfTable::GetStream() const -> IStream * {
 }
 
 void CUtfTable::GetHeader(UTF_HEADER &header) const {
-    memcpy(&header, &_utfHeader, sizeof(UTF_HEADER));
+    std::memcpy(&header, &_utfHeader, sizeof(UTF_HEADER));
 }
 
 auto CUtfTable::GetHeader() const -> const UTF_HEADER {
@@ -58,7 +58,7 @@ auto CUtfTable::GetRows() const -> const std::vector<CUtfTable::UtfRow> & {
     return _rows;
 }
 
-auto CUtfTable::GetName() const -> const char * {
+auto CUtfTable::GetName() const -> std::string {
     return _tableName;
 }
 
@@ -74,8 +74,8 @@ void CUtfTable::Initialize() {
         stream->Seek(offset, StreamSeekOrigin::Begin);
     }
 
-    std::uint8_t magic[4];
-    CBinaryReader::PeekBytes(stream, magic, 4, 0, 4);
+    std::array<std::uint8_t, 4> magic;
+    CBinaryReader::PeekBytes(stream, magic.data(), magic.size(), 0, 4);
 
     const auto magicFound = CheckEncryption(magic);
 
@@ -97,8 +97,8 @@ void CUtfTable::Initialize() {
     delete tableDataStream;
 }
 
-auto CUtfTable::CheckEncryption(const std::uint8_t *magic) -> bool_t {
-    if (std::memcmp(magic, UTF_SIGNATURE.data(), UTF_SIGNATURE.size()) == 0) {
+auto CUtfTable::CheckEncryption(const std::array<std::uint8_t, 4> &magic) -> bool_t {
+    if (magic == UTF_SIGNATURE) {
         _utfReader   = new CUtfReader();
         _isEncrypted = FALSE;
     } else {
@@ -115,7 +115,7 @@ auto CUtfTable::CheckEncryption(const std::uint8_t *magic) -> bool_t {
 }
 
 auto CUtfTable::GetKeysForEncryptedUtfTable(
-    const std::uint8_t *magic, std::uint8_t *seed, std::uint8_t *incr
+    const std::array<std::uint8_t, 4> &magic, std::uint8_t *seed, std::uint8_t *incr
 ) -> bool_t {
     for (auto s = 0; s <= 0xff; ++s) {
         if ((magic[0] ^ s) != UTF_SIGNATURE[0]) {
@@ -187,12 +187,12 @@ auto CUtfTable::GetTableDataStream() -> CMemoryStream * {
     return memoryStream;
 }
 
-void CUtfTable::ReadUtfHeader(IStream *stream, UTF_HEADER &header, char *tableNameBuffer) {
+void CUtfTable::ReadUtfHeader(IStream *stream, UTF_HEADER &header, std::string &tableNameBuffer) {
     ReadUtfHeader(stream, stream->GetPosition(), header, tableNameBuffer);
 }
 
 void CUtfTable::ReadUtfHeader(
-    IStream *stream, std::uint64_t streamOffset, UTF_HEADER &header, char *tableNameBuffer
+    IStream *stream, std::uint64_t streamOffset, UTF_HEADER &header, std::string &tableNameBuffer
 ) {
     CBinaryReader reader(stream);
     auto pos = stream->GetPosition();
@@ -209,10 +209,8 @@ void CUtfTable::ReadUtfHeader(
     header.rowSize           = reader.ReadUInt16BE();
     header.rowCount          = reader.ReadUInt32BE();
 
-    if (tableNameBuffer) {
-        stream->Seek(header.stringTableOffset + header.tableNameOffset, StreamSeekOrigin::Begin);
-        CStreamExtensions::ReadNullEndedString(stream, tableNameBuffer, UTF_TABLE_MAX_NAME_LEN);
-    }
+    stream->Seek(header.stringTableOffset + header.tableNameOffset, StreamSeekOrigin::Begin);
+    CStreamExtensions::ReadNullEndedString(stream, tableNameBuffer, UTF_TABLE_MAX_NAME_LEN);
 
     stream->Seek(pos, StreamSeekOrigin::Begin);
 }
@@ -220,10 +218,10 @@ void CUtfTable::ReadUtfHeader(
 void CUtfTable::InitializeUtfSchema(
     IStream *sourceStream, CMemoryStream *tableDataStream, std::uint64_t schemaOffset
 ) {
-    const auto &header                           = _utfHeader;
-    const auto baseOffset                        = _streamOffset;
-    auto &rows                                   = _rows;
-    char fieldNameBuffer[UTF_FIELD_MAX_NAME_LEN] = {'\0'};
+    const auto &header    = _utfHeader;
+    const auto baseOffset = _streamOffset;
+    auto &rows            = _rows;
+    std::string fieldNameBuffer;
 
     for (std::uint32_t i = 0; i < header.rowCount; ++i) {
         auto currentStreamOffset = schemaOffset;

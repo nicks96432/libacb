@@ -51,15 +51,15 @@ CMemoryStream::~CMemoryStream() {
 }
 
 auto CMemoryStream::Read(
-    void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+    void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+) -> std::size_t {
     if (!buffer) {
         throw CArgumentException("MemoryStream::Read()");
     }
     if (!IsReadable()) {
         throw CInvalidOperationException("MemoryStream::Read()");
     }
-    count               = std::min(static_cast<std::uint32_t>(bufferSize - offset), count);
+    count               = std::min(bufferSize - offset, count);
     std::size_t maxRead = 0;
     if (count > 0) {
         auto position = GetPosition();
@@ -75,15 +75,15 @@ auto CMemoryStream::Read(
 }
 
 auto CMemoryStream::Write(
-    const void *buffer, std::uint32_t bufferSize, std::size_t offset, std::uint32_t count
-) -> std::uint32_t {
+    const void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
+) -> std::size_t {
     if (!buffer) {
         throw CArgumentException("MemoryStream::Write()");
     }
     if (!IsWritable()) {
         throw CInvalidOperationException("MemoryStream::Write()");
     }
-    count = std::min(static_cast<std::uint32_t>(bufferSize - offset), count);
+    count = std::min(bufferSize - offset, count);
     if (count > 0) {
         auto position             = GetPosition();
         const auto expectedLength = position + count;

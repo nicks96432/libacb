@@ -7,35 +7,37 @@
 #include "cgss_cenum.h"
 #include "cgss_env.h"
 #include "cgss_env_ns.h"
+#include "cgss_env_platform.h"
 
 CGSS_NS_BEGIN
 
-class CGSS_EXPORT CException: public std::exception {
+class CException: public std::exception {
 
     __extends(std::exception, CException);
 
 public:
-    CException() noexcept;
+    CGSS_EXPORT CException() noexcept;
 
-    CException(const CException &) noexcept;
+    CGSS_EXPORT CException(const CException &) noexcept;
 
-    auto operator=(const CException &) noexcept -> CException &;
+    CGSS_EXPORT auto operator=(const CException &) noexcept -> CException &;
 
-    explicit CException(CGSS_OP_RESULT result) noexcept;
+    CGSS_EXPORT explicit CException(CGSS_OP_RESULT result) noexcept;
 
-    explicit CException(const char *message) noexcept;
+    CGSS_EXPORT explicit CException(const char *message) noexcept;
 
-    explicit CException(const std::string &message) noexcept;
+    CGSS_EXPORT explicit CException(const std::string &message) noexcept;
 
-    CException(CGSS_OP_RESULT result, std::string message) noexcept;
+    CGSS_EXPORT CException(CGSS_OP_RESULT result, std::string message) noexcept;
 
-    ~CException() noexcept override = default;
+    CGSS_EXPORT ~CException() noexcept override = default;
 
-    virtual auto GetExceptionMessage() const noexcept -> const std::string &;
+    [[nodiscard]] CGSS_EXPORT virtual auto
+    GetExceptionMessage() const noexcept -> const std::string &;
 
-    virtual auto GetOpResult() const noexcept -> CGSS_OP_RESULT;
+    [[nodiscard]] CGSS_EXPORT virtual auto GetOpResult() const noexcept -> CGSS_OP_RESULT;
 
-    auto what() const noexcept -> const char * override;
+    [[nodiscard]] CGSS_EXPORT auto what() const noexcept -> const char * override;
 
 protected:
     CGSS_OP_RESULT _result;
