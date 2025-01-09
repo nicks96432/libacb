@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-project(acb
+project(
+    acb
     LANGUAGES CXX
     VERSION 0.4.0
 )
@@ -73,19 +74,20 @@ add_link_options(
 configure_file(include/acb_env.h.in include/acb_env.h @ONLY)
 
 file(GLOB_RECURSE LIBACB_SOURCE_FILES "src/**/*.cpp" "src/**/*.h")
-add_library(acb-objects OBJECT ${LIBACB_SOURCE_FILES})
-set(${LIBACB_INCLUDE_DIRECTORY} ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include)
 
-target_include_directories(acb-objects PUBLIC ${LIBACB_INCLUDE_DIRECTORY})
-set_property(TARGET acb-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
+add_library(${PROJECT_NAME}-objects OBJECT ${LIBACB_SOURCE_FILES})
+set(LIBACB_INCLUDE_DIRECTORY ${CMAKE_SOURCE_DIR}/include/ ${CMAKE_BINARY_DIR}/include/)
+
+target_include_directories(${PROJECT_NAME}-objects PUBLIC ${LIBACB_INCLUDE_DIRECTORY})
+set_target_properties(${PROJECT_NAME}-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
 
 if(UNIX AND NOT (CYGWIN OR MINGW))
     target_link_libraries(acb-objects dl)
 endif()
 
 if(LIBACB_BUILD_STATIC_LIBS)
-    add_library(acb-static STATIC $<TARGET_OBJECTS:acb-objects>)
-    set_target_properties(acb-static PROPERTIES OUTPUT_NAME acb)
+    add_library(${PROJECT_NAME}-static STATIC $<TARGET_OBJECTS:${PROJECT_NAME}-objects>)
+    set_target_properties(${PROJECT_NAME}-static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
     install(
         TARGETS                   acb-static
@@ -96,11 +98,11 @@ if(LIBACB_BUILD_STATIC_LIBS)
 endif()
 
 if(LIBACB_BUILD_SHARED_LIBS)
-    add_library(acb-shared SHARED $<TARGET_OBJECTS:acb-objects>)
-    set_target_properties(acb-shared PROPERTIES OUTPUT_NAME acb)
+    add_library(${PROJECT_NAME}-shared SHARED $<TARGET_OBJECTS:${PROJECT_NAME}-objects>)
+    set_target_properties(${PROJECT_NAME}-shared PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
     install(
-        TARGETS                   acb-static
+        TARGETS                   acb-shared
         ARCHIVE DESTINATION       lib
         LIBRARY DESTINATION       lib
         RUNTIME DESTINATION       lib
@@ -110,4 +112,6 @@ endif()
 install(
     DIRECTORY         ${LIBACB_INCLUDE_DIRECTORY}
     DESTINATION       include
+    FILES_MATCHING
+    PATTERN           "*.h"
 )
