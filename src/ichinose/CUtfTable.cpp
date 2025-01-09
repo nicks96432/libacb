@@ -254,7 +254,7 @@ void CUtfTable::InitializeUtfSchema(
             switch (storage) {
             case UtfColumnStorage::Const:
             case UtfColumnStorage::Const2: {
-                const auto constantOffset = currentStreamOffset + 5;
+                const auto constantOffset = static_cast<std::uint32_t>(currentStreamOffset + 5);
                 field->offsetInRow        = 0; // constant
 
                 switch (type) {
