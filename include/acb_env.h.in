@@ -1,22 +1,30 @@
-#ifndef CGSS_ENV_H_
-#define CGSS_ENV_H_
+#ifndef ACB_ENV_H_
+#define ACB_ENV_H_
 
-#include "cgss_env_platform.h"
+// NOLINTBEGIN(modernize-macro-to-enum)
+
+#define ACB_VERSION_MAJOR @acb_VERSION_MAJOR@
+#define ACB_VERSION_MINOR @acb_VERSION_MINOR@
+#define ACB_VERSION_PATCH @acb_VERSION_PATCH@
+
+// NOLINTEND(modernize-macro-to-enum)
+
+#include "acb_env_platform.h"
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW__)
 #ifdef __GNUC__
-#define CGSS_EXPORT __attribute__((dllexport))
+#define ACB_EXPORT __attribute__((dllexport))
 #else
-#define CGSS_EXPORT __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
+#define ACB_EXPORT __declspec(dllexport) // Note: actually gcc seems to also supports this syntax.
 #endif
-#define CGSS_DLL_LOCAL
+#define ACB_DLL_LOCAL
 #else
 #if __GNUC__ >= 4
-#define CGSS_EXPORT    __attribute__((visibility("default")))
-#define CGSS_DLL_LOCAL __attribute__((visibility("hidden")))
+#define ACB_EXPORT    __attribute__((visibility("default")))
+#define ACB_DLL_LOCAL __attribute__((visibility("hidden")))
 #else
-#define CGSS_EXPORT
-#define CGSS_DLL_LOCAL
+#define ACB_EXPORT
+#define ACB_DLL_LOCAL
 #endif
 #endif
 
@@ -28,13 +36,13 @@
 
 #ifndef STDCALL
 
-#ifdef __CGSS_OS_WINDOWS__
+#ifdef __ACB_OS_WINDOWS__
 #ifndef STDCALL
 #define STDCALL __stdcall
 #endif // STDCALL
 #else
 #define STDCALL
-#endif // __CGSS_OS_WINDOWS__
+#endif // __ACB_OS_WINDOWS__
 
 #endif // STDCALL
 
@@ -44,7 +52,7 @@
 
 using bool_t = std::uint32_t;
 
-#ifndef __CGSS_OS_WINDOWS__
+#ifndef __ACB_OS_WINDOWS__
 using LPCSTR = const char *;
 #endif
 #ifndef TRUE
@@ -68,7 +76,7 @@ using LPCSTR = const char *;
 #define _REF_
 #endif
 
-#ifdef __CGSS_OS_WINDOWS__
+#ifdef __ACB_OS_WINDOWS__
 
 #ifndef _MBCS
 #define _MBCS
@@ -82,7 +90,7 @@ using LPCSTR = const char *;
 #define NOMINMAX
 #endif
 
-#endif // __CGSS_OS_WINDOWS__
+#endif // __ACB_OS_WINDOWS__
 
 #define PURE_STATIC(className)                               \
 public:                                                      \
@@ -101,4 +109,4 @@ private:                                 \
     typedef parent_cls MyBase;           \
     typedef child_cls MyClass
 
-#endif // CGSS_ENV_H_
+#endif // ACB_ENV_H_

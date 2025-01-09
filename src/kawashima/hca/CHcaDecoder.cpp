@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <cstring>
 
-#include "cgss_cdata.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env_ns.h"
 #include "kawashima/hca/CHcaDecoder.h"
 #include "kawashima/hca/hca_utils.h"
 #include "kawashima/wave/wave_native.h"
@@ -21,7 +21,7 @@
 #undef min
 #endif
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CHcaDecoder::CHcaDecoder(IStream *stream): MyClass(stream, HCA_DECODER_CONFIG()) {}
 
@@ -275,12 +275,12 @@ auto CHcaDecoder::DecodeBlock(std::uint32_t blockIndex) -> const std::uint8_t * 
     stream->Seek(hcaInfo.dataOffset + hcaInfo.blockSize * blockIndex, StreamSeekOrigin::Begin);
     auto actualRead = stream->Read(hcaBlockBuffer, hcaInfo.blockSize, 0, hcaInfo.blockSize);
     if (actualRead < hcaInfo.blockSize) {
-        throw CException(CGSS_OP_DECODE_FAILED);
+        throw CException(ACB_OP_DECODE_FAILED);
     }
 
     // Compute block checksum.
     if (ComputeChecksum(hcaBlockBuffer, hcaInfo.blockSize, 0) != 0) {
-        throw CException(CGSS_OP_CHECKSUM_ERROR);
+        throw CException(ACB_OP_CHECKSUM_ERROR);
     }
 
     // Decrypt block if needed.
@@ -290,7 +290,7 @@ auto CHcaDecoder::DecodeBlock(std::uint32_t blockIndex) -> const std::uint8_t * 
 
     const auto magic = data.GetBit(16);
     if (magic != 0xffff) {
-        throw CException(CGSS_OP_DECODE_FAILED);
+        throw CException(ACB_OP_DECODE_FAILED);
     }
 
     // Actual decoding process.
@@ -467,4 +467,4 @@ auto CHcaDecoder::Read(void *buffer, std::size_t bufferSize, std::size_t offset,
     return totalRead;
 }
 
-CGSS_NS_END
+ACB_NS_END

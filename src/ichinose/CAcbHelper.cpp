@@ -3,7 +3,7 @@
 #include "ichinose/CAcbHelper.h"
 #include "takamori/streams/CMemoryStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 auto CAcbHelper::ExtractToNewStream(IStream *stream, std::size_t offset, std::size_t size)
     -> CMemoryStream * {
@@ -46,4 +46,4 @@ auto CAcbHelper::RoundUpToAlignment(std::int32_t value, std::int32_t alignment) 
     return (value + alignment - 1) / alignment * alignment;
 }
 
-CGSS_NS_END
+ACB_NS_END

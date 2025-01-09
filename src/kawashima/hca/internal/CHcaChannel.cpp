@@ -5,12 +5,12 @@
 #include <cstring>
 #include <tuple>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 
 #include "./CHcaChannel.h"
 #include "./CHcaData.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CHcaChannel::CHcaChannel() {
     std::memset(this, 0, sizeof(CHcaChannel));
@@ -494,4 +494,4 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
     }
 }
 
-CGSS_NS_END
+ACB_NS_END

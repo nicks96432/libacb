@@ -2,11 +2,11 @@
 #include <cstdint>
 #include <string>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 #include "takamori/streams/CStreamExtensions.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 void CStreamExtensions::ReadNullEndedString(
     IStream *stream, std::string &buffer, std::size_t bufferSize
@@ -23,4 +23,4 @@ void CStreamExtensions::ReadNullEndedString(
     }
 }
 
-CGSS_NS_END
+ACB_NS_END

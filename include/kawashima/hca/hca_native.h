@@ -1,17 +1,17 @@
-#ifndef CGSS_KAWASHIMA_HCA_HCA_NATIVE_H_
-#define CGSS_KAWASHIMA_HCA_HCA_NATIVE_H_
+#ifndef ACB_KAWASHIMA_HCA_HCA_NATIVE_H_
+#define ACB_KAWASHIMA_HCA_HCA_NATIVE_H_
 
 #include <cstdint>
 
-#include "cgss_env_ns.h"
-#include "cgss_env_platform.h"
+#include "acb_env_ns.h"
+#include "acb_env_platform.h"
 
-#ifdef __CGSS_OS_WINDOWS__
+#ifdef __ACB_OS_WINDOWS__
 #pragma warning(push)
 #pragma warning(disable: 4200)
 #endif
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 #pragma pack(push)
 #pragma pack(1)
@@ -294,10 +294,10 @@ struct HCA_PADDING_HEADER {
 
 #pragma pack(pop)
 
-CGSS_NS_END
+ACB_NS_END
 
-#ifdef __CGSS_OS_WINDOWS__
+#ifdef __ACB_OS_WINDOWS__
 #pragma warning(pop)
 #endif
 
-#endif // CGSS_KAWASHIMA_HCA_HCA_NATIVE_H_
+#endif // ACB_KAWASHIMA_HCA_HCA_NATIVE_H_

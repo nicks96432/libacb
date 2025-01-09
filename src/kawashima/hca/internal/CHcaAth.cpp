@@ -2,11 +2,11 @@
 #include <array>
 #include <cstdint>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 
 #include "./CHcaAth.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CHcaAth::CHcaAth() {
     Init0();
@@ -91,4 +91,4 @@ void CHcaAth::Init1(std::uint32_t key) {
     }
 }
 
-CGSS_NS_END
+ACB_NS_END

@@ -7,9 +7,9 @@
 #include <cstring>
 #include <type_traits>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 inline auto _bswap(std::uint16_t v) -> std::uint16_t {
 #if defined(__GNUC__)
@@ -80,6 +80,6 @@ inline auto ceil2(std::uint32_t a, std::uint32_t b) -> std::uint32_t {
     return (b > 0) ? (a / b + ((a % b) ? 1 : 0)) : 0;
 }
 
-CGSS_NS_END
+ACB_NS_END
 
 #endif // QUICK_UTILS_H_

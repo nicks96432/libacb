@@ -1,13 +1,13 @@
-#ifndef CGSS_KAWASHIMA_HCA_HCAUTILS_H_
-#define CGSS_KAWASHIMA_HCA_HCAUTILS_H_
+#ifndef ACB_KAWASHIMA_HCA_HCAUTILS_H_
+#define ACB_KAWASHIMA_HCA_HCAUTILS_H_
 
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 #include "takamori/exceptions/CFormatException.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 struct WaveSettings final {
     /**
@@ -47,6 +47,6 @@ inline void ensureMagicMatch(std::uint32_t toCheck, Magic standard) {
     }
 }
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_HCAUTILS_H_
+#endif // ACB_KAWASHIMA_HCA_HCAUTILS_H_

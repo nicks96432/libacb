@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "cgss_cdata.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env_ns.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CUtfField.h"
 #include "ichinose/CUtfReader.h"
@@ -16,7 +16,7 @@
 #include "takamori/streams/CStreamExtensions.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 constexpr std::array<std::uint8_t, 4> UTF_SIGNATURE = {'@', 'U', 'T', 'F'};
 
@@ -243,11 +243,11 @@ void CUtfTable::InitializeUtfSchema(
             tableDataStream->Seek(pos, StreamSeekOrigin::Begin);
 
             const auto storage =
-                static_cast<UtfColumnStorage>(columnType & CGSS_UTF_COLUMN_STORAGE_MASK);
-            const auto type = static_cast<UtfColumnType>(columnType & CGSS_UTF_COLUMN_TYPE_MASK);
+                static_cast<UtfColumnStorage>(columnType & ACB_UTF_COLUMN_STORAGE_MASK);
+            const auto type = static_cast<UtfColumnType>(columnType & ACB_UTF_COLUMN_TYPE_MASK);
 
-            field->type    = static_cast<CGSS_UTF_COLUMN_TYPE>(type);
-            field->storage = static_cast<CGSS_UTF_COLUMN_STORAGE>(storage);
+            field->type    = static_cast<ACB_UTF_COLUMN_TYPE>(type);
+            field->storage = static_cast<ACB_UTF_COLUMN_STORAGE>(storage);
 
             switch (storage) {
             case UtfColumnStorage::Const:
@@ -525,4 +525,4 @@ auto CUtfTable::GetFieldSize(std::uint32_t rowIndex, const char *fieldName, std:
     return FALSE;
 }
 
-CGSS_NS_END
+ACB_NS_END

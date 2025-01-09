@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "cgss_cdata.h"
+#include "acb_cdata.h"
 
 #include "./CHcaCipher.h"
 
@@ -27,7 +27,7 @@ static void TransformKey(
     }
 }
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CHcaCipher::CHcaCipher() {
     Init(CHcaCipherConfig(HcaCipherType::NoCipher));
@@ -187,4 +187,4 @@ auto CHcaCipher::InitEncryptTable() -> bool_t {
     return TRUE;
 }
 
-CGSS_NS_END
+ACB_NS_END

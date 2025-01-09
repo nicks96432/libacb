@@ -1,13 +1,13 @@
-#ifndef CGSS_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
-#define CGSS_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
+#ifndef ACB_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
+#define ACB_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
 
-#include "cgss_cdata.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CHcaDecoderConfig final: public HCA_DECODER_CONFIG {
+class ACB_EXPORT CHcaDecoderConfig final: public HCA_DECODER_CONFIG {
 
     __extends(HCA_DECODER_CONFIG, CHcaDecoderConfig);
 
@@ -15,6 +15,6 @@ public:
     CHcaDecoderConfig();
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_CHCADECODERCONFIG_H_
+#endif // ACB_KAWASHIMA_HCA_CHCADECODERCONFIG_H_

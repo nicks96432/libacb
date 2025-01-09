@@ -9,9 +9,9 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
-#include "common/quick_utils.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
+#include "acb_utils.h"
 #include "kawashima/hca/CHcaFormatReader.h"
 #include "kawashima/hca/hca_native.h"
 #include "kawashima/hca/hca_utils.h"
@@ -21,7 +21,7 @@
 #include "takamori/streams/CBinaryReader.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 class NullHcaReader final: public CHcaFormatReader {
 
@@ -147,7 +147,7 @@ void CHcaFormatReader::Initialize() {
         ENSURE_READ_ALL_BUFFER(headerContents, dataOffset);
         const auto headerChecksum = ComputeChecksum(headerContents, dataOffset, 0);
         if (headerChecksum != 0) {
-            throw CException(CGSS_OP_CHECKSUM_ERROR, "Header is corrupted.");
+            throw CException(ACB_OP_CHECKSUM_ERROR, "Header is corrupted.");
         }
         delete[] headerContents;
 
@@ -270,14 +270,14 @@ void CHcaFormatReader::Initialize() {
         if (areMagicMatch(magic, Magic::CIPHER)) {
             HCA_CIPHER_HEADER hcaCipherHeader;
             ENSURE_READ_ALL(hcaCipherHeader);
-            const auto cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(bswap(hcaCipherHeader.type));
+            const auto cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(bswap(hcaCipherHeader.type));
             hcaInfo.cipherType    = cipherType;
-            if (!(cipherType == CGSS_HCA_CIPH_NO_CIPHER || cipherType == CGSS_HCA_CIPH_STATIC ||
-                  cipherType == CGSS_HCA_CIPH_WITH_KEY)) {
+            if (!(cipherType == ACB_HCA_CIPH_NO_CIPHER || cipherType == ACB_HCA_CIPH_STATIC ||
+                  cipherType == ACB_HCA_CIPH_WITH_KEY)) {
                 throw CFormatException("Cipher type is invalid.");
             }
         } else {
-            hcaInfo.cipherType = CGSS_HCA_CIPH_NO_CIPHER;
+            hcaInfo.cipherType = ACB_HCA_CIPH_NO_CIPHER;
         }
     }
 
@@ -394,4 +394,4 @@ auto CHcaFormatReader::IsPossibleHcaStream(IStream *stream) -> bool_t {
     return TRUE;
 }
 
-CGSS_NS_END
+ACB_NS_END

@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_env_ns.h"
-#include "common/quick_utils.h"
+#include "acb_env_ns.h"
+#include "acb_utils.h"
 #include "takamori/exceptions/CException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CBinaryReader.h"
@@ -26,7 +26,7 @@ static const union {
 
 #define O32_HOST_ORDER (_o32_host_order.value)
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CBinaryReader::CBinaryReader(IStream *baseStream): _baseStream(baseStream) {}
 
@@ -46,7 +46,7 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     auto read = stream->Read(buffer.data(), buffer.size(), 0, buffer.size()); \
     do {                                                                      \
         if (read < buffer.size()) {                                           \
-            throw CException(CGSS_OP_BUFFER_TOO_SMALL);                       \
+            throw CException(ACB_OP_BUFFER_TOO_SMALL);                       \
         }                                                                     \
     } while (0)
 
@@ -598,4 +598,4 @@ auto CBinaryReader::PeekBytes(
     return v;
 }
 
-CGSS_NS_END
+ACB_NS_END

@@ -9,7 +9,7 @@
 #include <format>
 #include <string>
 
-#include "common/quick_utils.h"
+#include "acb_utils.h"
 #include "internal/CHcaCipher.h"
 #include "internal/CHcaData.h"
 #include "kawashima/hca/CHcaCipherConverter.h"
@@ -24,14 +24,14 @@
 #undef min
 #endif
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 #define ENSURE_READ_ALL_BUFFER(buffer, size)                                   \
     bufferSize = size;                                                         \
     actualRead = stream->Read(buffer, bufferSize, 0, bufferSize);              \
     do {                                                                       \
         if (actualRead < bufferSize) {                                         \
-            throw CException(CGSS_OP_FORMAT_ERROR, "Unexpected end of file."); \
+            throw CException(ACB_OP_FORMAT_ERROR, "Unexpected end of file."); \
         }                                                                      \
     } while (0)
 
@@ -258,4 +258,4 @@ auto CHcaCipherConverter::Read(
     return totalRead;
 }
 
-CGSS_NS_END
+ACB_NS_END

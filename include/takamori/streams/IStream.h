@@ -1,16 +1,16 @@
-#ifndef CGSS_TAKAMORI_STREAMS_ISTREAM_H_
-#define CGSS_TAKAMORI_STREAMS_ISTREAM_H_
+#ifndef ACB_TAKAMORI_STREAMS_ISTREAM_H_
+#define ACB_TAKAMORI_STREAMS_ISTREAM_H_
 
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_enum.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_enum.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-struct CGSS_EXPORT IStream {
+struct ACB_EXPORT IStream {
 
     IStream(IStream &) = delete;
 
@@ -53,6 +53,6 @@ protected:
     IStream() = default;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_STREAMS_ISTREAM_H_
+#endif // ACB_TAKAMORI_STREAMS_ISTREAM_H_

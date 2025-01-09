@@ -1,11 +1,11 @@
-#ifndef CGSS_CDATA_H_
-#define CGSS_CDATA_H_
+#ifndef ACB_CDATA_H_
+#define ACB_CDATA_H_
 
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_cenum.h"
-#include "cgss_env.h"
+#include "acb_cenum.h"
+#include "acb_env.h"
 
 #pragma pack(push)
 #pragma pack(1)
@@ -63,7 +63,7 @@ struct HCA_CIPHER_CONFIG {
         std::uint64_t key;
     } key;
 
-    CGSS_HCA_CIPHER_TYPE cipherType;
+    ACB_HCA_CIPHER_TYPE cipherType;
 
     std::uint16_t keyModifier;
 };
@@ -124,7 +124,7 @@ struct HCA_INFO {
     /**
      * Cipher type.
      */
-    CGSS_HCA_CIPHER_TYPE cipherType;
+    ACB_HCA_CIPHER_TYPE cipherType;
     /**
      * Relative volume in RVA (relative volume adjustment) table. It is the multiply factor for
      * floating point wave data.
@@ -153,8 +153,8 @@ constexpr std::size_t UTF_FIELD_MAX_NAME_LEN = 1024;
 
 struct UTF_FIELD {
 
-    CGSS_UTF_COLUMN_TYPE type;
-    CGSS_UTF_COLUMN_STORAGE storage;
+    ACB_UTF_COLUMN_TYPE type;
+    ACB_UTF_COLUMN_STORAGE storage;
 
     std::uint32_t offset;
     std::uint32_t offsetInRow;
@@ -221,4 +221,4 @@ struct UTF_TABLE {
 
 #pragma pack(pop)
 
-#endif // CGSS_CDATA_H
+#endif // ACB_CDATA_H

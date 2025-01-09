@@ -1,16 +1,16 @@
-#ifndef CGSS_ICHINOSE_CUTFREADER_H_
-#define CGSS_ICHINOSE_CUTFREADER_H_
+#ifndef ACB_ICHINOSE_CUTFREADER_H_
+#define ACB_ICHINOSE_CUTFREADER_H_
 
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CUtfReader final {
+class ACB_EXPORT CUtfReader final {
 
     __root_class(CUtfReader);
 
@@ -76,6 +76,6 @@ private:
     std::uint64_t _currentUtfStringOffset;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_ICHINOSE_CUTFREADER_H_
+#endif // ACB_ICHINOSE_CUTFREADER_H_

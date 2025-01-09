@@ -1,16 +1,16 @@
-#ifndef CGSS_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
-#define CGSS_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
+#ifndef ACB_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
+#define ACB_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
 
 #include <cstdint>
 
-#include "cgss_cdata.h"
-#include "cgss_enum.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_enum.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CHcaCipherConfig final: public HCA_CIPHER_CONFIG {
+class ACB_EXPORT CHcaCipherConfig final: public HCA_CIPHER_CONFIG {
 
     __extends(HCA_CIPHER_CONFIG, CHcaCipherConfig);
 
@@ -31,6 +31,6 @@ private:
     void Initialize(std::uint32_t key1, std::uint32_t key2, std::uint16_t modifier);
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_
+#endif // ACB_KAWASHIMA_HCA_CHCACIPHERCONFIG_H_

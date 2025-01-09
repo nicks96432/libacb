@@ -3,22 +3,22 @@
 #include <cstdint>
 #include <cstring>
 
-#include "cgss_cdata.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CAfs2Archive.h"
 #include "takamori/exceptions/CFormatException.h"
 #include "takamori/streams/CBinaryReader.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 static constexpr std::array<std::uint8_t, 4> Afs2Signature = {0x41, 0x46, 0x53, 0x32}; // 'AFS2'
 static constexpr std::int32_t InvalidCueId                 = -1;
 
 CAfs2Archive::CAfs2Archive(
-    cgss::IStream *stream, std::uint64_t offset, const std::string &fileName, bool_t disposeStream
+    acb::IStream *stream, std::uint64_t offset, const std::string &fileName, bool_t disposeStream
 ) {
     _stream         = stream;
     _streamOffset   = offset;
@@ -145,4 +145,4 @@ auto CAfs2Archive::GetFileName() const -> const std::string & {
     return _fileName;
 }
 
-CGSS_NS_END
+ACB_NS_END

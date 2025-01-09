@@ -1,12 +1,12 @@
-#ifndef CGSS_TAKAMORI_UTILITIES_H_
-#define CGSS_TAKAMORI_UTILITIES_H_
+#ifndef ACB_TAKAMORI_UTILITIES_H_
+#define ACB_TAKAMORI_UTILITIES_H_
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT Utilities {
+class ACB_EXPORT Utilities {
 
 public:
     using HLIB = void *;
@@ -20,6 +20,6 @@ public:
     PURE_STATIC(Utilities);
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_UTILITIES_H_
+#endif // ACB_TAKAMORI_UTILITIES_H_

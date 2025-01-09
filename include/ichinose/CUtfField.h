@@ -1,16 +1,16 @@
-#ifndef CGSS_ICHINOSE_CUTF_FIELD_H_
-#define CGSS_ICHINOSE_CUTF_FIELD_H_
+#ifndef ACB_ICHINOSE_CUTF_FIELD_H_
+#define ACB_ICHINOSE_CUTF_FIELD_H_
 
 #include <cstdint>
 #include <string>
 
-#include "cgss_cdata.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CUtfField final: public UTF_FIELD {
+class ACB_EXPORT CUtfField final: public UTF_FIELD {
 
     __extends(UTF_FIELD, CUtfField);
 
@@ -51,6 +51,6 @@ private:
     void ReleaseData();
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_ICHINOSE_CUTF_FIELD_H_
+#endif // ACB_ICHINOSE_CUTF_FIELD_H_

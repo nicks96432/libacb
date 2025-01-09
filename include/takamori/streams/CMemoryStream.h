@@ -1,17 +1,17 @@
-#ifndef CGSS_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
-#define CGSS_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
+#ifndef ACB_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
+#define ACB_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
 
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
 #include "./CStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CMemoryStream final: public CStream {
+class ACB_EXPORT CMemoryStream final: public CStream {
 
     __extends(CStream, CMemoryStream);
 
@@ -85,6 +85,6 @@ private:
     bool_t _isWritable;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_STREAMS_CMEMORYSTREAM_H_
+#endif // ACB_TAKAMORI_STREAMS_CMEMORYSTREAM_H_

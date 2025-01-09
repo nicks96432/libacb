@@ -1,8 +1,8 @@
 #include <bit>
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 #include "takamori/CBitConverter.h"
 
 // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
@@ -21,7 +21,7 @@ static const union {
 
 #define O32_HOST_ORDER (_o32_host_order.value)
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 auto CBitConverter::IsLittleEndian() -> bool_t {
     return static_cast<bool_t>(O32_HOST_ORDER == O32_LITTLE_ENDIAN);
@@ -63,4 +63,4 @@ TO_INT(64, , )
 
 TO_INT(64, u, U)
 
-CGSS_NS_END
+ACB_NS_END

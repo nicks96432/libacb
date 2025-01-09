@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
-project(cgss
+project(acb
     LANGUAGES CXX
+    VERSION 0.4.0
 )
 
-option(LIBCGSS_BUILD_STATIC_LIBS "Build the static library" ON)
-option(LIBCGSS_BUILD_SHARED_LIBS "Build the shared library" ON)
+option(LIBACB_BUILD_STATIC_LIBS "Build the static library" ON)
+option(LIBACB_BUILD_SHARED_LIBS "Build the shared library" ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -59,7 +60,7 @@ set(debug "$<CONFIG:Debug>")
 set(debuginfo "$<CONFIG:Debug,RelWithDebInfo>")
 
 add_compile_options(
-    "$<${is_msvc}:/MT;/W4;/WX;/EHsc;>"
+    "$<${is_msvc}:;/W4;/WX;/EHsc;>"
     "$<$<NOT:${is_msvc}>:-Wall;-Wextra;-Wpedantic;-Werror;-fdiagnostics-color=always;>"
 
     "$<${is_msvc}:$<${debug}:/Od;>$<${debuginfo}:/DEBUG:FULL;>>"
@@ -69,49 +70,36 @@ add_link_options(
     "$<$<NOT:${is_msvc}>:$<$<NOT:${debug}>:-z;now;>>"
 )
 
-set(LIBCGSS_INCLUDE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+configure_file(include/acb_env.h.in include/acb_env.h @ONLY)
 
-file(GLOB_RECURSE LIBCGSS_SOURCE_FILES "src/**/*.cpp" "src/**/*.h")
+file(GLOB_RECURSE LIBACB_SOURCE_FILES "src/**/*.cpp" "src/**/*.h")
+add_library(acb-objects OBJECT ${LIBACB_SOURCE_FILES})
 
-set(LIBCGSS_DEF_FILE src/cgss.def)
-set(LIBCGSS_SOURCE_FILES ${LIBCGSS_SOURCE_FILES})
+target_include_directories(acb-objects PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include)
+set_property(TARGET acb-objects PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-if(LIBCGSS_BUILD_STATIC_LIBS)
-    add_library(cgss-static STATIC ${LIBCGSS_SOURCE_FILES})
-    target_include_directories(cgss-static PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
-    set_target_properties(cgss-static PROPERTIES OUTPUT_NAME cgss)
+if(UNIX AND NOT (CYGWIN OR MINGW))
+    target_link_libraries(acb-objects dl)
+endif()
 
-    if(UNIX AND NOT (CYGWIN OR MINGW))
-        target_link_libraries(cgss-static dl)
-    endif()
-
-    if(WIN32)
-        set_target_properties(cgss-static PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
-    endif()
+if(LIBACB_BUILD_STATIC_LIBS)
+    add_library(acb-static STATIC $<TARGET_OBJECTS:acb-objects>)
+    set_target_properties(acb-static PROPERTIES OUTPUT_NAME acb)
 
     install(
-        TARGETS                   cgss-static
+        TARGETS                   acb-static
         ARCHIVE DESTINATION       lib
         LIBRARY DESTINATION       lib
         RUNTIME DESTINATION       bin
     )
 endif()
 
-if(LIBCGSS_BUILD_SHARED_LIBS)
-    add_library(cgss-shared SHARED ${LIBCGSS_SOURCE_FILES})
-    target_include_directories(cgss-shared PUBLIC ${LIBCGSS_INCLUDE_DIRECTORY})
-    set_target_properties(cgss-shared PROPERTIES OUTPUT_NAME cgss)
-
-    if(UNIX AND NOT (CYGWIN OR MINGW))
-        target_link_libraries(cgss-shared dl)
-    endif()
-
-    if(WIN32)
-        set_target_properties(cgss-shared PROPERTIES LINK_DEF_FILE_FLAG ${LIBCGSS_DEF_FILE})
-    endif()
+if(LIBACB_BUILD_SHARED_LIBS)
+    add_library(acb-shared SHARED $<TARGET_OBJECTS:acb-objects>)
+    set_target_properties(acb-shared PROPERTIES OUTPUT_NAME acb)
 
     install(
-        TARGETS                   cgss-static
+        TARGETS                   acb-static
         ARCHIVE DESTINATION       lib
         LIBRARY DESTINATION       lib
         RUNTIME DESTINATION       lib
@@ -119,6 +107,6 @@ if(LIBCGSS_BUILD_SHARED_LIBS)
 endif()
 
 install(
-    DIRECTORY         ${LIBCGSS_INCLUDE_DIRECTORY}
+    DIRECTORY         ${LIBACB_INCLUDE_DIRECTORY}
     DESTINATION       include
 )

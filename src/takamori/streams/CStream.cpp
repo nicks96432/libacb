@@ -1,12 +1,12 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 #include "takamori/exceptions/CArgumentException.h"
 #include "takamori/streams/CStream.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 void CStream::Seek(std::int64_t offset, StreamSeekOrigin origin) {
     std::int64_t position = 0;
@@ -65,4 +65,4 @@ void CStream::CopyTo(IStream &destination, std::uint32_t bufferSize) {
     delete[] buffer;
 }
 
-CGSS_NS_END
+ACB_NS_END

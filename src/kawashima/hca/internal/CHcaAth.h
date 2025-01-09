@@ -1,13 +1,13 @@
-#ifndef CGSS_KAWASHIMA_HCA_CHCAATH_H_
-#define CGSS_KAWASHIMA_HCA_CHCAATH_H_
+#ifndef ACB_KAWASHIMA_HCA_CHCAATH_H_
+#define ACB_KAWASHIMA_HCA_CHCAATH_H_
 
 #include <array>
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 class CHcaAth {
 
@@ -28,6 +28,6 @@ private:
     void Init1(std::uint32_t key);
 };
 
-CGSS_NS_END
+ACB_NS_END
 
 #endif

@@ -1,14 +1,14 @@
-#ifndef CGSS_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
-#define CGSS_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
+#ifndef ACB_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
+#define ACB_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
 
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CDefaultWaveGenerator final {
+class ACB_EXPORT CDefaultWaveGenerator final {
 
 public:
     static auto
@@ -29,6 +29,6 @@ public:
     PURE_STATIC(CDefaultWaveGenerator);
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_
+#endif // ACB_KAWASHIMA_HCA_CDEFAULTWAVEGENERATOR_H_

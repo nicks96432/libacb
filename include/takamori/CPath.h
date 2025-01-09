@@ -1,14 +1,14 @@
-#ifndef CGSS_TAKAMORI_CPATH_H_
-#define CGSS_TAKAMORI_CPATH_H_
+#ifndef ACB_TAKAMORI_CPATH_H_
+#define ACB_TAKAMORI_CPATH_H_
 
 #include <string>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CPath final {
+class ACB_EXPORT CPath final {
 
     PURE_STATIC(CPath);
 
@@ -27,6 +27,6 @@ private:
     static auto FindLastSlash(const std::string &path) -> std::string::size_type;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_CPATH_H_
+#endif // ACB_TAKAMORI_CPATH_H_

@@ -1,11 +1,11 @@
-#ifndef CGSS_KAWASHIMA_WAVE_WAVE_NATIVE_H_
-#define CGSS_KAWASHIMA_WAVE_WAVE_NATIVE_H_
+#ifndef ACB_KAWASHIMA_WAVE_WAVE_NATIVE_H_
+#define ACB_KAWASHIMA_WAVE_WAVE_NATIVE_H_
 
 #include <cstdint>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 // NOLINTBEGIN(modernize-avoid-c-arrays)
 
@@ -56,6 +56,6 @@ struct WaveDataSection {
 
 // NOLINTEND(modernize-avoid-c-arrays)
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_WAVE_WAVE_NATIVE_H_
+#endif // ACB_KAWASHIMA_WAVE_WAVE_NATIVE_H_

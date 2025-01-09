@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <cstdio>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 #include "takamori/CFileSystem.h"
 #include "takamori/exceptions/CArgumentException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
@@ -19,7 +19,7 @@
 #define __FILE_READ_U  ("rb+")
 #define __FILE_WRITE_U ("wb+")
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CFileStream::CFileStream(const char *fileName): MyClass(fileName, FileMode::OpenOrCreate) {}
 
@@ -238,4 +238,4 @@ void CFileStream::CreateFileInternal(const char *fileName) {
     std::fclose(fp);
 }
 
-CGSS_NS_END
+ACB_NS_END

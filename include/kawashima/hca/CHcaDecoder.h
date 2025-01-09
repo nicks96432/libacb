@@ -1,17 +1,17 @@
-#ifndef CGSS_KAWASHIMA_HCA_CHCADECODER_H_
-#define CGSS_KAWASHIMA_HCA_CHCADECODER_H_
+#ifndef ACB_KAWASHIMA_HCA_CHCADECODER_H_
+#define ACB_KAWASHIMA_HCA_CHCADECODER_H_
 
 #include <array>
 #include <cstdint>
 #include <map>
 
-#include "cgss_cdata.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
 #include "./CHcaFormatReader.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 class CHcaCipher;
 class CHcaAth;
@@ -22,9 +22,9 @@ class CHcaDecoder: public CHcaFormatReader {
     __extends(CHcaFormatReader, CHcaDecoder);
 
 public:
-    CGSS_EXPORT explicit CHcaDecoder(IStream *stream);
+    ACB_EXPORT explicit CHcaDecoder(IStream *stream);
 
-    CGSS_EXPORT CHcaDecoder(IStream *stream, const HCA_DECODER_CONFIG &decoderConfig);
+    ACB_EXPORT CHcaDecoder(IStream *stream, const HCA_DECODER_CONFIG &decoderConfig);
 
     CHcaDecoder(const CHcaDecoder &) = delete;
 
@@ -34,17 +34,17 @@ public:
 
     auto operator=(CHcaDecoder &&) -> CHcaDecoder & = delete;
 
-    CGSS_EXPORT ~CHcaDecoder() override;
+    ACB_EXPORT ~CHcaDecoder() override;
 
-    CGSS_EXPORT auto Read(
+    ACB_EXPORT auto Read(
         void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
     ) -> std::size_t override;
 
-    CGSS_EXPORT auto GetPosition() -> std::uint64_t override;
+    ACB_EXPORT auto GetPosition() -> std::uint64_t override;
 
-    CGSS_EXPORT void SetPosition(std::uint64_t value) override;
+    ACB_EXPORT void SetPosition(std::uint64_t value) override;
 
-    CGSS_EXPORT auto GetLength() -> std::uint64_t override;
+    ACB_EXPORT auto GetLength() -> std::uint64_t override;
 
 private:
     void InitializeExtra();
@@ -105,6 +105,6 @@ private:
     std::uint64_t _position;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_CHCADECODER_H_
+#endif // ACB_KAWASHIMA_HCA_CHCADECODER_H_

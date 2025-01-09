@@ -1,96 +1,96 @@
-#ifndef CGSS_ICHINOSE_CACBFILE_H_
-#define CGSS_ICHINOSE_CACBFILE_H_
+#ifndef ACB_ICHINOSE_CACBFILE_H_
+#define ACB_ICHINOSE_CACBFILE_H_
 
 #include <cstdint>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 #include "ichinose/CAfs2Archive.h"
 
 #include "./CUtfTable.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 class CAcbFile final: public CUtfTable {
 
     __extends(CUtfTable, CAcbFile);
 
 public:
-    CGSS_EXPORT CAcbFile(IStream *stream, const char *fileName);
+    ACB_EXPORT CAcbFile(IStream *stream, const char *fileName);
 
-    CGSS_EXPORT CAcbFile(IStream *stream, std::uint64_t streamOffset, const char *fileName);
+    ACB_EXPORT CAcbFile(IStream *stream, std::uint64_t streamOffset, const char *fileName);
 
-    CGSS_EXPORT ~CAcbFile() override;
+    ACB_EXPORT ~CAcbFile() override;
 
-    CGSS_EXPORT auto GetFileNames() const -> const std::vector<std::string> &;
+    ACB_EXPORT auto GetFileNames() const -> const std::vector<std::string> &;
 
-    CGSS_EXPORT auto GetFileName() const -> const char *;
+    ACB_EXPORT auto GetFileName() const -> const char *;
 
-    CGSS_EXPORT auto
+    ACB_EXPORT auto
     OpenDataStream(const AFS2_FILE_RECORD *fileRecord, bool_t isStreaming) const -> IStream *;
 
-    CGSS_EXPORT auto OpenDataStream(const char *fileName) const -> IStream *;
+    ACB_EXPORT auto OpenDataStream(const char *fileName) const -> IStream *;
 
-    CGSS_EXPORT auto OpenDataStream(std::uint32_t cueId) const -> IStream *;
+    ACB_EXPORT auto OpenDataStream(std::uint32_t cueId) const -> IStream *;
 
-    CGSS_EXPORT auto GetSymbolicFileNameHintByCueId(std::uint32_t cueId) const -> std::string;
+    ACB_EXPORT auto GetSymbolicFileNameHintByCueId(std::uint32_t cueId) const -> std::string;
 
-    CGSS_EXPORT static auto GetSymbolicFileBaseNameByCueId(std::uint32_t cueId) -> std::string;
+    ACB_EXPORT static auto GetSymbolicFileBaseNameByCueId(std::uint32_t cueId) -> std::string;
 
-    CGSS_EXPORT auto GetSymbolicFileNameHintByTrackIndex(std::uint32_t trackIndex
+    ACB_EXPORT auto GetSymbolicFileNameHintByTrackIndex(std::uint32_t trackIndex
     ) const -> std::string;
 
-    CGSS_EXPORT static auto GetSymbolicFileBaseNameByTrackIndex(std::uint32_t trackIndex
+    ACB_EXPORT static auto GetSymbolicFileBaseNameByTrackIndex(std::uint32_t trackIndex
     ) -> std::string;
 
-    CGSS_EXPORT auto GetCueNameByCueId(std::uint32_t cueId) const -> std::string;
+    ACB_EXPORT auto GetCueNameByCueId(std::uint32_t cueId) const -> std::string;
 
-    CGSS_EXPORT auto GetCueNameByTrackIndex(std::uint32_t trackIndex) const -> std::string;
+    ACB_EXPORT auto GetCueNameByTrackIndex(std::uint32_t trackIndex) const -> std::string;
 
-    CGSS_EXPORT auto GetCueRecordByWaveformFileName(const char *waveformFileName
+    ACB_EXPORT auto GetCueRecordByWaveformFileName(const char *waveformFileName
     ) const -> const ACB_CUE_RECORD *;
 
-    CGSS_EXPORT auto GetCueRecordByCueId(std::uint32_t cueId) const -> const ACB_CUE_RECORD *;
+    ACB_EXPORT auto GetCueRecordByCueId(std::uint32_t cueId) const -> const ACB_CUE_RECORD *;
 
-    CGSS_EXPORT auto GetFileRecordByWaveformFileName(const char *waveformFileName
+    ACB_EXPORT auto GetFileRecordByWaveformFileName(const char *waveformFileName
     ) const -> const AFS2_FILE_RECORD *;
 
-    CGSS_EXPORT auto GetFileRecordByCueId(std::uint32_t cueId) const -> const AFS2_FILE_RECORD *;
+    ACB_EXPORT auto GetFileRecordByCueId(std::uint32_t cueId) const -> const AFS2_FILE_RECORD *;
 
-    CGSS_EXPORT auto GetFileRecordByTrackIndex(std::uint32_t trackIndex
+    ACB_EXPORT auto GetFileRecordByTrackIndex(std::uint32_t trackIndex
     ) const -> const AFS2_FILE_RECORD *;
 
-    CGSS_EXPORT auto GetTrackCountOfCueByCueId(std::uint32_t cueId) const -> std::uint32_t;
+    ACB_EXPORT auto GetTrackCountOfCueByCueId(std::uint32_t cueId) const -> std::uint32_t;
 
-    CGSS_EXPORT auto GetTrackIndicesOfCueByCueId(
+    ACB_EXPORT auto GetTrackIndicesOfCueByCueId(
         std::uint32_t cueId, std::uint32_t *numberOfTracks, std::uint32_t *trackIndices
     ) const -> bool_t;
 
-    CGSS_EXPORT auto GetTrackIndicesOfCueByCueId(
+    ACB_EXPORT auto GetTrackIndicesOfCueByCueId(
         std::uint32_t cueId, std::vector<std::uint32_t> &trackIndices
     ) const -> bool_t;
 
-    CGSS_EXPORT auto GetTrackRecords() const -> const std::vector<ACB_TRACK_RECORD> &;
+    ACB_EXPORT auto GetTrackRecords() const -> const std::vector<ACB_TRACK_RECORD> &;
 
-    CGSS_EXPORT auto IsCueIdentified(std::uint32_t cueId) const -> bool_t;
+    ACB_EXPORT auto IsCueIdentified(std::uint32_t cueId) const -> bool_t;
 
-    CGSS_EXPORT void Initialize();
+    ACB_EXPORT void Initialize();
 
-    CGSS_EXPORT auto GetInternalAwb() const -> const CAfs2Archive *;
+    ACB_EXPORT auto GetInternalAwb() const -> const CAfs2Archive *;
 
-    CGSS_EXPORT auto GetExternalAwb() const -> const CAfs2Archive *;
+    ACB_EXPORT auto GetExternalAwb() const -> const CAfs2Archive *;
 
-    CGSS_EXPORT auto GetFormatVersion() const -> std::uint32_t;
+    ACB_EXPORT auto GetFormatVersion() const -> std::uint32_t;
 
-    CGSS_EXPORT auto GetFileExtensionHintByCueId(std::uint32_t cueId) const -> std::string;
+    ACB_EXPORT auto GetFileExtensionHintByCueId(std::uint32_t cueId) const -> std::string;
 
-    CGSS_EXPORT auto GetFileExtensionHintByWaveformFileName(const char *waveformFileName
+    ACB_EXPORT auto GetFileExtensionHintByWaveformFileName(const char *waveformFileName
     ) const -> std::string;
 
-    CGSS_EXPORT auto GetFileExtensionHintByTrackIndex(std::uint32_t trackIndex
+    ACB_EXPORT auto GetFileExtensionHintByTrackIndex(std::uint32_t trackIndex
     ) const -> std::string;
 
     static constexpr std::uint32_t KEY_MODIFIER_ENABLED_VERSION = 0x01300000;
@@ -137,6 +137,6 @@ private:
     const char *_fileName;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_ICHINOSE_CACBFILE_H_
+#endif // ACB_ICHINOSE_CACBFILE_H_

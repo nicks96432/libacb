@@ -1,7 +1,7 @@
 MIT License
 
 Copyright (c) 2016 George Wu <uiharu@buaa.edu.cn>
-Copyright (c) 2023 我可能很廢
+Copyright (c) 2023-2025 我可能很廢
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

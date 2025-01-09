@@ -2,11 +2,11 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 
 #include "./CHcaData.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CHcaData::CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::uint32_t size) {
     _data     = data;
@@ -45,4 +45,4 @@ void CHcaData::AddBit(std::int32_t bitSize) {
     _bit += bitSize;
 }
 
-CGSS_NS_END
+ACB_NS_END

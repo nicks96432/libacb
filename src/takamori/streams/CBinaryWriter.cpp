@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "common/quick_utils.h"
+#include "acb_utils.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CBinaryWriter.h"
 
@@ -31,7 +31,7 @@ static const union {
     auto written                 = _baseStream->Write(buffer, bufferSize, 0, bufferSize); \
     return written
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CBinaryWriter::CBinaryWriter(IStream *baseStream): _baseStream(baseStream) {}
 
@@ -154,4 +154,4 @@ void CBinaryWriter::Flush() {
     _baseStream->Flush();
 }
 
-CGSS_NS_END
+ACB_NS_END

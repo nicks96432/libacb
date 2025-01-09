@@ -3,7 +3,7 @@
 #include "kawashima/hca/CDefaultWaveGenerator.h"
 #include "takamori/exceptions/CArgumentException.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 auto CDefaultWaveGenerator::Decode8BitU(
     float data, std::uint8_t *buffer, const std::uint32_t cursor
@@ -76,4 +76,4 @@ auto CDefaultWaveGenerator::DecodeFloat(
     return cursor + 4;
 }
 
-CGSS_NS_END
+ACB_NS_END

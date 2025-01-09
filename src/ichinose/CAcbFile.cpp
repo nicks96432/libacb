@@ -6,11 +6,11 @@
 #include <type_traits>
 #include <vector>
 
-#include "cgss_cdata.h"
-#include "cgss_cenum.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
-#include "cgss_env_platform.h"
+#include "acb_cdata.h"
+#include "acb_cenum.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
+#include "acb_env_platform.h"
 #include "ichinose/CAcbFile.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CAfs2Archive.h"
@@ -23,7 +23,7 @@
 #include "takamori/streams/CFileStream.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 #define DEFAULT_BINARY_FILE_EXTENSION ".bin"
 static const std::string &DefaultBinaryFileExtension = DEFAULT_BINARY_FILE_EXTENSION;
@@ -39,7 +39,7 @@ auto GetFieldValueAsString(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, std::string &s
 ) -> bool_t;
 
-CAcbFile::CAcbFile(cgss::IStream *stream, const char *fileName): MyClass(stream, 0, fileName) {}
+CAcbFile::CAcbFile(acb::IStream *stream, const char *fileName): MyClass(stream, 0, fileName) {}
 
 CAcbFile::CAcbFile(IStream *stream, std::uint64_t streamOffset, const char *fileName)
     : MyBase(stream, streamOffset) {
@@ -107,12 +107,12 @@ void CAcbFile::InitializeCueList() {
         GetFieldValueAsNumber(cueTable, i, "CueId", &cue.cueId);
         GetFieldValueAsNumber(cueTable, i, "ReferenceType", &cue.referenceType);
 
-#ifdef __CGSS_OS_WINDOWS__
+#ifdef __ACB_OS_WINDOWS__
 #pragma warning(push)
 #pragma warning(disable: 4366)
 #endif
         GetFieldValueAsNumber(cueTable, i, "ReferenceIndex", &cue.referenceIndex);
-#ifdef __CGSS_OS_WINDOWS__
+#ifdef __ACB_OS_WINDOWS__
 #pragma warning(pop)
 #endif
 
@@ -279,11 +279,11 @@ void CAcbFile::InitializeTrackList() {
         bool isStoredPerRow;
 
         switch (refItemField->storage) {
-        case CGSS_UTF_COLUMN_STORAGE_PER_ROW:
+        case ACB_UTF_COLUMN_STORAGE_PER_ROW:
             isStoredPerRow = true;
             break;
-        case CGSS_UTF_COLUMN_STORAGE_CONST:
-        case CGSS_UTF_COLUMN_STORAGE_CONST2:
+        case ACB_UTF_COLUMN_STORAGE_CONST:
+        case ACB_UTF_COLUMN_STORAGE_CONST2:
             isStoredPerRow = false;
             break;
         default:
@@ -908,21 +908,21 @@ auto CAcbFile::ChooseSourceStream(const ACB_CUE_RECORD *cue) const -> IStream * 
 }
 
 static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string {
-    auto type = static_cast<CGSS_ACB_WAVEFORM_ENCODE_TYPE>(encodeType);
+    auto type = static_cast<ACB_ACB_WAVEFORM_ENCODE_TYPE>(encodeType);
 
     switch (type) {
-    case CGSS_ACB_WAVEFORM_ADX:
+    case ACB_ACB_WAVEFORM_ADX:
         return ".adx";
-    case CGSS_ACB_WAVEFORM_HCA:
-    case CGSS_ACB_WAVEFORM_HCA2:
+    case ACB_ACB_WAVEFORM_HCA:
+    case ACB_ACB_WAVEFORM_HCA2:
         return ".hca";
-    case CGSS_ACB_WAVEFORM_VAG:
+    case ACB_ACB_WAVEFORM_VAG:
         return ".vag";
-    case CGSS_ACB_WAVEFORM_ATRAC3:
+    case ACB_ACB_WAVEFORM_ATRAC3:
         return ".at3";
-    case CGSS_ACB_WAVEFORM_BCWAV:
+    case ACB_ACB_WAVEFORM_BCWAV:
         return ".bcwav";
-    case CGSS_ACB_WAVEFORM_NINTENDO_DSP:
+    case ACB_ACB_WAVEFORM_NINTENDO_DSP:
         return ".dsp";
     default:
         break;
@@ -952,34 +952,34 @@ auto GetFieldValueAsNumber(
         if (std::strcmp(fieldName, field->name) == 0) {
             if (result) {
                 switch (field->type) {
-                case CGSS_UTF_COLUMN_TYPE_U8:
+                case ACB_UTF_COLUMN_TYPE_U8:
                     *result = static_cast<T>(field->value.u8);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_S8:
+                case ACB_UTF_COLUMN_TYPE_S8:
                     *result = static_cast<T>(field->value.s8);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_U16:
+                case ACB_UTF_COLUMN_TYPE_U16:
                     *result = static_cast<T>(field->value.u16);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_S16:
+                case ACB_UTF_COLUMN_TYPE_S16:
                     *result = static_cast<T>(field->value.s16);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_U32:
+                case ACB_UTF_COLUMN_TYPE_U32:
                     *result = static_cast<T>(field->value.u32);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_S32:
+                case ACB_UTF_COLUMN_TYPE_S32:
                     *result = static_cast<T>(field->value.s32);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_U64:
+                case ACB_UTF_COLUMN_TYPE_U64:
                     *result = static_cast<T>(field->value.u64);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_S64:
+                case ACB_UTF_COLUMN_TYPE_S64:
                     *result = static_cast<T>(field->value.s64);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_R32:
+                case ACB_UTF_COLUMN_TYPE_R32:
                     *result = static_cast<T>(field->value.r32);
                     break;
-                case CGSS_UTF_COLUMN_TYPE_R64:
+                case ACB_UTF_COLUMN_TYPE_R64:
                     *result = static_cast<T>(field->value.r64);
                     break;
                 default:
@@ -1018,4 +1018,4 @@ auto GetFieldValueAsString(
     return FALSE;
 }
 
-CGSS_NS_END
+ACB_NS_END

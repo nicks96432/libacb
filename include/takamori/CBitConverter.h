@@ -1,14 +1,14 @@
-#ifndef CGSS_TAKAMORI_CBITCONVERTER_H_
-#define CGSS_TAKAMORI_CBITCONVERTER_H_
+#ifndef ACB_TAKAMORI_CBITCONVERTER_H_
+#define ACB_TAKAMORI_CBITCONVERTER_H_
 
 #include <cstdint>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CBitConverter final {
+class ACB_EXPORT CBitConverter final {
 
     PURE_STATIC(CBitConverter);
 
@@ -32,6 +32,6 @@ public:
     static auto ToDouble(const void *p) -> double;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_CBITCONVERTER_H_
+#endif // ACB_TAKAMORI_CBITCONVERTER_H_

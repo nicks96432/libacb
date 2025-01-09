@@ -3,13 +3,13 @@
 #include <bit>
 #include <cstdint>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 #include "ichinose/CUtfReader.h"
 #include "takamori/CBitConverter.h"
 #include "takamori/streams/CBinaryReader.h"
 #include "takamori/streams/IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CUtfReader::CUtfReader(): _encrypted(FALSE), _seed(0), _increment(0) {
     _currentXor             = 0;
@@ -149,4 +149,4 @@ PEEK_FUNC(64, , )
 
 PEEK_FUNC(64, u, U)
 
-CGSS_NS_END
+ACB_NS_END

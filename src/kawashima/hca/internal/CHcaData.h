@@ -1,11 +1,11 @@
-#ifndef CGSS_KAWASHIMA_HCA_CHCADATA_H_
-#define CGSS_KAWASHIMA_HCA_CHCADATA_H_
+#ifndef ACB_KAWASHIMA_HCA_CHCADATA_H_
+#define ACB_KAWASHIMA_HCA_CHCADATA_H_
 
 #include <cstdint>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 class CHcaData {
 
@@ -27,6 +27,6 @@ private:
     std::int32_t _bit;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_CHCADATA_H_
+#endif // ACB_KAWASHIMA_HCA_CHCADATA_H_

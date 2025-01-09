@@ -1,16 +1,16 @@
-#ifndef CGSS_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
-#define CGSS_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
+#ifndef ACB_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
+#define ACB_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
 
 #include <cstdint>
 #include <map>
 
-#include "cgss_cdata.h"
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_cdata.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
 #include "./CHcaFormatReader.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 class CHcaCipher;
 
@@ -26,7 +26,7 @@ public:
      * @param cryptTo Wanted cipher type.
      * @return
      */
-    CGSS_EXPORT CHcaCipherConverter(
+    ACB_EXPORT CHcaCipherConverter(
         IStream *stream, const HCA_CIPHER_CONFIG &cryptFrom, const HCA_CIPHER_CONFIG &cryptTo
     );
 
@@ -38,17 +38,17 @@ public:
 
     auto operator=(CHcaCipherConverter &&) -> CHcaCipherConverter & = delete;
 
-    CGSS_EXPORT ~CHcaCipherConverter() override;
+    ACB_EXPORT ~CHcaCipherConverter() override;
 
-    CGSS_EXPORT auto Read(
+    ACB_EXPORT auto Read(
         void *buffer, std::size_t bufferSize, std::size_t offset, std::size_t count
     ) -> std::size_t override;
 
-    CGSS_EXPORT auto GetPosition() -> std::uint64_t override;
+    ACB_EXPORT auto GetPosition() -> std::uint64_t override;
 
-    CGSS_EXPORT void SetPosition(std::uint64_t value) override;
+    ACB_EXPORT void SetPosition(std::uint64_t value) override;
 
-    CGSS_EXPORT auto GetLength() -> std::uint64_t override;
+    ACB_EXPORT auto GetLength() -> std::uint64_t override;
 
 private:
     auto ConvertBlock(std::uint32_t blockIndex) -> const std::uint8_t *;
@@ -65,6 +65,6 @@ private:
     std::uint64_t _position;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_
+#endif // ACB_KAWASHIMA_HCA_CHCACIPHERCONVERTER_H_

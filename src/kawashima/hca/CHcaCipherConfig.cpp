@@ -1,10 +1,10 @@
 #include <cstdint>
 #include <cstring>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 #include "kawashima/hca/CHcaCipherConfig.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 CHcaCipherConfig::CHcaCipherConfig(): MyBase() {
     std::memset(this, 0, sizeof(CHcaCipherConfig));
@@ -15,7 +15,7 @@ CHcaCipherConfig::CHcaCipherConfig(HcaCipherType cipherType): MyClass() {
     if (cipherType == HcaCipherType::WithKey) {
         cipherType = HcaCipherType::NoCipher;
     }
-    this->cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(cipherType);
+    this->cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(cipherType);
 }
 
 CHcaCipherConfig::CHcaCipherConfig(std::uint32_t key1, std::uint32_t key2): MyClass() {
@@ -39,13 +39,13 @@ void CHcaCipherConfig::Initialize(
     std::uint32_t key1, std::uint32_t key2, std::uint16_t modifier
 ) {
     if (key1 == 0 && key2 == 0) {
-        cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(HcaCipherType::NoCipher);
+        cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(HcaCipherType::NoCipher);
     } else {
-        cipherType = static_cast<CGSS_HCA_CIPHER_TYPE>(HcaCipherType::WithKey);
+        cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(HcaCipherType::WithKey);
     }
     this->key.keyParts.key1 = key1;
     this->key.keyParts.key2 = key2;
     this->keyModifier       = modifier;
 }
 
-CGSS_NS_END
+ACB_NS_END

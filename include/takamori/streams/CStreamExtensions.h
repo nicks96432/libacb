@@ -1,17 +1,17 @@
-#ifndef CGSS_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_
-#define CGSS_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_
+#ifndef ACB_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_
+#define ACB_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_
 
 #include <cstddef>
 #include <string>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
 #include "./IStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CStreamExtensions {
+class ACB_EXPORT CStreamExtensions {
 
 public:
     CStreamExtensions() = delete;
@@ -27,6 +27,6 @@ public:
     static void ReadNullEndedString(IStream *stream, std::string &buffer, std::size_t bufferSize);
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_
+#endif // ACB_TAKAMORI_STREAMS_CSTREAMEXTENSIONS_H_

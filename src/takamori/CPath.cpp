@@ -1,10 +1,10 @@
 #include <algorithm>
 #include <string>
 
-#include "cgss_env_ns.h"
+#include "acb_env_ns.h"
 #include "takamori/CPath.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 auto CPath::Combine(const std::string &basePath, const std::string &path1) -> std::string {
     if (basePath.empty()) {
@@ -100,4 +100,4 @@ auto CPath::FindLastSlash(const std::string &path) -> std::string::size_type {
     return std::max(forward, backward);
 }
 
-CGSS_NS_END
+ACB_NS_END

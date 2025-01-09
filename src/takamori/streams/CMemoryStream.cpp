@@ -5,13 +5,13 @@
 
 // TODO: FILE: size_t vs. uint64
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 #include "takamori/exceptions/CArgumentException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CMemoryStream.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
 static const float MemoryStreamGrowFactor = 1.25f;
 
@@ -204,4 +204,4 @@ void CMemoryStream::EnsureCapacity(std::uint64_t requestedLength) {
     SetCapacity(capacity);
 }
 
-CGSS_NS_END
+ACB_NS_END

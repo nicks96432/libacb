@@ -1,14 +1,14 @@
-#ifndef CGSS_TAKAMORI_CFILESYSTEM_H_
-#define CGSS_TAKAMORI_CFILESYSTEM_H_
+#ifndef ACB_TAKAMORI_CFILESYSTEM_H_
+#define ACB_TAKAMORI_CFILESYSTEM_H_
 
 #include <string>
 
-#include "cgss_env.h"
-#include "cgss_env_ns.h"
+#include "acb_env.h"
+#include "acb_env_ns.h"
 
-CGSS_NS_BEGIN
+ACB_NS_BEGIN
 
-class CGSS_EXPORT CFileSystem final {
+class ACB_EXPORT CFileSystem final {
 
     PURE_STATIC(CFileSystem);
 
@@ -22,6 +22,6 @@ public:
     static auto RmFile(const std::string &path) -> bool_t;
 };
 
-CGSS_NS_END
+ACB_NS_END
 
-#endif // CGSS_TAKAMORI_CFILESYSTEM_H_
+#endif // ACB_TAKAMORI_CFILESYSTEM_H_
