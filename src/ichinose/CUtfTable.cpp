@@ -237,7 +237,7 @@ void CUtfTable::InitializeUtfSchema(
             const auto pos = tableDataStream->GetPosition();
             tableDataStream->Seek(header.stringTableOffset + nameOffset, StreamSeekOrigin::Begin);
             CStreamExtensions::ReadNullEndedString(
-                tableDataStream, fieldNameBuffer, sizeof(fieldNameBuffer)
+                tableDataStream, fieldNameBuffer, UTF_FIELD_MAX_NAME_LEN
             );
             field->SetName(fieldNameBuffer);
             tableDataStream->Seek(pos, StreamSeekOrigin::Begin);
