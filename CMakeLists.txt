@@ -64,8 +64,8 @@ add_compile_options(
     "$<${is_msvc}:;/W4;/WX;/EHsc;>"
     "$<$<NOT:${is_msvc}>:-Wall;-Wextra;-Wpedantic;-Werror;-fdiagnostics-color=always;>"
 
-    "$<${is_msvc}:$<${debug}:/Od;>$<${debuginfo}:/DEBUG:FULL;>>"
-    "$<$<NOT:${is_msvc}>:$<${debug}:-Og;>$<${debuginfo}:-g;-ggdb;>>"
+    "$<${is_msvc}:$<${debuginfo}:/DEBUG:FULL;>>"
+    "$<$<NOT:${is_msvc}>:$<${debuginfo}:-g;-ggdb;>>"
 )
 add_link_options(
     "$<$<NOT:${is_msvc}>:$<$<NOT:${debug}>:-z;now;>>"
