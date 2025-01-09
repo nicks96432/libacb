@@ -221,7 +221,6 @@ void CUtfTable::InitializeUtfSchema(
     const auto &header    = _utfHeader;
     const auto baseOffset = _streamOffset;
     auto &rows            = _rows;
-    std::string fieldNameBuffer;
 
     for (std::uint32_t i = 0; i < header.rowCount; ++i) {
         auto currentStreamOffset = schemaOffset;
@@ -236,10 +235,13 @@ void CUtfTable::InitializeUtfSchema(
                 CBinaryReader::PeekInt32BE(tableDataStream, currentStreamOffset + 1);
             const auto pos = tableDataStream->GetPosition();
             tableDataStream->Seek(header.stringTableOffset + nameOffset, StreamSeekOrigin::Begin);
+
+            std::string fieldNameBuffer;
             CStreamExtensions::ReadNullEndedString(
                 tableDataStream, fieldNameBuffer, UTF_FIELD_MAX_NAME_LEN
             );
             field->SetName(fieldNameBuffer);
+
             tableDataStream->Seek(pos, StreamSeekOrigin::Begin);
 
             const auto storage =
@@ -252,7 +254,7 @@ void CUtfTable::InitializeUtfSchema(
             switch (storage) {
             case UtfColumnStorage::Const:
             case UtfColumnStorage::Const2: {
-                const auto constantOffset = static_cast<std::uint32_t>(currentStreamOffset) + 5;
+                const auto constantOffset = currentStreamOffset + 5;
                 field->offsetInRow        = 0; // constant
 
                 switch (type) {
