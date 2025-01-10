@@ -60,12 +60,15 @@ set(is_msvc "$<CXX_COMPILER_ID:MSVC>")
 set(debug "$<CONFIG:Debug>")
 set(debuginfo "$<CONFIG:Debug,RelWithDebInfo>")
 
-add_compile_options(
-    "$<${is_msvc}:;/W4;/WX;/EHsc;>"
-    "$<$<NOT:${is_msvc}>:-Wall;-Wextra;-Wpedantic;-Werror;-fdiagnostics-color=always;>"
+set(warning_flag_msvc /W4 /WX /EHsc)
+set(warning_flag_gnu -Wall -Wextra -Wpedantic -Werror -fdiagnostics-color=always)
 
-    "$<${is_msvc}:$<${debuginfo}:/DEBUG:FULL;>>"
-    "$<$<NOT:${is_msvc}>:$<${debuginfo}:-g;-ggdb;>>"
+set(debug_flag_msvc /DEBUG:FULL)
+set(debug_flag_gnu -g -ggdb)
+
+add_compile_options(
+    "$<IF:${is_msvc},${warning_flag_msvc},${warning_flag_gnu}>"
+    "$<${debuginfo}:$<IF:${is_msvc},${debug_flag_msvc},${debug_flag_gnu}>>"
 )
 add_link_options(
     "$<$<NOT:${is_msvc}>:$<$<NOT:${debug}>:-z;now;>>"
