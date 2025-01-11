@@ -3,13 +3,13 @@
 #endif
 
 #include <algorithm>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <format>
 #include <string>
 
-#include "acb_utils.h"
 #include "internal/CHcaCipher.h"
 #include "internal/CHcaData.h"
 #include "kawashima/hca/CHcaCipherConverter.h"
@@ -26,13 +26,13 @@
 
 ACB_NS_BEGIN
 
-#define ENSURE_READ_ALL_BUFFER(buffer, size)                                   \
-    bufferSize = size;                                                         \
-    actualRead = stream->Read(buffer, bufferSize, 0, bufferSize);              \
-    do {                                                                       \
-        if (actualRead < bufferSize) {                                         \
+#define ENSURE_READ_ALL_BUFFER(buffer, size)                                  \
+    bufferSize = size;                                                        \
+    actualRead = stream->Read(buffer, bufferSize, 0, bufferSize);             \
+    do {                                                                      \
+        if (actualRead < bufferSize) {                                        \
             throw CException(ACB_OP_FORMAT_ERROR, "Unexpected end of file."); \
-        }                                                                      \
+        }                                                                     \
     } while (0)
 
 CHcaCipherConverter::CHcaCipherConverter(
@@ -129,13 +129,13 @@ auto CHcaCipherConverter::ConvertHeader() -> const std::uint8_t * {
     auto *ciph = reinterpret_cast<HCA_CIPHER_HEADER *>(headerBuffer + cursor);
     if (areMagicMatch(ciph->ciph, Magic::CIPHER)) {
         auto newCipherType = static_cast<std::uint16_t>(_ccTo.cipherType);
-        newCipherType      = bswap(newCipherType);
+        newCipherType      = std::byteswap(newCipherType);
         ciph->type         = newCipherType;
     }
 
     // Recompute checksum and write to the header.
     const auto newHeaderChecksum = ComputeChecksum(headerBuffer, hcaInfo.dataOffset - 2, 0);
-    *(std::uint16_t *)(headerBuffer + hcaInfo.dataOffset - 2) = bswap(newHeaderChecksum);
+    *(std::uint16_t *)(headerBuffer + hcaInfo.dataOffset - 2) = std::byteswap(newHeaderChecksum);
     return headerBuffer;
 }
 
@@ -183,7 +183,7 @@ auto CHcaCipherConverter::ConvertBlock(std::uint32_t blockIndex) -> const std::u
 
     // Fix block checksum.
     const auto checksum = ComputeChecksum(blockBuffer, validDataSize, 0);
-    *(std::uint16_t *)(blockBuffer + validDataSize) = bswap(checksum);
+    *(std::uint16_t *)(blockBuffer + validDataSize) = std::byteswap(checksum);
     return blockBuffer;
 }
 

@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include "acb_env_ns.h"
-#include "acb_utils.h"
 #include "takamori/exceptions/CException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CBinaryReader.h"
@@ -54,7 +53,7 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     ENSURE_READ((bit) / 8);                                                        \
     std::int##bit##_t ret = *reinterpret_cast<std::int##bit##_t *>(buffer.data()); \
     if (O32_HOST_ORDER != (hostEndian)) {                                          \
-        ret = bswap(ret);                                                          \
+        ret = std::byteswap(ret);                                                          \
     }                                                                              \
     return ret
 
@@ -62,7 +61,7 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     ENSURE_READ((bit) / 8);                                                          \
     std::uint##bit##_t ret = *reinterpret_cast<std::uint##bit##_t *>(buffer.data()); \
     if (O32_HOST_ORDER != (hostEndian)) {                                            \
-        ret = bswap(ret);                                                            \
+        ret = std::byteswap(ret);                                                            \
     }                                                                                \
     return ret
 

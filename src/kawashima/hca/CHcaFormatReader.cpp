@@ -3,6 +3,7 @@
 #endif
 
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -135,8 +136,8 @@ void CHcaFormatReader::Initialize() {
         ensureMagicMatch(hcaFileHeader.hca, Magic::HCA);
         // Calculate the correct data offset.
         // Headers will take up to dataOffset bytes, and after that, audio data.
-        std::uint32_t dataOffset  = bswap(hcaFileHeader.dataOffset);
-        std::uint16_t fileVersion = bswap(hcaFileHeader.version);
+        std::uint32_t dataOffset  = std::byteswap(hcaFileHeader.dataOffset);
+        std::uint16_t fileVersion = std::byteswap(hcaFileHeader.version);
         hcaInfo.versionMajor      = (std::uint16_t)(fileVersion >> 8);
         hcaInfo.versionMinor      = (std::uint16_t)(fileVersion & 0xff);
         hcaInfo.dataOffset        = dataOffset;
@@ -160,10 +161,10 @@ void CHcaFormatReader::Initialize() {
         ENSURE_READ_ALL(hcaFormatHeader);
         ensureMagicMatch(hcaFormatHeader.fmt, Magic::FORMAT);
         hcaInfo.channelCount = hcaFormatHeader.channelCount;
-        hcaInfo.samplingRate = bswap(hcaFormatHeader.samplingRate << 8);
-        hcaInfo.blockCount   = bswap(hcaFormatHeader.blockCount);
-        hcaInfo.fmtR01       = bswap(hcaFormatHeader.r01);
-        hcaInfo.fmtR02       = bswap(hcaFormatHeader.r02);
+        hcaInfo.samplingRate = std::byteswap(hcaFormatHeader.samplingRate << 8);
+        hcaInfo.blockCount   = std::byteswap(hcaFormatHeader.blockCount);
+        hcaInfo.fmtR01       = std::byteswap(hcaFormatHeader.r01);
+        hcaInfo.fmtR02       = std::byteswap(hcaFormatHeader.r02);
         if (!(1 <= hcaInfo.channelCount && hcaInfo.channelCount <= 16)) {
             throw CFormatException("Number of channels is out of range.");
         }
@@ -179,7 +180,7 @@ void CHcaFormatReader::Initialize() {
         if (areMagicMatch(magic, Magic::COMPRESS)) {
             HCA_COMPRESS_HEADER hcaCompressHeader;
             ENSURE_READ_ALL(hcaCompressHeader);
-            hcaInfo.blockSize = bswap(hcaCompressHeader.blockSize);
+            hcaInfo.blockSize = std::byteswap(hcaCompressHeader.blockSize);
             hcaInfo.compR01   = hcaCompressHeader.r01;
             hcaInfo.compR02   = hcaCompressHeader.r02;
             hcaInfo.compR03   = hcaCompressHeader.r03;
@@ -197,7 +198,7 @@ void CHcaFormatReader::Initialize() {
         } else if (areMagicMatch(magic, Magic::DECODE)) {
             HCA_DECODE_HEADER hcaDecodeHeader;
             ENSURE_READ_ALL(hcaDecodeHeader);
-            hcaInfo.blockSize = bswap(hcaDecodeHeader.blockSize);
+            hcaInfo.blockSize = std::byteswap(hcaDecodeHeader.blockSize);
             hcaInfo.compR01   = hcaDecodeHeader.r01;
             hcaInfo.compR02   = hcaDecodeHeader.r02;
             hcaInfo.compR03   = hcaDecodeHeader.r04;
@@ -220,8 +221,8 @@ void CHcaFormatReader::Initialize() {
         if (areMagicMatch(magic, Magic::VBR)) {
             HCA_VBR_HEADER hcaVbrHeader;
             ENSURE_READ_ALL(hcaVbrHeader);
-            hcaInfo.vbrR01 = bswap(hcaVbrHeader.r01);
-            hcaInfo.vbrR02 = bswap(hcaVbrHeader.r02);
+            hcaInfo.vbrR01 = std::byteswap(hcaVbrHeader.r01);
+            hcaInfo.vbrR02 = std::byteswap(hcaVbrHeader.r02);
         } else {
             hcaInfo.vbrR01 = hcaInfo.vbrR02 = 0;
         }
@@ -248,10 +249,10 @@ void CHcaFormatReader::Initialize() {
             HCA_LOOP_HEADER hcaLoopHeader;
             ENSURE_READ_ALL(hcaLoopHeader);
             hcaInfo.loopExists = TRUE;
-            hcaInfo.loopStart  = bswap(hcaLoopHeader.loopStart);
-            hcaInfo.loopEnd    = bswap(hcaLoopHeader.loopEnd);
-            hcaInfo.loopR01    = bswap(hcaLoopHeader.r01);
-            hcaInfo.loopR02    = bswap(hcaLoopHeader.r02);
+            hcaInfo.loopStart  = std::byteswap(hcaLoopHeader.loopStart);
+            hcaInfo.loopEnd    = std::byteswap(hcaLoopHeader.loopEnd);
+            hcaInfo.loopR01    = std::byteswap(hcaLoopHeader.r01);
+            hcaInfo.loopR02    = std::byteswap(hcaLoopHeader.r02);
             if (!(hcaInfo.loopStart <= hcaInfo.loopEnd && hcaInfo.loopEnd < hcaInfo.blockCount)) {
                 throw CFormatException("Loop information is invalid.");
             }
@@ -270,8 +271,9 @@ void CHcaFormatReader::Initialize() {
         if (areMagicMatch(magic, Magic::CIPHER)) {
             HCA_CIPHER_HEADER hcaCipherHeader;
             ENSURE_READ_ALL(hcaCipherHeader);
-            const auto cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(bswap(hcaCipherHeader.type));
-            hcaInfo.cipherType    = cipherType;
+            const auto cipherType =
+                static_cast<ACB_HCA_CIPHER_TYPE>(std::byteswap(hcaCipherHeader.type));
+            hcaInfo.cipherType = cipherType;
             if (!(cipherType == ACB_HCA_CIPH_NO_CIPHER || cipherType == ACB_HCA_CIPH_STATIC ||
                   cipherType == ACB_HCA_CIPH_WITH_KEY)) {
                 throw CFormatException("Cipher type is invalid.");
@@ -288,7 +290,8 @@ void CHcaFormatReader::Initialize() {
         if (areMagicMatch(magic, Magic::RVA)) {
             HCA_RVA_HEADER hcaRvaHeader;
             ENSURE_READ_ALL(hcaRvaHeader);
-            hcaInfo.rvaVolume = bswap(hcaRvaHeader.volume);
+            std::uint32_t tmp = std::byteswap(std::bit_cast<std::uint32_t>(hcaRvaHeader.volume));
+            hcaInfo.rvaVolume = std::bit_cast<float>(tmp);
         } else {
             hcaInfo.rvaVolume = 1.0f;
         }
