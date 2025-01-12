@@ -8,7 +8,7 @@
 
 ACB_NS_BEGIN
 
-CHcaData::CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::uint32_t size) {
+CHcaData::CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::int32_t size) {
     _data     = data;
     _dataSize = dataSize;
     _size     = size * 8 - 16;
@@ -28,7 +28,7 @@ auto CHcaData::CheckBit(std::int32_t bitSize) -> std::int32_t {
         v             = (v << 8) | SAFE_ACCESS(_data, _dataSize, i + 1);
         v             = (v << 8) | SAFE_ACCESS(_data, _dataSize, i + 2);
         v &= mask[_bit & 7];
-        v >>= 24 - (_bit & 7) - bitSize;
+        v >>= 24 - (_bit & 7) - static_cast<std::int32_t>(bitSize);
     }
     return v;
 

@@ -2,11 +2,13 @@
 #define ACB_ENV_H_
 
 // NOLINTBEGIN(modernize-macro-to-enum)
+// clang-format off
 
 #define ACB_VERSION_MAJOR @acb_VERSION_MAJOR@
 #define ACB_VERSION_MINOR @acb_VERSION_MINOR@
 #define ACB_VERSION_PATCH @acb_VERSION_PATCH@
 
+// clang-format on
 // NOLINTEND(modernize-macro-to-enum)
 
 #include "acb_env_platform.h"
@@ -36,13 +38,13 @@
 
 #ifndef STDCALL
 
-#ifdef __ACB_OS_WINDOWS__
+#ifdef ACB_OS_WINDOWS
 #ifndef STDCALL
 #define STDCALL __stdcall
 #endif // STDCALL
 #else
 #define STDCALL
-#endif // __ACB_OS_WINDOWS__
+#endif // ACB_OS_WINDOWS
 
 #endif // STDCALL
 
@@ -52,7 +54,7 @@
 
 using bool_t = std::uint32_t;
 
-#ifndef __ACB_OS_WINDOWS__
+#ifndef ACB_OS_WINDOWS
 using LPCSTR = const char *;
 #endif
 #ifndef TRUE
@@ -66,17 +68,7 @@ using LPCSTR = const char *;
 #define PURE = 0
 #endif
 
-#ifndef _OUT_
-#define _OUT_
-#endif
-#ifndef _IN_
-#define _IN_
-#endif
-#ifndef _REF_
-#define _REF_
-#endif
-
-#ifdef __ACB_OS_WINDOWS__
+#ifdef ACB_OS_WINDOWS
 
 #ifndef _MBCS
 #define _MBCS
@@ -90,7 +82,9 @@ using LPCSTR = const char *;
 #define NOMINMAX
 #endif
 
-#endif // __ACB_OS_WINDOWS__
+#endif // ACB_OS_WINDOWS
+
+// NOLINTBEGIN(bugprone-macro-parentheses)
 
 #define PURE_STATIC(className)                               \
 public:                                                      \
@@ -100,13 +94,15 @@ public:                                                      \
     auto operator=(const className &)->className & = delete; \
     auto operator=(className &&)->className      & = delete
 
-#define __root_class(cls) \
-private:                  \
+// NOLINTEND(bugprone-macro-parentheses)
+
+#define _root_class(cls) \
+private:                 \
     typedef cls MyClass
 
-#define __extends(parent_cls, child_cls) \
-private:                                 \
-    typedef parent_cls MyBase;           \
+#define _extends(parent_cls, child_cls) \
+private:                                \
+    typedef parent_cls MyBase;          \
     typedef child_cls MyClass
 
 #endif // ACB_ENV_H_

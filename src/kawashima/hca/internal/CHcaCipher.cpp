@@ -49,7 +49,7 @@ CHcaCipher::CHcaCipher(const CHcaCipher &other) {
 }
 
 auto CHcaCipher::Init(const CHcaCipherConfig &config) -> bool_t {
-    auto type = static_cast<HcaCipherType>(config.cipherType);
+    auto type = config.cipherType;
 
     if (config.key.key == 0 && type == HcaCipherType::WithKey) {
         type = HcaCipherType::NoCipher;

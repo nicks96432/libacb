@@ -15,7 +15,7 @@ CHcaCipherConfig::CHcaCipherConfig(HcaCipherType cipherType): MyClass() {
     if (cipherType == HcaCipherType::WithKey) {
         cipherType = HcaCipherType::NoCipher;
     }
-    this->cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(cipherType);
+    this->cipherType = cipherType;
 }
 
 CHcaCipherConfig::CHcaCipherConfig(std::uint32_t key1, std::uint32_t key2): MyClass() {
@@ -35,13 +35,11 @@ CHcaCipherConfig::CHcaCipherConfig(
 CHcaCipherConfig::CHcaCipherConfig(std::uint64_t key, std::uint16_t keyModifier)
     : MyClass((std::uint32_t)(key >> 32u), (std::uint32_t)(key & 0xffffffff), keyModifier) {}
 
-void CHcaCipherConfig::Initialize(
-    std::uint32_t key1, std::uint32_t key2, std::uint16_t modifier
-) {
+void CHcaCipherConfig::Initialize(std::uint32_t key1, std::uint32_t key2, std::uint16_t modifier) {
     if (key1 == 0 && key2 == 0) {
-        cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(HcaCipherType::NoCipher);
+        cipherType = HcaCipherType::NoCipher;
     } else {
-        cipherType = static_cast<ACB_HCA_CIPHER_TYPE>(HcaCipherType::WithKey);
+        cipherType = HcaCipherType::WithKey;
     }
     this->key.keyParts.key1 = key1;
     this->key.keyParts.key2 = key2;

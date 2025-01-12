@@ -11,15 +11,12 @@ ACB_NS_BEGIN
 void CStreamExtensions::ReadNullEndedString(
     IStream *stream, std::string &buffer, std::size_t bufferSize
 ) {
-    std::uint8_t t = 1;
-    std::size_t i  = 0;
-
-    while (t && i < bufferSize) {
-        t = stream->ReadByte();
-
+    for (std::size_t i = 0; i < bufferSize; ++i) {
+        std::uint8_t t = stream->ReadByte();
+        if (!t) {
+            return;
+        }
         buffer += static_cast<char>(t);
-
-        ++i;
     }
 }
 

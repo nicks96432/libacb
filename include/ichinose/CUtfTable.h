@@ -9,6 +9,7 @@
 #include "acb_cdata.h"
 #include "acb_env.h"
 #include "acb_env_ns.h"
+#include "ichinose/CUtfField.h"
 #include "ichinose/CUtfReader.h"
 #include "takamori/streams/CMemoryStream.h"
 #include "takamori/streams/IStream.h"
@@ -17,7 +18,7 @@ ACB_NS_BEGIN
 
 class CUtfTable {
 
-    __root_class(CUtfTable);
+    _root_class(CUtfTable);
 
 public:
     ACB_EXPORT CUtfTable(IStream *stream, std::uint64_t streamOffset);
@@ -34,7 +35,7 @@ public:
 
     struct UtfRow {
         std::uint32_t baseOffset;
-        std::vector<UTF_FIELD *> fields;
+        std::vector<CUtfField> fields;
     };
 
     [[nodiscard]] ACB_EXPORT auto GetRows() const -> const std::vector<CUtfTable::UtfRow> &;
@@ -45,9 +46,8 @@ public:
         std::uint32_t rowIndex, const char *fieldName, std::uint64_t *offset
     ) const -> bool_t;
 
-    ACB_EXPORT auto GetFieldSize(
-        std::uint32_t rowIndex, const char *fieldName, std::uint32_t *size
-    ) const -> bool_t;
+    ACB_EXPORT auto GetFieldSize(std::uint32_t rowIndex, const char *fieldName, std::uint32_t *size)
+        const -> bool_t;
 
 protected:
     [[nodiscard]] auto GetReader() const -> CUtfReader *;
@@ -60,7 +60,7 @@ private:
     auto CheckEncryption(const std::array<std::uint8_t, 4> &magic) -> bool_t;
 
     static auto GetKeysForEncryptedUtfTable(
-        const std::array<std::uint8_t, 4> &magic, _OUT_ std::uint8_t *seed, _OUT_ std::uint8_t *incr
+        const std::array<std::uint8_t, 4> &magic, std::uint8_t *seed, std::uint8_t *incr
     ) -> bool_t;
 
     static void ReadUtfHeader(IStream *stream, UTF_HEADER &header, std::string &tableNameBuffer);

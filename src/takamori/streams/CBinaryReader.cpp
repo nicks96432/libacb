@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "acb_enum.h"
 #include "acb_env_ns.h"
 #include "takamori/exceptions/CException.h"
 #include "takamori/exceptions/CInvalidOperationException.h"
@@ -45,7 +46,7 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     auto read = stream->Read(buffer.data(), buffer.size(), 0, buffer.size()); \
     do {                                                                      \
         if (read < buffer.size()) {                                           \
-            throw CException(ACB_OP_BUFFER_TOO_SMALL);                       \
+            throw CException(OpResult::BufferTooSmall);                       \
         }                                                                     \
     } while (0)
 
@@ -53,7 +54,7 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     ENSURE_READ((bit) / 8);                                                        \
     std::int##bit##_t ret = *reinterpret_cast<std::int##bit##_t *>(buffer.data()); \
     if (O32_HOST_ORDER != (hostEndian)) {                                          \
-        ret = std::byteswap(ret);                                                          \
+        ret = std::byteswap(ret);                                                  \
     }                                                                              \
     return ret
 
@@ -61,7 +62,7 @@ auto CBinaryReader::ReadUInt8(IStream *stream) -> std::uint8_t {
     ENSURE_READ((bit) / 8);                                                          \
     std::uint##bit##_t ret = *reinterpret_cast<std::uint##bit##_t *>(buffer.data()); \
     if (O32_HOST_ORDER != (hostEndian)) {                                            \
-        ret = std::byteswap(ret);                                                            \
+        ret = std::byteswap(ret);                                                    \
     }                                                                                \
     return ret
 
@@ -593,7 +594,7 @@ auto CBinaryReader::PeekBytes(
 ) -> std::size_t {
     const auto position = stream->GetPosition();
     const auto v        = stream->Read(buffer, bufferSize, offset, count);
-    stream->Seek(position, StreamSeekOrigin::Begin);
+    stream->Seek(static_cast<std::int64_t>(position), StreamSeekOrigin::Begin);
     return v;
 }
 

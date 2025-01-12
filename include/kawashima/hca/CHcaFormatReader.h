@@ -13,7 +13,7 @@ ACB_NS_BEGIN
 
 class CHcaFormatReader: public CStream {
 
-    __extends(CStream, CHcaFormatReader);
+    _extends(CStream, CHcaFormatReader);
 
 public:
     ACB_EXPORT explicit CHcaFormatReader(IStream *baseStream);

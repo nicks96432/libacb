@@ -15,10 +15,10 @@ void CStream::Seek(std::int64_t offset, StreamSeekOrigin origin) {
         position = offset;
         break;
     case StreamSeekOrigin::Current:
-        position = GetPosition() + offset;
+        position = static_cast<std::int64_t>(GetPosition()) + offset;
         break;
     case StreamSeekOrigin::End:
-        position = GetLength() + offset;
+        position = static_cast<std::int64_t>(GetLength()) + offset;
         break;
     }
     if (static_cast<std::uint64_t>(position) != GetPosition()) {

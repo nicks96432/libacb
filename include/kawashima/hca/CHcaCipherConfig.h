@@ -12,7 +12,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CHcaCipherConfig final: public HCA_CIPHER_CONFIG {
 
-    __extends(HCA_CIPHER_CONFIG, CHcaCipherConfig);
+    _extends(HCA_CIPHER_CONFIG, CHcaCipherConfig);
 
 public:
     CHcaCipherConfig();

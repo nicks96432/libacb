@@ -9,7 +9,9 @@
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
+#include "acb_enum.h"
 #include "acb_env.h"
 #include "acb_env_ns.h"
 #include "acb_utils.h"
@@ -26,7 +28,7 @@ ACB_NS_BEGIN
 
 class NullHcaReader final: public CHcaFormatReader {
 
-    __extends(CHcaFormatReader, NullHcaReader);
+    _extends(CHcaFormatReader, NullHcaReader);
 
 public:
     explicit NullHcaReader(IStream *baseStream): MyBase{baseStream} {}
@@ -112,13 +114,13 @@ void CHcaFormatReader::Initialize() {
     std::size_t bufferSize;
     std::size_t actualRead;
 
-#define ENSURE_READ_ALL(var)                                    \
-    bufferSize = sizeof(var);                                   \
-    actualRead = stream->Read(&var, bufferSize, 0, bufferSize); \
-    do {                                                        \
-        if (actualRead < bufferSize) {                          \
-            throw CFormatException("Unexpected end of file.");  \
-        }                                                       \
+#define ENSURE_READ_ALL(var)                                      \
+    bufferSize = sizeof(var);                                     \
+    actualRead = stream->Read(&(var), bufferSize, 0, bufferSize); \
+    do {                                                          \
+        if (actualRead < bufferSize) {                            \
+            throw CFormatException("Unexpected end of file.");    \
+        }                                                         \
     } while (0)
 #define ENSURE_READ_ALL_BUFFER(buffer, size)                      \
     bufferSize = size;                                            \
@@ -148,7 +150,7 @@ void CHcaFormatReader::Initialize() {
         ENSURE_READ_ALL_BUFFER(headerContents, dataOffset);
         const auto headerChecksum = ComputeChecksum(headerContents, dataOffset, 0);
         if (headerChecksum != 0) {
-            throw CException(ACB_OP_CHECKSUM_ERROR, "Header is corrupted.");
+            throw CException(OpResult::ChecksumError, "Header is corrupted.");
         }
         delete[] headerContents;
 
@@ -271,15 +273,14 @@ void CHcaFormatReader::Initialize() {
         if (areMagicMatch(magic, Magic::CIPHER)) {
             HCA_CIPHER_HEADER hcaCipherHeader;
             ENSURE_READ_ALL(hcaCipherHeader);
-            const auto cipherType =
-                static_cast<ACB_HCA_CIPHER_TYPE>(std::byteswap(hcaCipherHeader.type));
-            hcaInfo.cipherType = cipherType;
-            if (!(cipherType == ACB_HCA_CIPH_NO_CIPHER || cipherType == ACB_HCA_CIPH_STATIC ||
-                  cipherType == ACB_HCA_CIPH_WITH_KEY)) {
+            const auto cipherType = static_cast<HcaCipherType>(std::byteswap(hcaCipherHeader.type));
+            hcaInfo.cipherType    = cipherType;
+            if (!(cipherType == HcaCipherType::NoCipher || cipherType == HcaCipherType::Static ||
+                  cipherType == HcaCipherType::WithKey)) {
                 throw CFormatException("Cipher type is invalid.");
             }
         } else {
-            hcaInfo.cipherType = ACB_HCA_CIPH_NO_CIPHER;
+            hcaInfo.cipherType = HcaCipherType::NoCipher;
         }
     }
 
@@ -357,24 +358,24 @@ auto CHcaFormatReader::Write(
 void CHcaFormatReader::PrintHcaInfo() {
     const auto &hcaInfo = _hcaInfo;
 
-    std::cout << "General:" << std::endl;
-    std::cout << "  Version: " << hcaInfo.versionMajor << "." << hcaInfo.versionMinor << std::endl;
-    std::cout << "  Channels: " << hcaInfo.channelCount << std::endl;
-    std::cout << "  Sampling rate: " << hcaInfo.samplingRate << std::endl;
-    std::cout << "  Data offset: " << hcaInfo.dataOffset << std::endl;
-    std::cout << "  Has loop: " << (hcaInfo.loopExists ? "Yes" : "No") << std::endl;
-    std::cout << "Decoding:" << std::endl;
-    std::cout << "  Number of blocks: " << hcaInfo.blockCount << std::endl;
-    std::cout << "  Size of each block: " << hcaInfo.blockSize << std::endl;
-    std::cout << "  Cipher type: " << hcaInfo.cipherType << std::endl;
+    std::cout << "General:" << '\n';
+    std::cout << "  Version: " << hcaInfo.versionMajor << "." << hcaInfo.versionMinor << '\n';
+    std::cout << "  Channels: " << hcaInfo.channelCount << '\n';
+    std::cout << "  Sampling rate: " << hcaInfo.samplingRate << '\n';
+    std::cout << "  Data offset: " << hcaInfo.dataOffset << '\n';
+    std::cout << "  Has loop: " << (hcaInfo.loopExists ? "Yes" : "No") << '\n';
+    std::cout << "Decoding:" << '\n';
+    std::cout << "  Number of blocks: " << hcaInfo.blockCount << '\n';
+    std::cout << "  Size of each block: " << hcaInfo.blockSize << '\n';
+    std::cout << "  Cipher type: " << std::to_underlying(hcaInfo.cipherType) << '\n';
     if (hcaInfo.loopExists) {
-        std::cout << "Loop:" << std::endl;
-        std::cout << "  Start index: " << hcaInfo.loopStart << std::endl;
-        std::cout << "  End index: " << hcaInfo.loopEnd << std::endl;
+        std::cout << "Loop:" << '\n';
+        std::cout << "  Start index: " << hcaInfo.loopStart << '\n';
+        std::cout << "  End index: " << hcaInfo.loopEnd << '\n';
     }
-    std::cout << "Other:" << std::endl;
-    std::cout << "  ATH: " << hcaInfo.athType << std::endl;
-    std::cout << "  Volume adjustment: " << hcaInfo.rvaVolume << std::endl;
+    std::cout << "Other:" << '\n';
+    std::cout << "  ATH: " << hcaInfo.athType << '\n';
+    std::cout << "  Volume adjustment: " << hcaInfo.rvaVolume << '\n';
 }
 
 auto CHcaFormatReader::IsPossibleHcaStream(IStream *stream) -> bool_t {

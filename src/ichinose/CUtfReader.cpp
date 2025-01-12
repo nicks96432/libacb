@@ -48,7 +48,7 @@ void CUtfReader::PeekBytes(
     std::size_t size,
     std::size_t utfOffset
 ) {
-    stream->Seek(streamOffset + utfOffset, StreamSeekOrigin::Begin);
+    stream->Seek(static_cast<std::int64_t>(streamOffset + utfOffset), StreamSeekOrigin::Begin);
 
     CBinaryReader::PeekBytes(stream, buffer, size, static_cast<std::size_t>(bufferOffset), size);
 

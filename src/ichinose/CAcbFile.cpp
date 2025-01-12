@@ -1,19 +1,22 @@
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <format>
 #include <string>
 #include <type_traits>
+#include <variant>
 #include <vector>
 
 #include "acb_cdata.h"
-#include "acb_cenum.h"
+#include "acb_enum.h"
 #include "acb_env.h"
 #include "acb_env_ns.h"
 #include "acb_env_platform.h"
 #include "ichinose/CAcbFile.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CAfs2Archive.h"
+#include "ichinose/CUtfField.h"
 #include "takamori/CFileSystem.h"
 #include "takamori/CPath.h"
 #include "takamori/exceptions/CArgumentException.h"
@@ -33,7 +36,7 @@ static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string;
 template<typename T>
 auto GetFieldValueAsNumber(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, T *result
-) -> bool_t requires(std::is_arithmetic_v<T>);
+) -> bool_t requires std::is_arithmetic_v<T>;
 
 auto GetFieldValueAsString(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, std::string &s
@@ -62,6 +65,12 @@ CAcbFile::~CAcbFile() {
 
 void CAcbFile::Initialize() {
     MyBase::Initialize();
+
+    const auto &fields = this->GetRows()[0].fields;
+    auto is_version    = [](const auto &field) { return field.name == "Version"; };
+    if (auto result = std::ranges::find_if(fields, is_version); result != fields.cend()) {
+        this->_formatVersion = std::get<std::uint32_t>(result->value);
+    }
 
     GetFieldValueAsNumber(this, 0, "Version", &_formatVersion);
 
@@ -107,12 +116,12 @@ void CAcbFile::InitializeCueList() {
         GetFieldValueAsNumber(cueTable, i, "CueId", &cue.cueId);
         GetFieldValueAsNumber(cueTable, i, "ReferenceType", &cue.referenceType);
 
-#ifdef __ACB_OS_WINDOWS__
+#ifdef ACB_OS_WINDOWS
 #pragma warning(push)
 #pragma warning(disable: 4366)
 #endif
         GetFieldValueAsNumber(cueTable, i, "ReferenceIndex", &cue.referenceIndex);
-#ifdef __ACB_OS_WINDOWS__
+#ifdef ACB_OS_WINDOWS
 #pragma warning(pop)
 #endif
 
@@ -262,28 +271,28 @@ void CAcbFile::InitializeTrackList() {
         track.trackIndex           = i;
         track.synthIndex           = static_cast<std::uint16_t>(track.trackIndex);
 
-        const auto &synthRow    = synthRows[i];
-        UTF_FIELD *refItemField = nullptr;
+        const auto &synthRow = synthRows[i];
+        UtfColumnStorage refItemFieldStorage;
 
-        for (const auto &field : synthRow.fields) {
-            if (std::strcmp(field->name, "ReferenceItems") == 0) {
-                refItemField = field;
-                break;
-            }
-        }
+        if (std::ranges::none_of(synthRow.fields, [&](const auto &f) {
+                if (f.name == "ReferenceItems") {
+                    refItemFieldStorage = f.storage;
+                    return true;
+                }
 
-        if (refItemField == nullptr) {
+                return false;
+            })) {
             throw CFormatException("Missing 'ReferenceItems' field in row.");
         }
 
         bool isStoredPerRow;
 
-        switch (refItemField->storage) {
-        case ACB_UTF_COLUMN_STORAGE_PER_ROW:
+        switch (refItemFieldStorage) {
+        case UtfColumnStorage::PerRow:
             isStoredPerRow = true;
             break;
-        case ACB_UTF_COLUMN_STORAGE_CONST:
-        case ACB_UTF_COLUMN_STORAGE_CONST2:
+        case UtfColumnStorage::Const:
+        case UtfColumnStorage::Const2:
             isStoredPerRow = false;
             break;
         default:
@@ -364,11 +373,11 @@ void CAcbFile::InitializeAwbArchives() {
 }
 
 auto CAcbFile::GetTable(const char *tableName) const -> CUtfTable * {
-    std::string s(tableName);
+    std::string s = tableName;
 
     CUtfTable *table;
 
-    if (_tables.find(s) != _tables.end()) {
+    if (_tables.contains(s)) {
         table = _tables[s];
     } else {
         table = ResolveTable(tableName);
@@ -908,21 +917,21 @@ auto CAcbFile::ChooseSourceStream(const ACB_CUE_RECORD *cue) const -> IStream * 
 }
 
 static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string {
-    auto type = static_cast<ACB_ACB_WAVEFORM_ENCODE_TYPE>(encodeType);
+    auto type = static_cast<AcbWaveformEncodeType>(encodeType);
 
     switch (type) {
-    case ACB_ACB_WAVEFORM_ADX:
+    case AcbWaveformEncodeType::Adx:
         return ".adx";
-    case ACB_ACB_WAVEFORM_HCA:
-    case ACB_ACB_WAVEFORM_HCA2:
+    case AcbWaveformEncodeType::Hca:
+    case AcbWaveformEncodeType::Hca2:
         return ".hca";
-    case ACB_ACB_WAVEFORM_VAG:
+    case AcbWaveformEncodeType::Vag:
         return ".vag";
-    case ACB_ACB_WAVEFORM_ATRAC3:
+    case AcbWaveformEncodeType::Atrac3:
         return ".at3";
-    case ACB_ACB_WAVEFORM_BCWAV:
+    case AcbWaveformEncodeType::BcWav:
         return ".bcwav";
-    case ACB_ACB_WAVEFORM_NINTENDO_DSP:
+    case AcbWaveformEncodeType::NintendoDSP:
         return ".dsp";
     default:
         break;
@@ -934,7 +943,7 @@ static auto GetExtensionForEncodeType(std::uint8_t encodeType) -> std::string {
 template<typename T>
 auto GetFieldValueAsNumber(
     CUtfTable *table, std::uint32_t rowIndex, const char *fieldName, T *result
-) -> bool_t requires(std::is_arithmetic_v<T>)
+) -> bool_t requires std::is_arithmetic_v<T>
 {
     if (result) {
         std::memset(result, 0, sizeof(T));
@@ -949,38 +958,39 @@ auto GetFieldValueAsNumber(
     auto &row = rows[rowIndex];
 
     for (auto &field : row.fields) {
-        if (std::strcmp(fieldName, field->name) == 0) {
+        if (field.name == fieldName) {
             if (result) {
-                switch (field->type) {
-                case ACB_UTF_COLUMN_TYPE_U8:
-                    *result = static_cast<T>(field->value.u8);
+                switch (field.type) {
+                case UtfColumnType::U8:
+                    *result = static_cast<T>(std::get<std::uint8_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_S8:
-                    *result = static_cast<T>(field->value.s8);
+                case UtfColumnType::S8:
+                    // NOLINTNEXTLINE(bugprone-signed-char-misuse)
+                    *result = static_cast<T>(std::get<std::int8_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_U16:
-                    *result = static_cast<T>(field->value.u16);
+                case UtfColumnType::U16:
+                    *result = static_cast<T>(std::get<std::uint16_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_S16:
-                    *result = static_cast<T>(field->value.s16);
+                case UtfColumnType::S16:
+                    *result = static_cast<T>(std::get<std::int16_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_U32:
-                    *result = static_cast<T>(field->value.u32);
+                case UtfColumnType::U32:
+                    *result = static_cast<T>(std::get<std::uint32_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_S32:
-                    *result = static_cast<T>(field->value.s32);
+                case UtfColumnType::S32:
+                    *result = static_cast<T>(std::get<std::int32_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_U64:
-                    *result = static_cast<T>(field->value.u64);
+                case UtfColumnType::U64:
+                    *result = static_cast<T>(std::get<std::uint64_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_S64:
-                    *result = static_cast<T>(field->value.s64);
+                case UtfColumnType::S64:
+                    *result = static_cast<T>(std::get<std::int64_t>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_R32:
-                    *result = static_cast<T>(field->value.r32);
+                case UtfColumnType::R32:
+                    *result = static_cast<T>(std::get<float>(field.value));
                     break;
-                case ACB_UTF_COLUMN_TYPE_R64:
-                    *result = static_cast<T>(field->value.r64);
+                case UtfColumnType::R64:
+                    *result = static_cast<T>(std::get<double>(field.value));
                     break;
                 default:
                     throw CInvalidOperationException(
@@ -1008,8 +1018,8 @@ auto GetFieldValueAsString(
     auto &row = rows[rowIndex];
 
     for (auto &field : row.fields) {
-        if (std::strcmp(fieldName, field->name) == 0) {
-            s = std::string(field->value.str);
+        if (field.name == fieldName) {
+            s = std::get<std::string>(field.value);
 
             return TRUE;
         }

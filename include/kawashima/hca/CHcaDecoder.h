@@ -19,7 +19,7 @@ class CHcaChannel;
 
 class CHcaDecoder: public CHcaFormatReader {
 
-    __extends(CHcaFormatReader, CHcaDecoder);
+    _extends(CHcaFormatReader, CHcaDecoder);
 
 public:
     ACB_EXPORT explicit CHcaDecoder(IStream *stream);

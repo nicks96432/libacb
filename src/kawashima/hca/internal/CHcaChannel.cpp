@@ -63,11 +63,11 @@ void CHcaChannel::Decode1(
     std::int32_t v          = data->GetBit(3);
     if (v >= 6) {
         for (std::uint32_t i = 0; i < inst->count; i++) {
-            inst->value[i] = (std::int8_t)data->GetBit(6);
+            inst->value[i] = static_cast<std::int8_t>(data->GetBit(6));
         }
     } else if (v) {
         std::int32_t v1 = data->GetBit(6), v2 = (1 << v) - 1, v3 = v2 >> 1, v4;
-        inst->value[0] = (std::int8_t)v1;
+        inst->value[0] = static_cast<std::int8_t>(v1);
         for (std::uint32_t i = 1; i < inst->count; i++) {
             v4 = data->GetBit(v);
             if (v4 != v2) {
@@ -82,21 +82,21 @@ void CHcaChannel::Decode1(
     }
     if (inst->type == 2) {
         v               = data->CheckBit(4);
-        inst->value2[0] = (std::int8_t)v;
+        inst->value2[0] = static_cast<std::int8_t>(v);
         if (v < 15) {
             for (signed char &c : inst->value2) {
-                c = (std::int8_t)data->GetBit(4);
+                c = static_cast<std::int8_t>(data->GetBit(4));
             }
         }
     } else {
         for (std::uint32_t i = 0; i < a; i++) {
-            inst->value3[i] = (std::int8_t)data->GetBit(6);
+            inst->value3[i] = static_cast<std::int8_t>(data->GetBit(6));
         }
     }
     for (std::uint32_t i = 0; i < inst->count; i++) {
-        v = inst->value[i];
+        v = inst->value[i]; // NOLINT(bugprone-signed-char-misuse)
         if (v) {
-            v = ath[i] + ((b + i) >> 8) - ((v * 5) >> 1) + 1;
+            v = ath[i] + ((b + static_cast<std::int32_t>(i)) >> 8) - ((v * 5) >> 1) + 1;
             if (v < 0) {
                 v = 15;
             } else if (v >= 0x39) {
@@ -105,7 +105,7 @@ void CHcaChannel::Decode1(
                 v = scalelist[v];
             }
         }
-        inst->scale[i] = (std::int8_t)v;
+        inst->scale[i] = static_cast<std::int8_t>(v);
     }
     std::fill(inst->scale.begin() + inst->count, inst->scale.end(), std::int8_t{0});
     for (std::uint32_t i = 0; i < inst->count; i++) {
@@ -144,8 +144,8 @@ void CHcaChannel::Decode2(CHcaChannel *inst, CHcaData *data) {
 
     for (std::uint32_t i = 0; i < inst->count; i++) {
         float f;
-        std::int32_t s       = inst->scale[i];
-        std::int32_t bitSize = list1[s];
+        std::int32_t s       = inst->scale[i]; // NOLINT(bugprone-signed-char-misuse)
+        std::int32_t bitSize = list1[s];       // NOLINT(bugprone-signed-char-misuse)
         std::int32_t v       = data->GetBit(bitSize);
         if (s < 8) {
             v += s << 4;
@@ -390,7 +390,7 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
         },
     }};
 
-    static constexpr std::array<std::uint32_t, 0x40 * 2> list3Int = {
+    static constexpr std::array<std::uint32_t, static_cast<std::size_t>(0x40 * 2)> list3Int = {
         0x3A3504F0, 0x3B0183B8, 0x3B70C538, 0x3BBB9268, 0x3C04A809, 0x3C308200, 0x3C61284C, 0x3C8B3F17,
         0x3CA83992, 0x3CC77FBD, 0x3CE91110, 0x3D0677CD, 0x3D198FC4, 0x3D2DD35C, 0x3D434643, 0x3D59ECC1,
         0x3D71CBA8, 0x3D85741E, 0x3D92A413, 0x3DA078B4, 0x3DAEF522, 0x3DBE1C9E, 0x3DCDF27B, 0x3DDE7A1D,
@@ -448,7 +448,7 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
             auto sa1         = s;
             auto sa2         = sa1 + count2;
             auto d1          = d;
-            auto d2          = d1 + count2 * 2 - 1;
+            auto d2          = d1 + static_cast<std::ptrdiff_t>(count2 * 2) - 1;
             for (std::int32_t j = 0; j < count1; j++) {
                 for (std::int32_t k = 0; k < count2; k++) {
                     float fa = *(sa1++);
@@ -461,7 +461,7 @@ void CHcaChannel::Decode5(CHcaChannel *inst, std::int32_t index) {
                 sa1 += count2;
                 sa2 += count2;
                 d1 += count2;
-                d2 += count2 * 3;
+                d2 += static_cast<std::ptrdiff_t>(count2 * 3);
             }
             std::swap(s, d);
         }

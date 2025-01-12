@@ -13,7 +13,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CBinaryWriter: public CStream {
 
-    __extends(CStream, CBinaryWriter);
+    _extends(CStream, CBinaryWriter);
 
 public:
     explicit CBinaryWriter(IStream *baseStream);

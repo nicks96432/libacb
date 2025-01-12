@@ -10,6 +10,7 @@
 #include <format>
 #include <string>
 
+#include "acb_enum.h"
 #include "internal/CHcaCipher.h"
 #include "internal/CHcaData.h"
 #include "kawashima/hca/CHcaCipherConverter.h"
@@ -26,13 +27,13 @@
 
 ACB_NS_BEGIN
 
-#define ENSURE_READ_ALL_BUFFER(buffer, size)                                  \
-    bufferSize = size;                                                        \
-    actualRead = stream->Read(buffer, bufferSize, 0, bufferSize);             \
-    do {                                                                      \
-        if (actualRead < bufferSize) {                                        \
-            throw CException(ACB_OP_FORMAT_ERROR, "Unexpected end of file."); \
-        }                                                                     \
+#define ENSURE_READ_ALL_BUFFER(buffer, size)                                    \
+    bufferSize = size;                                                          \
+    actualRead = stream->Read(buffer, bufferSize, 0, bufferSize);               \
+    do {                                                                        \
+        if (actualRead < bufferSize) {                                          \
+            throw CException(OpResult::FormatError, "Unexpected end of file."); \
+        }                                                                       \
     } while (0)
 
 CHcaCipherConverter::CHcaCipherConverter(
@@ -148,9 +149,8 @@ auto CHcaCipherConverter::ConvertBlock(std::uint32_t blockIndex) -> const std::u
         }
     }
 
-    const auto &hcaInfo    = _hcaInfo;
-    const auto stream      = _baseStream;
-    const auto *cipherFrom = _cipherFrom, *cipherTo = _cipherTo;
+    const auto &hcaInfo = _hcaInfo;
+    const auto stream   = _baseStream;
     std::size_t bufferSize;
     std::size_t actualRead;
 
@@ -167,7 +167,7 @@ auto CHcaCipherConverter::ConvertBlock(std::uint32_t blockIndex) -> const std::u
 
     // Decipher.
     const auto validDataSize = static_cast<std::uint32_t>(hcaInfo.blockSize - 2);
-    cipherFrom->Decrypt(blockBuffer, validDataSize);
+    _cipherFrom->Decrypt(blockBuffer, validDataSize);
 
     // Check magic piece of plain text.
     CHcaData data(blockBuffer, hcaInfo.blockSize, hcaInfo.blockSize);
@@ -179,7 +179,7 @@ auto CHcaCipherConverter::ConvertBlock(std::uint32_t blockIndex) -> const std::u
     }
 
     // Recipher.
-    cipherTo->Encrypt(blockBuffer, validDataSize);
+    _cipherTo->Encrypt(blockBuffer, validDataSize);
 
     // Fix block checksum.
     const auto checksum = ComputeChecksum(blockBuffer, validDataSize, 0);
@@ -220,8 +220,9 @@ auto CHcaCipherConverter::Read(
     const auto &hcaInfo   = _hcaInfo;
     std::size_t totalRead = 0;
     if (streamPosition < hcaInfo.dataOffset) {
-        const auto headerCopyLength = std::min(count, hcaInfo.dataOffset - streamPosition);
-        const auto headerData       = ConvertHeader();
+        const auto headerCopyLength =
+            std::min(count, static_cast<std::size_t>(hcaInfo.dataOffset) - streamPosition);
+        const auto headerData = ConvertHeader();
         std::memcpy(byteBuffer + offset, headerData + streamPosition, headerCopyLength);
         streamPosition += headerCopyLength;
         if (count <= headerCopyLength) {

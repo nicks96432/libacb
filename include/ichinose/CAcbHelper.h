@@ -15,11 +15,11 @@ class ACB_EXPORT CAcbHelper final {
 
     PURE_STATIC(CAcbHelper);
 
-    __root_class(CAcbHelper);
+    _root_class(CAcbHelper);
 
 public:
-    static auto ExtractToNewStream(IStream *stream, std::size_t offset, std::size_t size)
-        -> CMemoryStream *;
+    static auto
+    ExtractToNewStream(IStream *stream, std::size_t offset, std::size_t size) -> CMemoryStream *;
 
     static auto RoundUpToAlignment(std::uint64_t value, std::uint64_t alignment) -> std::uint64_t;
 

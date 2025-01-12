@@ -74,7 +74,7 @@ auto CPath::GetDirectoryName(const std::string &path) -> std::string {
 }
 
 auto CPath::GetFileBaseName(const std::string &path) -> std::string {
-    const auto fileName = GetFileName(path);
+    auto fileName = GetFileName(path);
 
     const auto dotPos = fileName.rfind('.');
 

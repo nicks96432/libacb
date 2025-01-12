@@ -16,7 +16,7 @@ ACB_NS_BEGIN
 
 class CAcbFile final: public CUtfTable {
 
-    __extends(CUtfTable, CAcbFile);
+    _extends(CUtfTable, CAcbFile);
 
 public:
     ACB_EXPORT CAcbFile(IStream *stream, const char *fileName);
@@ -90,8 +90,7 @@ public:
     ACB_EXPORT auto GetFileExtensionHintByWaveformFileName(const char *waveformFileName
     ) const -> std::string;
 
-    ACB_EXPORT auto GetFileExtensionHintByTrackIndex(std::uint32_t trackIndex
-    ) const -> std::string;
+    ACB_EXPORT auto GetFileExtensionHintByTrackIndex(std::uint32_t trackIndex) const -> std::string;
 
     static constexpr std::uint32_t KEY_MODIFIER_ENABLED_VERSION = 0x01300000;
 

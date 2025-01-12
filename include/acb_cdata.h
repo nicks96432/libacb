@@ -4,11 +4,13 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "acb_cenum.h"
+#include "acb_enum.h"
 #include "acb_env.h"
+#include "acb_env_ns.h"
 
-#pragma pack(push)
-#pragma pack(1)
+ACB_NS_BEGIN
+
+#pragma pack(push, 1)
 
 constexpr std::size_t ACB_CUE_RECORD_NAME_MAX_LEN = 256;
 
@@ -63,7 +65,7 @@ struct HCA_CIPHER_CONFIG {
         std::uint64_t key;
     } key;
 
-    ACB_HCA_CIPHER_TYPE cipherType;
+    HcaCipherType cipherType;
 
     std::uint16_t keyModifier;
 };
@@ -124,7 +126,7 @@ struct HCA_INFO {
     /**
      * Cipher type.
      */
-    ACB_HCA_CIPHER_TYPE cipherType;
+    HcaCipherType cipherType;
     /**
      * Relative volume in RVA (relative volume adjustment) table. It is the multiply factor for
      * floating point wave data.
@@ -151,39 +153,7 @@ struct HCA_INFO {
 
 constexpr std::size_t UTF_FIELD_MAX_NAME_LEN = 1024;
 
-struct UTF_FIELD {
-
-    ACB_UTF_COLUMN_TYPE type;
-    ACB_UTF_COLUMN_STORAGE storage;
-
-    std::uint32_t offset;
-    std::uint32_t offsetInRow;
-
-    char name[UTF_FIELD_MAX_NAME_LEN];
-
-    union {
-        std::uint8_t u8;
-        std::int8_t s8;
-        std::uint16_t u16;
-        std::int16_t s16;
-        std::uint32_t u32;
-        std::int32_t s32;
-        std::uint64_t u64;
-        std::int64_t s64;
-        float r32;
-        double r64;
-
-        struct {
-            std::uint8_t *ptr;
-            std::uint32_t size;
-        } data;
-
-        char *str;
-    } value;
-};
-
 struct UTF_HEADER {
-
     std::uint32_t tableSize;
     std::uint16_t unk1;
     std::uint32_t perRowDataOffset;
@@ -220,5 +190,7 @@ struct UTF_TABLE {
 // NOLINTEND(modernize-avoid-c-arrays)
 
 #pragma pack(pop)
+
+ACB_NS_END
 
 #endif // ACB_CDATA_H

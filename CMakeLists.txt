@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.25)
 project(
     acb
     LANGUAGES CXX
@@ -26,6 +26,8 @@ if(SCCACHE_PATH)
     message(STATUS "Using sccache at ${SCCACHE_PATH}")
     set(CMAKE_C_COMPILER_LAUNCHER ${SCCACHE_PATH})
     set(CMAKE_CXX_COMPILER_LAUNCHER ${SCCACHE_PATH})
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded)
+    cmake_policy(SET CMP0141 NEW)
 endif()
 
 if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)

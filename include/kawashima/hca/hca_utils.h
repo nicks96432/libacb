@@ -2,6 +2,7 @@
 #define ACB_KAWASHIMA_HCA_HCAUTILS_H_
 
 #include <cstdint>
+#include <utility>
 
 #include "acb_env.h"
 #include "acb_env_ns.h"
@@ -36,9 +37,7 @@ enum class Magic : std::uint32_t {
 };
 
 inline auto areMagicMatch(std::uint32_t toCheck, Magic standard) -> bool_t {
-    return static_cast<bool_t>(
-        (toCheck & 0x7f7f7f7f) == static_cast<std::underlying_type_t<Magic>>(standard)
-    );
+    return static_cast<bool_t>((toCheck & 0x7f7f7f7f) == std::to_underlying(standard));
 }
 
 inline void ensureMagicMatch(std::uint32_t toCheck, Magic standard) {

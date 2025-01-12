@@ -2,9 +2,11 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "acb_cdata.h"
+#include "acb_enum.h"
 #include "acb_env_ns.h"
 #include "ichinose/CAcbHelper.h"
 #include "ichinose/CUtfField.h"
@@ -26,12 +28,6 @@ CUtfTable::CUtfTable(IStream *stream, std::uint64_t streamOffset)
 }
 
 CUtfTable::~CUtfTable() {
-    for (auto &row : _rows) {
-        for (auto pField : row.fields) {
-            delete pField;
-        }
-    }
-
     if (_utfReader) {
         delete _utfReader;
         _utfReader = nullptr;
@@ -71,7 +67,7 @@ void CUtfTable::Initialize() {
     const auto offset = _streamOffset;
 
     if (offset != stream->GetPosition()) {
-        stream->Seek(offset, StreamSeekOrigin::Begin);
+        stream->Seek(static_cast<std::int64_t>(offset), StreamSeekOrigin::Begin);
     }
 
     std::array<std::uint8_t, 4> magic;
@@ -197,11 +193,11 @@ void CUtfTable::ReadUtfHeader(
     CBinaryReader reader(stream);
     auto pos = stream->GetPosition();
 
-    reader.Seek(streamOffset + 4, StreamSeekOrigin::Begin);
+    reader.Seek(static_cast<std::int64_t>(streamOffset + 4), StreamSeekOrigin::Begin);
 
     header.tableSize         = reader.ReadUInt32BE();
     header.unk1              = reader.ReadUInt16BE();
-    header.perRowDataOffset  = (std::uint32_t)reader.ReadUInt16BE() + 8;
+    header.perRowDataOffset  = static_cast<std::uint32_t>(reader.ReadUInt16BE()) + 8;
     header.stringTableOffset = reader.ReadUInt32BE() + 8;
     header.extraDataOffset   = reader.ReadUInt32BE() + 8;
     header.tableNameOffset   = reader.ReadUInt32BE();
@@ -212,7 +208,7 @@ void CUtfTable::ReadUtfHeader(
     stream->Seek(header.stringTableOffset + header.tableNameOffset, StreamSeekOrigin::Begin);
     CStreamExtensions::ReadNullEndedString(stream, tableNameBuffer, UTF_TABLE_MAX_NAME_LEN);
 
-    stream->Seek(pos, StreamSeekOrigin::Begin);
+    stream->Seek(static_cast<std::int64_t>(pos), StreamSeekOrigin::Begin);
 }
 
 void CUtfTable::InitializeUtfSchema(
@@ -223,13 +219,13 @@ void CUtfTable::InitializeUtfSchema(
     auto &rows            = _rows;
 
     for (std::uint32_t i = 0; i < header.rowCount; ++i) {
-        auto currentStreamOffset = schemaOffset;
         UtfRow row;
+        auto currentStreamOffset       = schemaOffset;
         std::uint32_t currentRowOffset = 0;
         row.baseOffset                 = header.perRowDataOffset + header.rowSize * i;
 
         for (auto j = 0; j < header.fieldCount; ++j) {
-            auto field            = new CUtfField();
+            CUtfField field;
             const auto columnType = CBinaryReader::PeekUInt8(tableDataStream, currentStreamOffset);
             const auto nameOffset =
                 CBinaryReader::PeekInt32BE(tableDataStream, currentStreamOffset + 1);
@@ -240,80 +236,82 @@ void CUtfTable::InitializeUtfSchema(
             CStreamExtensions::ReadNullEndedString(
                 tableDataStream, fieldNameBuffer, UTF_FIELD_MAX_NAME_LEN
             );
-            field->SetName(fieldNameBuffer);
+            field.SetName(fieldNameBuffer);
 
-            tableDataStream->Seek(pos, StreamSeekOrigin::Begin);
+            tableDataStream->Seek(static_cast<std::int64_t>(pos), StreamSeekOrigin::Begin);
 
-            const auto storage =
-                static_cast<UtfColumnStorage>(columnType & ACB_UTF_COLUMN_STORAGE_MASK);
-            const auto type = static_cast<UtfColumnType>(columnType & ACB_UTF_COLUMN_TYPE_MASK);
+            const auto storage = static_cast<UtfColumnStorage>(
+                columnType & std::to_underlying(UtfColumnStorage::Mask)
+            );
+            const auto type =
+                static_cast<UtfColumnType>(columnType & std::to_underlying(UtfColumnType::Mask));
 
-            field->type    = static_cast<ACB_UTF_COLUMN_TYPE>(type);
-            field->storage = static_cast<ACB_UTF_COLUMN_STORAGE>(storage);
+            field.type    = type;
+            field.storage = storage;
 
             switch (storage) {
             case UtfColumnStorage::Const:
             case UtfColumnStorage::Const2: {
                 const auto constantOffset = static_cast<std::uint32_t>(currentStreamOffset + 5);
-                field->offsetInRow        = 0; // constant
+                field.offsetInRow         = 0; // constant
 
                 switch (type) {
                 case UtfColumnType::U8:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt8(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 1;
                     break;
                 case UtfColumnType::S8:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt8(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 1;
                     break;
                 case UtfColumnType::U16:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt16BE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 2;
                     break;
                 case UtfColumnType::S16:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt16BE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 2;
                     break;
                 case UtfColumnType::U32:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt32BE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 4;
                     break;
                 case UtfColumnType::S32:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt32BE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 4;
                     break;
                 case UtfColumnType::U64:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt64BE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 8;
                     break;
                 case UtfColumnType::S64:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt64BE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 8;
                     break;
                 case UtfColumnType::R32:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekSingleBE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 4;
                     break;
                 case UtfColumnType::R64:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekDoubleBE(tableDataStream, constantOffset), constantOffset
                     );
                     currentStreamOffset += 8;
@@ -324,7 +322,7 @@ void CUtfTable::InitializeUtfSchema(
                     const auto fieldDataOffset = header.stringTableOffset + dataOffset;
                     const auto *str = reinterpret_cast<const char *>(tableDataStream->GetBuffer()) +
                                       fieldDataOffset;
-                    field->SetValue(str, dataOffset);
+                    field.SetValue(std::string{str}, dataOffset);
                     currentStreamOffset += 4;
                     break;
                 }
@@ -336,14 +334,13 @@ void CUtfTable::InitializeUtfSchema(
                     const auto fieldDataOffset = static_cast<std::uint32_t>(baseOffset) +
                                                  header.extraDataOffset + dataOffset;
                     if (dataSize > 0) {
-                        auto dataBuffer = new std::uint8_t[dataSize];
-                        std::memset(dataBuffer, 0, dataSize);
+                        auto dataBuffer = std::vector<std::byte>{dataSize};
                         sourceStream->Seek(fieldDataOffset, StreamSeekOrigin::Begin);
-                        sourceStream->Read(dataBuffer, dataSize, 0, dataSize);
-                        field->SetValue(dataBuffer, dataSize, fieldDataOffset);
-                        delete[] dataBuffer;
+                        sourceStream->Read(dataBuffer.data(), dataSize, 0, dataSize);
+                        field.SetValue(std::span{dataBuffer}, fieldDataOffset);
                     } else {
-                        field->SetValue(nullptr, dataSize, fieldDataOffset);
+                        auto v = std::vector<std::byte>{};
+                        field.SetValue(std::span{v}, fieldDataOffset);
                     }
                     currentStreamOffset += 8;
                     break;
@@ -355,72 +352,72 @@ void CUtfTable::InitializeUtfSchema(
             }
             case UtfColumnStorage::PerRow: {
                 auto fieldDataOffset = row.baseOffset + currentRowOffset;
-                field->offsetInRow   = currentRowOffset;
+                field.offsetInRow    = currentRowOffset;
 
                 switch (type) {
                 case UtfColumnType::U8:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt8(tableDataStream, fieldDataOffset), fieldDataOffset
                     );
                     currentRowOffset += 1;
                     break;
                 case UtfColumnType::S8:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt8(tableDataStream, fieldDataOffset), fieldDataOffset
                     );
                     currentRowOffset += 1;
                     break;
                 case UtfColumnType::U16:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt16BE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 2;
                     break;
                 case UtfColumnType::S16:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt16BE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 2;
                     break;
                 case UtfColumnType::U32:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekUInt32BE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 4;
                     break;
                 case UtfColumnType::S32:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt32BE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 4;
                     break;
                 case UtfColumnType::U64:
-                    field->SetValue(
-                        CBinaryReader::PeekInt64BE(tableDataStream, fieldDataOffset),
+                    field.SetValue(
+                        CBinaryReader::PeekUInt64BE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 8;
                     break;
                 case UtfColumnType::S64:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekInt64BE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 8;
                     break;
                 case UtfColumnType::R32:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekSingleBE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
                     currentRowOffset += 4;
                     break;
                 case UtfColumnType::R64:
-                    field->SetValue(
+                    field.SetValue(
                         CBinaryReader::PeekDoubleBE(tableDataStream, fieldDataOffset),
                         fieldDataOffset
                     );
@@ -433,7 +430,7 @@ void CUtfTable::InitializeUtfSchema(
                     fieldDataOffset = header.stringTableOffset + rowDataOffset;
                     const auto *str = reinterpret_cast<const char *>(tableDataStream->GetBuffer()) +
                                       fieldDataOffset;
-                    field->SetValue(str, fieldDataOffset);
+                    field.SetValue(std::string{str}, fieldDataOffset);
                     currentRowOffset += 4;
                     break;
                 }
@@ -446,16 +443,17 @@ void CUtfTable::InitializeUtfSchema(
                     );
                     fieldDataOffset = static_cast<std::uint32_t>(baseOffset) +
                                       header.extraDataOffset + rowDataOffset;
+
                     if (dataSize > 0) {
-                        auto dataBuffer = new std::uint8_t[dataSize];
-                        std::memset(dataBuffer, 0, dataSize);
+                        std::vector<std::byte> dataBuffer = {dataSize, std::byte{}};
                         sourceStream->Seek(fieldDataOffset, StreamSeekOrigin::Begin);
-                        sourceStream->Read(dataBuffer, dataSize, 0, dataSize);
-                        field->SetValue(dataBuffer, dataSize, fieldDataOffset);
-                        delete[] dataBuffer;
+                        sourceStream->Read(dataBuffer.data(), dataSize, 0, dataSize);
+                        field.SetValue(std::span{dataBuffer}, fieldDataOffset);
                     } else {
-                        field->SetValue(nullptr, dataSize, fieldDataOffset);
+                        std::vector<std::byte> v = {};
+                        field.SetValue(std::span{v}, fieldDataOffset);
                     }
+
                     currentRowOffset += 8;
                     break;
                 }
@@ -468,12 +466,12 @@ void CUtfTable::InitializeUtfSchema(
                 throw CFormatException("Unknown UTF table field storage format.");
             }
 
-            row.fields.push_back(field);
+            row.fields.push_back(std::move(field));
 
             currentStreamOffset += 5;
         }
 
-        rows.push_back(row);
+        rows.push_back(std::move(row));
     }
 }
 
@@ -489,10 +487,10 @@ auto CUtfTable::GetFieldOffset(std::uint32_t rowIndex, const char *fieldName, st
 
     const auto &row = _rows[rowIndex];
 
-    for (auto &field : row.fields) {
-        if (std::strcmp(fieldName, field->name) == 0) {
+    for (const auto &field : row.fields) {
+        if (field.name == fieldName) {
             if (offset) {
-                *offset = field->offset;
+                *offset = field.offset;
             }
 
             return TRUE;
@@ -514,10 +512,12 @@ auto CUtfTable::GetFieldSize(std::uint32_t rowIndex, const char *fieldName, std:
 
     const auto &row = _rows[rowIndex];
 
-    for (auto &field : row.fields) {
-        if (std::strcmp(fieldName, field->name) == 0) {
+    for (const auto &field : row.fields) {
+        if (field.name == fieldName) {
             if (size) {
-                *size = field->value.data.size;
+                *size =
+                    static_cast<std::uint32_t>(std::get<std::vector<std::byte>>(field.value).size()
+                    );
             }
 
             return TRUE;

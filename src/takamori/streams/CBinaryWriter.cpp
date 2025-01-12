@@ -23,7 +23,7 @@ static const union {
 
 #define WRITE_XINT(bit, hostEndian)                                                       \
     if (O32_HOST_ORDER != (hostEndian)) {                                                 \
-        v = std::byteswap(v);                                                                     \
+        v = std::byteswap(v);                                                             \
     }                                                                                     \
     std::uint8_t *buffer         = reinterpret_cast<std::uint8_t *>(&v);                  \
     static const auto bufferSize = (bit) / 8;                                             \

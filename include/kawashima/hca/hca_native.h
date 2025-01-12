@@ -6,7 +6,7 @@
 #include "acb_env_ns.h"
 #include "acb_env_platform.h"
 
-#ifdef __ACB_OS_WINDOWS__
+#ifdef ACB_OS_WINDOWS
 #pragma warning(push)
 #pragma warning(disable: 4200)
 #endif
@@ -296,7 +296,7 @@ struct HCA_PADDING_HEADER {
 
 ACB_NS_END
 
-#ifdef __ACB_OS_WINDOWS__
+#ifdef ACB_OS_WINDOWS
 #pragma warning(pop)
 #endif
 

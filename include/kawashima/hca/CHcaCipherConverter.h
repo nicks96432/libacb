@@ -16,7 +16,7 @@ class CHcaCipher;
 
 class CHcaCipherConverter: public CHcaFormatReader {
 
-    __extends(CHcaFormatReader, CHcaFormatReader);
+    _extends(CHcaFormatReader, CHcaFormatReader);
 
 public:
     /**

@@ -12,7 +12,7 @@ ACB_NS_BEGIN
 
 class CFormatException: public CException {
 
-    __extends(CException, CFormatException);
+    _extends(CException, CFormatException);
 
 public:
     ACB_EXPORT CFormatException() noexcept;

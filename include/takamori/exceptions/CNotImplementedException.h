@@ -12,7 +12,7 @@ ACB_NS_BEGIN
 
 class CNotImplementedException: public CException {
 
-    __extends(CException, CNotImplementedException);
+    _extends(CException, CNotImplementedException);
 
 public:
     ACB_EXPORT CNotImplementedException() noexcept;

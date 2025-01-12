@@ -8,14 +8,13 @@
 #include "acb_cdata.h"
 #include "acb_env.h"
 #include "acb_env_ns.h"
-#include "acb_env_platform.h"
 #include "takamori/streams/IStream.h"
 
 ACB_NS_BEGIN
 
 class CAfs2Archive final {
 
-    __root_class(CAfs2Archive);
+    _root_class(CAfs2Archive);
 
 public:
     ACB_EXPORT CAfs2Archive(

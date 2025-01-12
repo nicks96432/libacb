@@ -13,7 +13,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CMemoryStream final: public CStream {
 
-    __extends(CStream, CMemoryStream);
+    _extends(CStream, CMemoryStream);
 
 public:
     CMemoryStream();

@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "acb_cdata.h"
+#include "acb_enum.h"
 #include "acb_env_ns.h"
 #include "kawashima/hca/CHcaDecoder.h"
 #include "kawashima/hca/hca_utils.h"
@@ -15,11 +16,6 @@
 #include "./internal/CHcaChannel.h"
 #include "./internal/CHcaCipher.h"
 #include "./internal/CHcaData.h"
-
-#ifdef _MSC_VER
-#undef max
-#undef min
-#endif
 
 ACB_NS_BEGIN
 
@@ -224,7 +220,7 @@ auto CHcaDecoder::GenerateWaveHeader() -> const std::uint8_t * {
 
     CMemoryStream memoryStream(headerBuffer, headerSize);
 
-#define WRITE_STRUCT(var) memoryStream.Write(&var, sizeof(var), 0, sizeof(var))
+#define WRITE_STRUCT(var) memoryStream.Write(&(var), sizeof(var), 0, sizeof(var))
 
     WRITE_STRUCT(wavRiff);
     if (hcaInfo.loopExists && !WaveSettings::SoftLoop) {
@@ -275,12 +271,12 @@ auto CHcaDecoder::DecodeBlock(std::uint32_t blockIndex) -> const std::uint8_t * 
     stream->Seek(hcaInfo.dataOffset + hcaInfo.blockSize * blockIndex, StreamSeekOrigin::Begin);
     auto actualRead = stream->Read(hcaBlockBuffer, hcaInfo.blockSize, 0, hcaInfo.blockSize);
     if (actualRead < hcaInfo.blockSize) {
-        throw CException(ACB_OP_DECODE_FAILED);
+        throw CException(OpResult::DecodeFailed);
     }
 
     // Compute block checksum.
     if (ComputeChecksum(hcaBlockBuffer, hcaInfo.blockSize, 0) != 0) {
-        throw CException(ACB_OP_CHECKSUM_ERROR);
+        throw CException(OpResult::ChecksumError);
     }
 
     // Decrypt block if needed.
@@ -290,7 +286,7 @@ auto CHcaDecoder::DecodeBlock(std::uint32_t blockIndex) -> const std::uint8_t * 
 
     const auto magic = data.GetBit(16);
     if (magic != 0xffff) {
-        throw CException(ACB_OP_DECODE_FAILED);
+        throw CException(OpResult::DecodeFailed);
     }
 
     // Actual decoding process.
@@ -373,8 +369,9 @@ auto CHcaDecoder::MapLoopedPosition(std::uint64_t linearPosition) -> std::uint64
     if (decoderConfig.loopCount == 0) {
         throw CArgumentException("CHcaDecoder::MapLoopedPosition");
     }
-    auto loopCount = (linearPosition - waveHeaderSize - beforeLoopStart * waveBlockSize) /
-                     (inLoop * waveBlockSize);
+    auto loopCount = (linearPosition - waveHeaderSize -
+                      static_cast<std::uint64_t>(beforeLoopStart) * waveBlockSize) /
+                     (static_cast<std::uint64_t>(inLoop) * waveBlockSize);
     loopCount = std::min(static_cast<std::uint32_t>(loopCount), decoderConfig.loopCount);
     return linearPosition - loopCount * inLoop * waveBlockSize - waveHeaderSize;
 }
@@ -394,14 +391,14 @@ auto CHcaDecoder::GetLength() -> std::uint64_t {
         const auto afterLoopEnd =
             hcaInfo.loopEnd < hcaInfo.blockCount - 1 ? hcaInfo.blockCount - 1 - hcaInfo.loopEnd : 0;
         const auto inLoop = hcaInfo.loopEnd - hcaInfo.loopStart + 1;
-        total += (beforeLoopStart + afterLoopEnd) * GetWaveBlockSize();
-        total += inLoop * decoderConfig.loopCount * GetWaveBlockSize();
+        total += static_cast<std::uint64_t>(beforeLoopStart + afterLoopEnd) * GetWaveBlockSize();
+        total += static_cast<std::uint64_t>(inLoop) * decoderConfig.loopCount * GetWaveBlockSize();
         return total;
     } else {
         if (decoderConfig.waveHeaderEnabled) {
             return GetWaveHeaderSize() + GetWaveBlockSize() * hcaInfo.blockCount;
         } else {
-            return GetWaveBlockSize() * hcaInfo.blockCount;
+            return static_cast<std::uint64_t>(GetWaveBlockSize()) * hcaInfo.blockCount;
         }
     }
 }
@@ -426,7 +423,7 @@ auto CHcaDecoder::Read(void *buffer, std::size_t bufferSize, std::size_t offset,
     }
 
     const auto waveHeaderSize = decoderConfig.waveHeaderEnabled ? GetWaveHeaderSize() : 0;
-    std::size_t totalRead   = 0;
+    std::size_t totalRead     = 0;
     if (mappedPosition < waveHeaderSize) {
         const auto headerLeftLength = static_cast<std::size_t>(waveHeaderSize - mappedPosition);
         const auto headerCopyLength = std::min(headerLeftLength, bufferSize);
@@ -451,7 +448,10 @@ auto CHcaDecoder::Read(void *buffer, std::size_t bufferSize, std::size_t offset,
         const auto blockData   = DecodeBlock(blockIndex);
         const auto copyLength  = std::min(
             waveStreamLength - mappedPosition,
-            std::min(waveBlockSize - startOffset, static_cast<std::uint64_t>(bufferSize))
+            std::min(
+                static_cast<std::uint64_t>(waveBlockSize) - startOffset,
+                static_cast<std::uint64_t>(bufferSize)
+            )
         );
         std::memcpy(
             byteBuffer + offset, blockData + startOffset, static_cast<std::size_t>(copyLength)

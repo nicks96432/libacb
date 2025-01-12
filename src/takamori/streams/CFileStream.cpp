@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <utility>
 
 #include "acb_env_ns.h"
 #include "takamori/CFileSystem.h"
@@ -13,11 +14,11 @@
 #include "takamori/exceptions/CInvalidOperationException.h"
 #include "takamori/streams/CFileStream.h"
 
-#define __FILE_READ    ("rb")
-#define __FILE_WRITE   ("wb")
-#define __FILE_APPEND  ("ab")
-#define __FILE_READ_U  ("rb+")
-#define __FILE_WRITE_U ("wb+")
+#define FILE_READ    ("rb")
+#define FILE_WRITE   ("wb")
+#define FILE_APPEND  ("ab")
+#define FILE_READ_U  ("rb+")
+#define FILE_WRITE_U ("wb+")
 
 ACB_NS_BEGIN
 
@@ -122,83 +123,82 @@ void CFileStream::Flush() {
 }
 
 auto CFileStream::OpenFile(const char *fileName) -> std::FILE * {
-#define __OUT() throw CException("Mode/Access: out of range")
-#define __CMB() throw CException("Mode/Access: incompatible")
-#define __EXT() throw CException("File exists: " + std::string(fileName))
-#define __NEX() throw CException("File doesn't exist: " + std::string(fileName))
+#define OUT_OF_RANGE()   throw CException("Mode/Access: out of range")
+#define INCOMPATIBLE()   throw CException("Mode/Access: incompatible")
+#define FILE_EXISTS()    throw CException("File exists: " + std::string(fileName))
+#define FILE_NOT_EXIST() throw CException("File doesn't exist: " + std::string(fileName))
     auto m = _mode;
     auto a = _access;
     // CLion cannot recognize bitwise operators defined. GCC can. However the error prompted by
     // CLion is still annoying.
-    _isReadable = (bool_t)(static_cast<std::underlying_type_t<FileAccess>>(a) &
-                           static_cast<std::underlying_type_t<FileMode>>(FileAccess::Read));
-    _isWritable = (bool_t)(static_cast<std::underlying_type_t<FileAccess>>(a) &
-                           static_cast<std::underlying_type_t<FileMode>>(FileAccess::Write));
-    _isSeekable = (bool_t)(m != FileMode::Append);
+    _isReadable = static_cast<bool_t>(std::to_underlying(a) & std::to_underlying(FileAccess::Read));
+    _isWritable =
+        static_cast<bool_t>(std::to_underlying(a) & std::to_underlying(FileAccess::Write));
+    _isSeekable = static_cast<bool_t>(m != FileMode::Append);
     if (m == FileMode::None || a == FileAccess::None) {
-        __OUT();
+        OUT_OF_RANGE();
     }
     const char *fileMode = nullptr;
     switch (m) {
     case FileMode::Append:
         switch (a) {
         case FileAccess::Write:
-            fileMode = __FILE_APPEND;
+            fileMode = FILE_APPEND;
             break;
         case FileAccess::Read:
         case FileAccess::ReadWrite:
-            __CMB();
+            INCOMPATIBLE();
         default:
-            __OUT();
+            OUT_OF_RANGE();
         }
         break;
     case FileMode::Create:
         switch (a) {
         case FileAccess::Write:
-            fileMode = __FILE_WRITE_U;
+            fileMode = FILE_WRITE_U;
             break;
         case FileAccess::Read:
             CreateFileInternal(fileName);
-            fileMode = __FILE_READ;
+            fileMode = FILE_READ;
             break;
         case FileAccess::ReadWrite:
             CreateFileInternal(fileName);
-            fileMode = __FILE_READ_U;
+            fileMode = FILE_READ_U;
             break;
         default:
-            __OUT();
+            OUT_OF_RANGE();
         }
         break;
     case FileMode::CreateNew:
         if (CFileSystem::FileExists(fileName)) {
-            __EXT();
+            FILE_EXISTS();
         }
         switch (a) {
         case FileAccess::Write:
         case FileAccess::Read:
         case FileAccess::ReadWrite:
-            fileMode = __FILE_WRITE_U;
+            fileMode = FILE_WRITE_U;
             break;
         default:
-            __OUT();
+            OUT_OF_RANGE();
         }
         break;
     case FileMode::OpenExisting:
         if (!CFileSystem::FileExists(fileName)) {
-            __NEX();
+            FILE_NOT_EXIST();
         }
         switch (a) {
         case FileAccess::Write:
-            fileMode = __FILE_WRITE;
+            fileMode = FILE_WRITE;
             break;
         case FileAccess::Read:
-            fileMode = __FILE_READ;
+            fileMode = FILE_READ;
             break;
         case FileAccess::ReadWrite:
-            fileMode = __FILE_READ_U;
+            fileMode = FILE_READ_U;
             break;
         default:
-            __OUT();
+            OUT_OF_RANGE();
         }
         break;
     case FileMode::OpenOrCreate:
@@ -207,27 +207,27 @@ auto CFileStream::OpenFile(const char *fileName) -> std::FILE * {
         }
         switch (a) {
         case FileAccess::Write:
-            fileMode = __FILE_WRITE;
+            fileMode = FILE_WRITE;
             break;
         case FileAccess::Read:
-            fileMode = __FILE_READ;
+            fileMode = FILE_READ;
             break;
         case FileAccess::ReadWrite:
-            fileMode = __FILE_READ_U;
+            fileMode = FILE_READ_U;
             break;
         default:
-            __OUT();
+            OUT_OF_RANGE();
         }
         break;
     default:
-        __OUT();
+        OUT_OF_RANGE();
     }
     return std::fopen(fileName, fileMode);
 
-#undef __OUT
-#undef __CMB
-#undef __EXT
-#undef __NEX
+#undef OUT_OF_RANGE
+#undef INCOMPATIBLE
+#undef FILE_EXISTS
+#undef FILE_NOT_EXIST
 }
 
 void CFileStream::CreateFileInternal(const char *fileName) {

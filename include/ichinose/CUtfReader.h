@@ -12,7 +12,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CUtfReader final {
 
-    __root_class(CUtfReader);
+    _root_class(CUtfReader);
 
 public:
     CUtfReader();

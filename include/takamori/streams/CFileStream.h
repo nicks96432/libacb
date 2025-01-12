@@ -15,7 +15,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CFileStream final: public CStream {
 
-    __extends(CStream, CFileStream);
+    _extends(CStream, CFileStream);
 
 public:
     explicit CFileStream(const char *fileName);

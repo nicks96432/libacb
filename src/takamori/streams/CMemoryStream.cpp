@@ -13,7 +13,7 @@
 
 ACB_NS_BEGIN
 
-static const float MemoryStreamGrowFactor = 1.25f;
+static constexpr double MemoryStreamGrowFactor = 1.25;
 
 CMemoryStream::CMemoryStream(): MyClass(0) {}
 
@@ -63,7 +63,9 @@ auto CMemoryStream::Read(
     std::size_t maxRead = 0;
     if (count > 0) {
         auto position = GetPosition();
-        maxRead = static_cast<std::size_t>(std::min(GetLength() - position, (std::uint64_t)count));
+        maxRead       = static_cast<std::size_t>(
+            std::min(GetLength() - position, static_cast<std::uint64_t>(count))
+        );
         if (maxRead > 0) {
             const auto byteBuffer = static_cast<std::uint8_t *>(buffer);
             std::memcpy(byteBuffer + offset, _buffer + position, maxRead);
@@ -199,7 +201,8 @@ void CMemoryStream::EnsureCapacity(std::uint64_t requestedLength) {
         throw CInvalidOperationException("MemoryStream::EnsureCapacity()");
     }
     do {
-        capacity = (std::uint64_t)(capacity * MemoryStreamGrowFactor);
+        capacity =
+            static_cast<std::uint64_t>(static_cast<double>(capacity) * MemoryStreamGrowFactor);
     } while (capacity < requestedLength);
     SetCapacity(capacity);
 }

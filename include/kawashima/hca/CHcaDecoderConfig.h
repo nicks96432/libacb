@@ -9,7 +9,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CHcaDecoderConfig final: public HCA_DECODER_CONFIG {
 
-    __extends(HCA_DECODER_CONFIG, CHcaDecoderConfig);
+    _extends(HCA_DECODER_CONFIG, CHcaDecoderConfig);
 
 public:
     CHcaDecoderConfig();

@@ -10,7 +10,7 @@ ACB_NS_BEGIN
 class CHcaData {
 
 public:
-    CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::uint32_t size);
+    CHcaData(std::uint8_t *data, std::uint32_t dataSize, std::int32_t size);
 
     CHcaData(CHcaData &) = default;
 

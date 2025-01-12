@@ -13,7 +13,7 @@ ACB_NS_BEGIN
 
 class ACB_EXPORT CBinaryReader: public CStream {
 
-    __extends(CStream, CBinaryReader);
+    _extends(CStream, CBinaryReader);
 
 public:
     explicit CBinaryReader(IStream *baseStream);

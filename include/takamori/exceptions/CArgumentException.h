@@ -12,7 +12,7 @@ ACB_NS_BEGIN
 
 class CArgumentException: public CException {
 
-    __extends(CException, CArgumentException);
+    _extends(CException, CArgumentException);
 
 public:
     ACB_EXPORT CArgumentException() noexcept;

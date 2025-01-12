@@ -6,7 +6,7 @@ libacb is a library originated from [libacb](https://github.com/hozuki/libacb), 
 
 Requirements:
 
-* CMake >= 3.21
+* CMake >= 3.25
 * MSVC >= 19.31 (VS2022 17.1) (Windows)
 * GCC >= 12 or clang >= 14.0.6 (Linux and MacOS)
 

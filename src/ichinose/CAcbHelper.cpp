@@ -9,7 +9,7 @@ auto CAcbHelper::ExtractToNewStream(IStream *stream, std::size_t offset, std::si
     -> CMemoryStream * {
     const auto originalPosition = stream->GetPosition();
 
-    stream->Seek(offset, StreamSeekOrigin::Begin);
+    stream->Seek(static_cast<std::int64_t>(offset), StreamSeekOrigin::Begin);
 
     auto *memory              = new CMemoryStream(size, FALSE);
     auto bytesLeft            = size;
@@ -24,7 +24,7 @@ auto CAcbHelper::ExtractToNewStream(IStream *stream, std::size_t offset, std::si
     } while (bytesLeft > 0);
 
     delete[] buffer;
-    stream->Seek(originalPosition, StreamSeekOrigin::Begin);
+    stream->Seek(static_cast<std::int64_t>(originalPosition), StreamSeekOrigin::Begin);
     memory->Seek(0, StreamSeekOrigin::Begin);
 
     return memory;

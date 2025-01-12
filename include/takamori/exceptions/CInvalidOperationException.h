@@ -12,7 +12,7 @@ ACB_NS_BEGIN
 
 class CInvalidOperationException: public CException {
 
-    __extends(CException, CInvalidOperationException);
+    _extends(CException, CInvalidOperationException);
 
 public:
     ACB_EXPORT CInvalidOperationException() noexcept;

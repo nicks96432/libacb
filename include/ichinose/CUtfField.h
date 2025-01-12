@@ -1,54 +1,52 @@
 #ifndef ACB_ICHINOSE_CUTF_FIELD_H_
 #define ACB_ICHINOSE_CUTF_FIELD_H_
 
+#include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string>
+#include <type_traits>
+#include <variant>
+#include <vector>
 
-#include "acb_cdata.h"
+#include "acb_enum.h"
 #include "acb_env.h"
 #include "acb_env_ns.h"
 
 ACB_NS_BEGIN
 
-class ACB_EXPORT CUtfField final: public UTF_FIELD {
+template<typename T>
+concept valid_field_type = std::is_arithmetic_v<T> || std::is_same_v<std::string, T> ||
+                           std::is_same_v<std::span<std::byte>, T>;
 
-    __extends(UTF_FIELD, CUtfField);
-
+class CUtfField final {
 public:
-    CUtfField();
+    ACB_EXPORT void SetName(const std::string &new_name);
 
-    explicit CUtfField(const UTF_FIELD &tpl);
+    ACB_EXPORT void SetValue(valid_field_type auto v, std::uint32_t fieldOffset);
 
-    ~CUtfField();
+    UtfColumnType type{};
+    UtfColumnStorage storage{};
 
-    void SetName(const std::string &new_name);
+    std::uint32_t offset{};
+    std::uint32_t offsetInRow{};
 
-    void SetValue(const void *data, std::uint32_t size, std::uint32_t fieldOffset);
+    std::string name{};
 
-    void SetValue(const char *str, std::uint32_t fieldOffset);
-
-    void SetValue(std::uint8_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::int8_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::uint16_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::int16_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::uint32_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::int32_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::uint64_t v, std::uint32_t fieldOffset);
-
-    void SetValue(std::int64_t v, std::uint32_t fieldOffset);
-
-    void SetValue(float v, std::uint32_t fieldOffset);
-
-    void SetValue(double v, std::uint32_t fieldOffset);
-
-private:
-    void ReleaseData();
+    std::variant<
+        std::uint8_t,
+        std::int8_t,
+        std::uint16_t,
+        std::int16_t,
+        std::uint32_t,
+        std::int32_t,
+        std::uint64_t,
+        std::int64_t,
+        float,
+        double,
+        std::vector<std::byte>,
+        std::string>
+        value{};
 };
 
 ACB_NS_END
